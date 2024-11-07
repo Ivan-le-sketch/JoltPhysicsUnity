@@ -9,3 +9,6 @@ zig-cache/
 
 # JetBrains cache directory
 .idea/
+
+# Visual studio
+.vs/
