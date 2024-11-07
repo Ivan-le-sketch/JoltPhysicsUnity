@@ -48,7 +48,7 @@ JPH_AABox=AABox
 JPH_Activation=Activation
 JPH_AllowedDOFs=AllowedDOFs
 JPH_BackFaceMode=BackFaceMode
-JPH_Bool32=NativeBool
+bool=NativeBool
 JPH_BodyID=BodyID
 JPH_BodyType=BodyType
 JPH_BroadPhaseCastResult=BroadPhaseCastResult
@@ -98,4 +98,3 @@ quaternion=Unity.Mathematics
 *=internal
 --nativeTypeNamesToStrip
 uint32_t
-JPH_Bool32
