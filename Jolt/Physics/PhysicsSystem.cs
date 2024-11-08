@@ -8,10 +8,6 @@ namespace Jolt
     {
         internal readonly NativeHandle<JPH_PhysicsSystem> Handle;
 
-        internal readonly NativeHandle<JPH_ContactListener> ContactListenerHandle;
-
-        internal readonly NativeHandle<JPH_BodyActivationListener> BodyActivationListenerHandle;
-
         /// <summary>
         /// The ObjectLayerPairFilter of the system.
         /// </summary>
@@ -36,14 +32,6 @@ namespace Jolt
             BroadPhaseLayerInterface = settings.BroadPhaseLayerInterface;
 
             ObjectVsBroadPhaseLayerFilter = settings.ObjectVsBroadPhaseLayerFilter;
-
-            ContactListenerHandle = JPH_ContactListener_Create();
-
-            JPH_PhysicsSystem_SetContactListener(Handle, ContactListenerHandle);
-
-            BodyActivationListenerHandle = JPH_BodyActivationListener_Create();
-
-            JPH_PhysicsSystem_SetBodyActivationListener(Handle, BodyActivationListenerHandle);
         }
 
         public void OptimizeBroadPhase()
@@ -69,12 +57,16 @@ namespace Jolt
 
         public void SetContactListener(IContactListener listener)
         {
-            JPH_ContactListener_SetProcs(ContactListenerHandle, listener);
+            var listenerNativeHandle = JPH_ContactListener_Create(listener);
+
+            JPH_PhysicsSystem_SetContactListener(Handle, listenerNativeHandle);
         }
 
         public void SetBodyActivationListener(IBodyActivationListener listener)
         {
-            JPH_BodyActivationListener_SetProcs(BodyActivationListenerHandle, listener);
+            var listenerNativeHandle = JPH_BodyActivationListener_Create(listener);
+
+            JPH_PhysicsSystem_SetBodyActivationListener(Handle, listenerNativeHandle);
         }
 
         /// <summary>
@@ -145,10 +137,8 @@ namespace Jolt
         public void Dispose()
         {
             JPH_PhysicsSystem_Destroy(Handle);
-
-            JPH_ContactListener_Destroy(ContactListenerHandle);
-
-            JPH_BodyActivationListener_Destroy(BodyActivationListenerHandle);
+            JPH_ContactListener_DestroyAll(); // Unimplemented
+            JPH_BodyActivationListener_DestroyAll(); // Unimplemented
         }
 
         #region IEquatable

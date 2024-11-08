@@ -9,18 +9,15 @@ namespace Jolt
     {
         private static Dictionary<IntPtr, IBodyActivationListener> managedBodyActivationListeners = new ();
 
-        public static NativeHandle<JPH_BodyActivationListener> JPH_BodyActivationListener_Create()
+        public static NativeHandle<JPH_BodyActivationListener> JPH_BodyActivationListener_Create(IBodyActivationListener managedListener)
         {
-            return CreateHandle(UnsafeBindings.JPH_BodyActivationListener_Create());
-        }
+            int truc = 4;
+            void* userData = &truc;
+            var listenerNativeHandle = CreateHandle(UnsafeBindings.JPH_BodyActivationListener_Create(UnsafeBodyActivationListenerProcs, userData));
 
-        public static void JPH_BodyActivationListener_SetProcs(NativeHandle<JPH_BodyActivationListener> listener, IBodyActivationListener managed)
-        {
-            UnsafeBindings.JPH_BodyActivationListener_SetProcs(listener, UnsafeBodyActivationListenerProcs, listener);
+            managedBodyActivationListeners[(nint)userData] = managedListener;
 
-            // See JoltAPI_JPH_ContactListener for notes about managed listeners.
-
-            managedBodyActivationListeners[(nint) listener.IntoPointer()] = managed;
+            return listenerNativeHandle;
         }
 
         public static void JPH_BodyActivationListener_Destroy(NativeHandle<JPH_BodyActivationListener> listener)
@@ -30,6 +27,11 @@ namespace Jolt
             UnsafeBindings.JPH_BodyActivationListener_Destroy(listener.IntoPointer());
 
             listener.Dispose();
+        }
+
+        public static void JPH_BodyActivationListener_DestroyAll()
+        {
+            // TODO : Destroy all remaining listeners
         }
 
         private static readonly JPH_BodyActivationListener_Procs UnsafeBodyActivationListenerProcs = new () {
