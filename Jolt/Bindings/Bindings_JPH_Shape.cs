@@ -101,9 +101,9 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_Shape_CollidePoint(NativeHandle<JPH_Shape> shape, float3 point)
+        public static bool JPH_Shape_CollidePoint(NativeHandle<JPH_Shape> shape, float3 point, NativeHandle<JPH_ShapeFilter> shapeFilter)
         {
-            return UnsafeBindings.JPH_Shape_CollidePoint(shape, &point);
+            return UnsafeBindings.JPH_Shape_CollidePoint(shape.IntoPointer(), &point, shapeFilter.IntoPointer());
         }
     }
 }

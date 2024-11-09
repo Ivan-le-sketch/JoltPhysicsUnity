@@ -66,9 +66,11 @@ namespace Jolt
         
         public float3 GetSurfaceNormal(SubShapeID subShapeID, float3 localPosition) => Bindings.JPH_Shape_GetSurfaceNormal(Handle.Reinterpret<JPH_Shape>(), subShapeID, localPosition);
         
+        public float GetVolume() => Bindings.JPH_Shape_GetVolume(Handle.Reinterpret<JPH_Shape>());
+        
         public bool CastRay(float3 origin, float3 direction, out RayCastResult result) => Bindings.JPH_Shape_CastRay(Handle.Reinterpret<JPH_Shape>(), origin, direction, out result);
         
-        public bool CollidePoint(float3 point) => Bindings.JPH_Shape_CollidePoint(Handle.Reinterpret<JPH_Shape>(), point);
+        public bool CollidePoint(float3 point, ShapeFilter shapeFilter) => Bindings.JPH_Shape_CollidePoint(Handle.Reinterpret<JPH_Shape>(), point, shapeFilter.Handle);
         
         #endregion
         

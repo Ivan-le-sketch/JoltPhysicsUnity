@@ -54,7 +54,7 @@ namespace Jolt
         
         public bool CastRay(float3 origin, float3 direction, out RayCastResult result) => Bindings.JPH_Shape_CastRay(Handle, origin, direction, out result);
         
-        public bool CollidePoint(float3 point) => Bindings.JPH_Shape_CollidePoint(Handle, point);
+        public bool CollidePoint(float3 point, ShapeFilter shapeFilter) => Bindings.JPH_Shape_CollidePoint(Handle, point, shapeFilter.Handle);
         
         #endregion
         
