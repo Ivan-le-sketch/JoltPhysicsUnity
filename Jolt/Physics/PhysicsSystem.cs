@@ -8,6 +8,8 @@ namespace Jolt
     {
         internal readonly NativeHandle<JPH_PhysicsSystem> Handle;
 
+        internal readonly NativeHandle<JPH_JobSystem> JobSystemHandle;
+
         /// <summary>
         /// The ObjectLayerPairFilter of the system.
         /// </summary>
@@ -26,6 +28,8 @@ namespace Jolt
         public PhysicsSystem(PhysicsSystemSettings settings)
         {
             Handle = JPH_PhysicsSystem_Create(settings);
+
+            JobSystemHandle = JPH_JobSystemThreadingPool_Create();
 
             ObjectLayerPairFilter = settings.ObjectLayerPairFilter;
 
@@ -77,7 +81,7 @@ namespace Jolt
         /// </remarks>
         public bool Update(float deltaTime, int collisionSteps, out PhysicsUpdateError error)
         {
-            return (error = JPH_PhysicsSystem_Update(Handle, deltaTime, collisionSteps)) == PhysicsUpdateError.None;
+            return (error = JPH_PhysicsSystem_Update(Handle, deltaTime, collisionSteps, JobSystemHandle)) == PhysicsUpdateError.None;
         }
 
         public bool WereBodiesInContact(BodyID a, BodyID b)

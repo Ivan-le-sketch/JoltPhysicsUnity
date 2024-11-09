@@ -35,11 +35,11 @@ namespace Jolt
             UnsafeBindings.JPH_PhysicsSystem_OptimizeBroadPhase(system);
         }
 
-        public static PhysicsUpdateError JPH_PhysicsSystem_Update(NativeHandle<JPH_PhysicsSystem> system, float deltaTime, int collisionSteps)
+        public static PhysicsUpdateError JPH_PhysicsSystem_Update(NativeHandle<JPH_PhysicsSystem> system, float deltaTime, int collisionSteps, NativeHandle<JPH_JobSystem> jobSystem)
         {
-            return UnsafeBindings.JPH_PhysicsSystem_Update(system, deltaTime, collisionSteps);
+            return UnsafeBindings.JPH_PhysicsSystem_Update(system.IntoPointer(), deltaTime, collisionSteps, jobSystem.IntoPointer());
         }
-        
+
         // JPH_PhysicsSystem_Step excluded, does same thing as JPH_PhysicsSystem_Update
 
         public static NativeHandle<JPH_BodyInterface> JPH_PhysicsSystem_GetBodyInterface(NativeHandle<JPH_PhysicsSystem> system)
