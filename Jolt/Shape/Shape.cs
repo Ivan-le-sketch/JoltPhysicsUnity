@@ -45,5 +45,10 @@
         {
             return new Shape(shape.Handle.Reinterpret<JPH_Shape>());
         }
+
+        public static implicit operator Shape(EmptyShape shape)
+        {
+            return new Shape(shape.Handle.Reinterpret<JPH_Shape>());
+        }
     }
 }
