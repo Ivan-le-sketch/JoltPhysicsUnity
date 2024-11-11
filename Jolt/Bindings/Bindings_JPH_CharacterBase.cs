@@ -7,6 +7,8 @@ namespace Jolt
         public static void JPH_CharacterBase_Destroy(NativeHandle<JPH_CharacterBase> character)
         {
             UnsafeBindings.JPH_CharacterBase_Destroy(character);
+
+            character.Dispose();
         }
 
         public static float JPH_CharacterBase_GetCosMaxSlopeAngle(NativeHandle<JPH_CharacterBase> character)
