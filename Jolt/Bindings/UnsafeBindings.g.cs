@@ -581,24 +581,6 @@ namespace Jolt
         public JPH_Body* body;
     }
 
-    internal partial struct JPH_ExtendedUpdateSettings
-    {
-        [NativeTypeName("JPH_Vec3")]
-        public float3 stickToFloorStepDown;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 walkStairsStepUp;
-
-        public float walkStairsMinStepForward;
-
-        public float walkStairsStepForwardTest;
-
-        public float walkStairsCosAngleForwardContact;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 walkStairsStepDownExtra;
-    }
-
     internal unsafe partial struct JPH_CharacterBaseSettings
     {
         [NativeTypeName("JPH_Vec3")]
@@ -2989,7 +2971,7 @@ namespace Jolt
         public static extern void JPH_CharacterVirtual_Update(JPH_CharacterVirtual* character, float deltaTime, [NativeTypeName("JPH_ObjectLayer")] ObjectLayer layer, JPH_PhysicsSystem* system);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float deltaTime, [NativeTypeName("const JPH_ExtendedUpdateSettings *")] JPH_ExtendedUpdateSettings* settings, [NativeTypeName("JPH_ObjectLayer")] ObjectLayer layer, JPH_PhysicsSystem* system);
+        public static extern void JPH_CharacterVirtual_ExtendedUpdate(JPH_CharacterVirtual* character, float deltaTime, [NativeTypeName("const JPH_ExtendedUpdateSettings *")] ExtendedUpdateSettings* settings, [NativeTypeName("JPH_ObjectLayer")] ObjectLayer layer, JPH_PhysicsSystem* system);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_CharacterVirtual_RefreshContacts(JPH_CharacterVirtual* character, [NativeTypeName("JPH_ObjectLayer")] ObjectLayer layer, JPH_PhysicsSystem* system);
