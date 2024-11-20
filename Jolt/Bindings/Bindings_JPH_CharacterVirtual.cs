@@ -4,7 +4,7 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_CharacterVirtual> JPH_CharacterVirtual_Create(NativeHandle<JPH_CharacterVirtualSettings> settings, rvec3 position, quaternion rotation, ulong userData, NativeHandle<JPH_PhysicsSystem> system)
+        public static NativeHandle<JPH_CharacterVirtual> JPH_CharacterVirtual_Create(JPH_CharacterVirtualSettings* settings, rvec3 position, quaternion rotation, ulong userData, NativeHandle<JPH_PhysicsSystem> system)
         {
             return CreateHandle(UnsafeBindings.JPH_CharacterVirtual_Create(settings, &position, &rotation, userData, system));
         }
@@ -145,6 +145,20 @@ namespace Jolt
             return UnsafeBindings.JPH_CharacterVirtual_GetMaxHitsExceeded(character);
         }
 
+        public static float3 JPH_CharacterVirtual_GetShapeOffset(NativeHandle<JPH_CharacterVirtual> character)
+        {
+            float3 result;
+
+            UnsafeBindings.JPH_CharacterVirtual_GetShapeOffset(character, &result);
+
+            return result;
+        }
+
+        public static void JPH_CharacterVirtual_SetShapeOffset(NativeHandle<JPH_CharacterVirtual> character, float3 value)
+        {
+            UnsafeBindings.JPH_CharacterVirtual_SetShapeOffset(character, &value);
+        }
+
         public static ulong JPH_CharacterVirtual_GetUserData(NativeHandle<JPH_CharacterVirtual> character)
         {
             return UnsafeBindings.JPH_CharacterVirtual_GetUserData(character);
@@ -160,19 +174,19 @@ namespace Jolt
             UnsafeBindings.JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(character, &desiredVelocity, &velocity);
         }
 
-        public static void JPH_CharacterVirtual_Update(NativeHandle<JPH_CharacterVirtual> character, float deltaTime, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)
+        public static void JPH_CharacterVirtual_Update(NativeHandle<JPH_CharacterVirtual> character, float deltaTime, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)//, NativeHandle<JPH_BodyFilter> bodyFilter, NativeHandle<JPH_ShapeFilter> shapeFilter)
         {
-            UnsafeBindings.JPH_CharacterVirtual_Update(character, deltaTime, layer, system);
+            UnsafeBindings.JPH_CharacterVirtual_Update(character, deltaTime, layer, system, null, null);// bodyFilter, shapeFilter);
         }
 
-        public static void JPH_CharacterVirtual_ExtendedUpdate(NativeHandle<JPH_CharacterVirtual> character, float deltaTime, ExtendedUpdateSettings settings, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)
+        public static void JPH_CharacterVirtual_ExtendedUpdate(NativeHandle<JPH_CharacterVirtual> character, float deltaTime, ExtendedUpdateSettings settings, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)//, NativeHandle<JPH_BodyFilter> bodyFilter, NativeHandle<JPH_ShapeFilter> shapeFilter)
         {
-            UnsafeBindings.JPH_CharacterVirtual_ExtendedUpdate(character, deltaTime, &settings, layer, system);
+            UnsafeBindings.JPH_CharacterVirtual_ExtendedUpdate(character, deltaTime, &settings, layer, system, null, null);// bodyFilter, shapeFilter);
         }
 
-        public static void JPH_CharacterVirtual_RefreshContacts(NativeHandle<JPH_CharacterVirtual> character, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)
+        public static void JPH_CharacterVirtual_RefreshContacts(NativeHandle<JPH_CharacterVirtual> character, ObjectLayer layer, NativeHandle<JPH_PhysicsSystem> system)//, NativeHandle<JPH_BodyFilter> bodyFilter, NativeHandle<JPH_ShapeFilter> shapeFilter)
         {
-            UnsafeBindings.JPH_CharacterVirtual_RefreshContacts(character, layer, system);
+            UnsafeBindings.JPH_CharacterVirtual_RefreshContacts(character, layer, system, null, null);// bodyFilter, shapeFilter);
         }
     }
 }

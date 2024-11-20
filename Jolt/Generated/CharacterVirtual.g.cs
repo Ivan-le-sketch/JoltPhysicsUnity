@@ -70,6 +70,10 @@ namespace Jolt
         
         public bool GetMaxHitsExceeded() => Bindings.JPH_CharacterVirtual_GetMaxHitsExceeded(Handle);
         
+        public float3 GetShapeOffset() => Bindings.JPH_CharacterVirtual_GetShapeOffset(Handle);
+        
+        public void SetShapeOffset(float3 value) => Bindings.JPH_CharacterVirtual_SetShapeOffset(Handle, value);
+        
         public ulong GetUserData() => Bindings.JPH_CharacterVirtual_GetUserData(Handle);
         
         public void SetUserData(ulong value) => Bindings.JPH_CharacterVirtual_SetUserData(Handle, value);
