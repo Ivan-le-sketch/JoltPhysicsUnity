@@ -67,6 +67,16 @@ namespace Jolt
         _JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Force32 = 0x7FFFFFFF,
     }
 
+    internal enum JPH_StateRecorderState
+    {
+        JPH_StateRecorderState_None = 0,
+        JPH_StateRecorderState_Global = 1,
+        JPH_StateRecorderState_Bodies = 2,
+        JPH_StateRecorderState_Contacts = 4,
+        JPH_StateRecorderState_Constraints = 8,
+        JPH_StateRecorderState_All = JPH_StateRecorderState_Global | JPH_StateRecorderState_Bodies | JPH_StateRecorderState_Contacts | JPH_StateRecorderState_Constraints,
+    }
+
     internal partial struct JPH_CollideSettingsBase
     {
         public JPH_ActiveEdgeMode activeEdgeMode;
@@ -560,6 +570,10 @@ namespace Jolt
     {
     }
 
+    internal partial struct JPH_StateRecorder
+    {
+    }
+
     internal unsafe partial struct JPH_BodyLockRead
     {
         [NativeTypeName("const JPH_BodyLockInterface *")]
@@ -1050,6 +1064,12 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_PhysicsSystem_GetConstraints([NativeTypeName("const JPH_PhysicsSystem *")] JPH_PhysicsSystem* system, [NativeTypeName("const JPH_Constraint **")] JPH_Constraint** constraints, uint count);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, [NativeTypeName("const JPH_DrawSettings *")] JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, [NativeTypeName("const JPH_BodyDrawFilter *")] JPH_BodyDrawFilter* bodyFilter);
@@ -3059,6 +3079,47 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_StateRecorder* JPH_StateRecorder_Create();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_Destroy(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_SetValidating(JPH_StateRecorder* recorder, [NativeTypeName("bool")] NativeBool validating);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_StateRecorder_IsValidating(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_Rewind(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_Clear(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_StateRecorder_IsEOF(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_StateRecorder_IsFailed(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_StateRecorder_IsEqual(JPH_StateRecorder* recorder, JPH_StateRecorder* other);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_WriteBytes(JPH_StateRecorder* recorder, [NativeTypeName("const void *")] void* data, [NativeTypeName("size_t")] ulong size);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorder_ReadBytes(JPH_StateRecorder* recorder, void* data, [NativeTypeName("size_t")] ulong size);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("size_t")]
+        public static extern ulong JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_DebugRenderer* JPH_DebugRenderer_Create(JPH_DebugRenderer_Procs procs, void* userData);
