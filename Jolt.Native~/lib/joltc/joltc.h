@@ -314,6 +314,16 @@ typedef enum JPH_DebugRenderer_DrawMode {
 	_JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Force32 = 0x7FFFFFFF
 } JPH_DebugRenderer_DrawMode;
 
+typedef enum JPH_StateRecorderState
+{
+	JPH_StateRecorderState_None = 0,
+	JPH_StateRecorderState_Global = 1,
+	JPH_StateRecorderState_Bodies = 2,
+	JPH_StateRecorderState_Contacts = 4,
+	JPH_StateRecorderState_Constraints = 8,
+	JPH_StateRecorderState_All = JPH_StateRecorderState_Global | JPH_StateRecorderState_Bodies | JPH_StateRecorderState_Contacts | JPH_StateRecorderState_Constraints
+} JPH_StateRecorderState;
+
 typedef struct JPH_Vec3 {
 	float x;
 	float y;
@@ -654,6 +664,8 @@ typedef struct JPH_SharedMutex                      JPH_SharedMutex;
 
 typedef struct JPH_DebugRenderer                    JPH_DebugRenderer;
 
+typedef struct JPH_StateRecorder					JPH_StateRecorder;
+
 typedef struct JPH_BodyLockRead
 {
 	const JPH_BodyLockInterface* lockInterface;
@@ -868,6 +880,9 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH
 
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
+
+JPH_CAPI void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state);
+JPH_CAPI void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder);
 
 JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter /* = nullptr */);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);
@@ -1934,6 +1949,20 @@ typedef struct JPH_CharacterContactListener_Procs {
 
 JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs, void* userData);
 JPH_CAPI void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener);
+
+/* StateRecorder */
+JPH_CAPI JPH_StateRecorder* JPH_StateRecorder_Create();
+JPH_CAPI void JPH_StateRecorder_Destroy(JPH_StateRecorder* recorder);
+JPH_CAPI void JPH_StateRecorder_SetValidating(JPH_StateRecorder* recorder, bool validating);
+JPH_CAPI bool JPH_StateRecorder_IsValidating(JPH_StateRecorder* recorder);
+JPH_CAPI void JPH_StateRecorder_Rewind(JPH_StateRecorder* recorder);
+JPH_CAPI void JPH_StateRecorder_Clear(JPH_StateRecorder* recorder);
+JPH_CAPI bool JPH_StateRecorder_IsEOF(JPH_StateRecorder* recorder);
+JPH_CAPI bool JPH_StateRecorder_IsFailed(JPH_StateRecorder* recorder);
+JPH_CAPI bool JPH_StateRecorder_IsEqual(JPH_StateRecorder* recorder, JPH_StateRecorder* other);
+JPH_CAPI void JPH_StateRecorder_WriteBytes(JPH_StateRecorder* recorder, const void* data, size_t size);
+JPH_CAPI void JPH_StateRecorder_ReadBytes(JPH_StateRecorder* recorder, void* data, size_t size);
+JPH_CAPI size_t JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder);
 
 /* DebugRenderer */
 typedef struct JPH_DebugRenderer_Procs {

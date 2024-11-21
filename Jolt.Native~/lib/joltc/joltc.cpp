@@ -62,6 +62,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <Jolt/Physics/Collision/PhysicsMaterialSimple.h>
+#include "Jolt/Physics/StateRecorderImpl.h"
 
 #include <iostream>
 #include <cstdarg>
@@ -834,6 +835,24 @@ const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterface(const JPH_Ph
 const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(const JPH_PhysicsSystem* system)
 {
 	return reinterpret_cast<const JPH_BodyLockInterface*>(&system->physicsSystem->GetBodyLockInterfaceNoLock());
+}
+
+void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state)
+{
+	//JPH_ASSERT(system);
+	//JPH_ASSERT(recorder);
+
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+	system->physicsSystem->SaveState(*jolt_recorder, static_cast<JPH::EStateRecorderState>(state));
+}
+
+void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder)
+{
+	//JPH_ASSERT(system);
+	//JPH_ASSERT(recorder);
+
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+	system->physicsSystem->RestoreState(*jolt_recorder);
 }
 
 /* JPH_BroadPhaseLayerFilter */
@@ -6980,6 +6999,82 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 {
 	if (listener)
 		delete reinterpret_cast<ManagedCharacterContactListener*>(listener);
+}
+
+/* StateRecorder */
+JPH_StateRecorder* JPH_StateRecorder_Create()
+{
+	auto jolt_recorder = new JPH::StateRecorderImpl();
+	return reinterpret_cast<JPH_StateRecorder*>(jolt_recorder);
+}
+
+void JPH_StateRecorder_Destroy(JPH_StateRecorder* recorder)
+{
+	if (recorder)
+	{
+		delete reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	}
+}
+
+void JPH_StateRecorder_SetValidating(JPH_StateRecorder* recorder, bool validating)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	jolt_recorder->SetValidating(!!validating);
+}
+
+bool JPH_StateRecorder_IsValidating(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	return jolt_recorder->IsValidating();
+}
+
+void JPH_StateRecorder_Rewind(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	jolt_recorder->Rewind();
+}
+
+void JPH_StateRecorder_Clear(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	jolt_recorder->Clear();
+}
+
+bool JPH_StateRecorder_IsEOF(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	return jolt_recorder->IsEOF();
+}
+
+bool JPH_StateRecorder_IsFailed(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	return jolt_recorder->IsFailed();
+}
+
+bool JPH_StateRecorder_IsEqual(JPH_StateRecorder* recorder, JPH_StateRecorder* other)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	auto jolt_other = reinterpret_cast<JPH::StateRecorderImpl*>(other);
+	return jolt_recorder->IsEqual(*jolt_other);
+}
+
+void JPH_StateRecorder_WriteBytes(JPH_StateRecorder* recorder, const void* data, size_t size)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	jolt_recorder->WriteBytes(data, size);
+}
+
+void JPH_StateRecorder_ReadBytes(JPH_StateRecorder* recorder, void* data, size_t size)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	jolt_recorder->ReadBytes(data, size);
+}
+
+size_t JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder)
+{
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
+	return jolt_recorder->GetData().size();
 }
 
 #ifdef JPH_DEBUG_RENDERER
