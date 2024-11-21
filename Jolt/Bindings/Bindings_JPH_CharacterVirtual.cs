@@ -188,5 +188,15 @@ namespace Jolt
         {
             UnsafeBindings.JPH_CharacterVirtual_RefreshContacts(character, layer, system, null, null);// bodyFilter, shapeFilter);
         }
+
+        public static void JPH_CharacterVirtual_SaveState(NativeHandle<JPH_CharacterVirtual> character, NativeHandle<JPH_StateRecorder> recorder)
+        {
+            UnsafeBindings.JPH_CharacterVirtual_SaveState(character, recorder);
+        }
+
+        public static void JPH_CharacterVirtual_RestoreState(NativeHandle<JPH_CharacterVirtual> character, NativeHandle<JPH_StateRecorder> recorder)
+        {
+            UnsafeBindings.JPH_CharacterVirtual_RestoreState(character, recorder);
+        }
     }
 }

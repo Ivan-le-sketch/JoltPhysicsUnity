@@ -86,6 +86,10 @@ namespace Jolt
         
         public void RefreshContacts(ObjectLayer layer, PhysicsSystem system) => Bindings.JPH_CharacterVirtual_RefreshContacts(Handle, layer, system.Handle);
         
+        public void SaveState(StateRecorder recorder) => Bindings.JPH_CharacterVirtual_SaveState(Handle, recorder.Handle);
+        
+        public void RestoreState(StateRecorder recorder) => Bindings.JPH_CharacterVirtual_RestoreState(Handle, recorder.Handle);
+        
         #endregion
         
         #region JPH_CharacterBase
