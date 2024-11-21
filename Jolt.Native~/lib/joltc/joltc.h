@@ -1913,6 +1913,9 @@ JPH_CAPI bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character,
 
 JPH_CAPI void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character);
 
+JPH_CAPI void JPH_CharacterVirtual_SaveState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder);
+JPH_CAPI void JPH_CharacterVirtual_RestoreState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder);
+
 /* CharacterContactListener */
 typedef struct JPH_CharacterContactListener_Procs {
 	void (JPH_API_CALL* OnAdjustBodyVelocity)(void* userData,

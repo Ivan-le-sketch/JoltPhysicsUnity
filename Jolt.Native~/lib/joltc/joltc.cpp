@@ -6882,6 +6882,22 @@ void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character)
 	AsCharacterVirtual(character)->UpdateGroundVelocity();
 }
 
+void JPH_CharacterVirtual_SaveState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder)
+{
+	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+
+	jolt_character->SaveState(*jolt_recorder);
+}
+
+void JPH_CharacterVirtual_RestoreState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder)
+{
+	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+
+	jolt_character->RestoreState(*jolt_recorder);
+}
+
 /* CharacterContactListener */
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
