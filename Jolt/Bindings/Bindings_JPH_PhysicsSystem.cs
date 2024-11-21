@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -149,6 +150,16 @@ namespace Jolt
         public static void JPH_PhysicsSystem_GetConstraints(NativeHandle<JPH_PhysicsSystem> system)
         {
             throw new NotImplementedException();
+        }
+
+        public static void JPH_PhysicsSystem_SaveState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, JPH_StateRecorderState state)
+        {
+            UnsafeBindings.JPH_PhysicsSystem_SaveState(system, recorder, state);
+        }
+
+        public static void JPH_PhysicsSystem_RestoreState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder)
+        {
+            UnsafeBindings.JPH_PhysicsSystem_RestoreState(system, recorder);
         }
     }
 }

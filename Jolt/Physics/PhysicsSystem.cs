@@ -138,6 +138,16 @@ namespace Jolt
             JPH_PhysicsSystem_RemoveConstraint(Handle, constraint.Handle);
         }
 
+        public void SaveState(StateRecorder recorder)//, JPH_StateRecorderState state)
+        {
+            JPH_PhysicsSystem_SaveState(Handle, recorder.Handle, JPH_StateRecorderState.JPH_StateRecorderState_All);
+        }
+
+        public void RestoreState(StateRecorder recorder)
+        {
+            JPH_PhysicsSystem_RestoreState(Handle, recorder.Handle);
+        }
+
         public void Dispose()
         {
             JPH_PhysicsSystem_Destroy(Handle);
