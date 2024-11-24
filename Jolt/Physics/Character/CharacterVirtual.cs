@@ -16,11 +16,9 @@ namespace Jolt
         }
 
         [OverrideBinding("JPH_CharacterVirtual_SetListener")]
-        public void SetListener(ICharacterContactListener listener)
+        public void SetListener(CharacterContactListener listener)
         {
-            var listenerNativeHandle = JPH_CharacterContactListener_Create(listener);
-
-            JPH_CharacterVirtual_SetListener(Handle, listenerNativeHandle);
+            JPH_CharacterVirtual_SetListener(Handle, listener.Handle);
         }
     }
 }
