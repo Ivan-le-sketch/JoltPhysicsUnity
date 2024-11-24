@@ -1929,9 +1929,22 @@ typedef struct JPH_CharacterContactListener_Procs {
 		const JPH_BodyID bodyID2,
 		const JPH_SubShapeID subShapeID2);
 
+	bool(JPH_API_CALL* OnCharacterContactValidate)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
+		const JPH_SubShapeID subShapeID2);
+
 	void(JPH_API_CALL* OnContactAdded)(void* userData,
 		const JPH_CharacterVirtual* character,
 		const JPH_BodyID bodyID2,
+		const JPH_SubShapeID subShapeID2,
+		const JPH_RVec3* contactPosition,
+		const JPH_Vec3* contactNormal,
+		JPH_CharacterContactSettings* ioSettings);
+
+	void(JPH_API_CALL* OnCharacterContactAdded)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
 		const JPH_SubShapeID subShapeID2,
 		const JPH_RVec3* contactPosition,
 		const JPH_Vec3* contactNormal,
@@ -1946,8 +1959,18 @@ typedef struct JPH_CharacterContactListener_Procs {
 		const JPH_Vec3* contactVelocity,
 		const JPH_PhysicsMaterial* contactMaterial,
 		const JPH_Vec3* characterVelocity,
-		JPH_Vec3* newCharacterVelocity
-		);
+		JPH_Vec3* newCharacterVelocity);
+
+	void(JPH_API_CALL* OnCharacterContactSolve)(void* userData,
+		const JPH_CharacterVirtual* character,
+		const JPH_CharacterVirtual* otherCharacter,
+		const JPH_SubShapeID subShapeID2,
+		const JPH_RVec3* contactPosition,
+		const JPH_Vec3* contactNormal,
+		const JPH_Vec3* contactVelocity,
+		const JPH_PhysicsMaterial* contactMaterial,
+		const JPH_Vec3* characterVelocity,
+		JPH_Vec3* newCharacterVelocity);
 } JPH_CharacterContactListener_Procs;
 
 JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs, void* userData);
