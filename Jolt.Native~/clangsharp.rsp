@@ -31,6 +31,7 @@ JPH_PhysicsUpdateError
 JPH_Plane
 JPH_Quat
 JPH_RayCastResult
+JPH_RayCastSettings
 JPH_RMatrix4x4
 JPH_RVec3
 JPH_ShapeCastResult
@@ -77,6 +78,7 @@ JPH_PhysicsUpdateError=PhysicsUpdateError
 JPH_Plane=Plane
 JPH_Quat=quaternion
 JPH_RayCastResult=RayCastResult
+JPH_RayCastSettings=RayCastSettings
 JPH_RMatrix4x4=rmatrix4x4
 JPH_RVec3=rvec3
 JPH_ShapeCastResult=ShapeCastResult
