@@ -4,19 +4,16 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
-        public static void JPH_BroadPhaseLayerFilter_SetProcs(NativeHandle<JPH_BroadPhaseLayerFilter> filter)
+        public static NativeHandle<JPH_BroadPhaseLayerFilter> JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs procs, void* userData)
         {
-            throw new NotImplementedException();
-        }
-
-        public static NativeHandle<JPH_BroadPhaseLayerFilter> JPH_BroadPhaseLayerFilter_Create() 
-        {
-            throw new NotImplementedException();
+            return CreateHandle(UnsafeBindings.JPH_BroadPhaseLayerFilter_Create(procs, userData));
         }
 
         public static void JPH_BroadPhaseLayerFilter_Destroy(NativeHandle<JPH_BroadPhaseLayerFilter> filter) 
         {
-            throw new NotImplementedException();   
+            UnsafeBindings.JPH_BroadPhaseLayerFilter_Destroy(filter);
+
+            filter.Dispose();
         }
     }
 }
