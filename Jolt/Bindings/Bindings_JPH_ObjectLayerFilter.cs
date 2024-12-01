@@ -4,19 +4,16 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
-        public static void JPH_ObjectLayerFilter_SetProcs(NativeHandle<JPH_ObjectLayerFilter> filter) 
+        public static NativeHandle<JPH_ObjectLayerFilter> JPH_ObjectLayerFilter_Create(JPH_ObjectLayerFilter_Procs procs, void* userData) 
         {
-            throw new NotImplementedException();
-        }
-
-        public static NativeHandle<JPH_ObjectLayerFilter> JPH_ObjectLayerFilter_Create() 
-        {
-            throw new NotImplementedException();
+            return CreateHandle(UnsafeBindings.JPH_ObjectLayerFilter_Create(procs, userData));
         }
 
         public static void JPH_ObjectLayerFilter_Destroy(NativeHandle<JPH_ObjectLayerFilter> filter) 
         {
-            throw new NotImplementedException();
+            UnsafeBindings.JPH_ObjectLayerFilter_Destroy(filter);
+
+            filter.Dispose();
         }
     }
 }
