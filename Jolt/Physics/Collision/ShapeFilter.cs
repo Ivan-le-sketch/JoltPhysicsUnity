@@ -6,9 +6,16 @@ namespace Jolt
 {
     public unsafe class ShapeFilter : IDisposable
     {
+        public enum FilterMode
+        {
+            CollideWithSelection,
+            IgnoreSelection,
+        }
+
         internal NativeHandle<JPH_ShapeFilter> Handle;
 
-        private HashSet<SubShapeID> ignoredSubShapeIDs = new HashSet<SubShapeID>();
+        private FilterMode mode;
+        private HashSet<SubShapeID> subShapeIDSelection = new HashSet<SubShapeID>();
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate bool ShouldCollide(IntPtr userData, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2);
@@ -23,12 +30,16 @@ namespace Jolt
             CreateNativeHandle();
         }
 
-        public ShapeFilter(IEnumerable<SubShapeID> subShapes)
+        public ShapeFilter(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
         {
+            CreateNativeHandle();
+
             foreach (SubShapeID subShape in subShapes)
             {
-                ignoredSubShapeIDs.Add(subShape);
+                subShapeIDSelection.Add(subShape);
             }
+
+            mode = filterMode;
         }
 
         public void Dispose()
@@ -40,14 +51,28 @@ namespace Jolt
         {
             var id = *subShapeIDOfShape2;
 
-            return !ignoredSubShapeIDs.Contains(id);
+            if (mode == FilterMode.CollideWithSelection)
+            {
+                return subShapeIDSelection.Contains(id);
+            }
+            else
+            {
+                return !subShapeIDSelection.Contains(id);
+            }
         }
 
         internal bool ShouldCollide2Callback(IntPtr userData, JPH_Shape* shape1, SubShapeID* subShapeIDOfShape1, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2)
         {
             var id = *subShapeIDOfShape2;
 
-            return !ignoredSubShapeIDs.Contains(id);
+            if (mode == FilterMode.CollideWithSelection)
+            {
+                return subShapeIDSelection.Contains(id);
+            }
+            else
+            {
+                return !subShapeIDSelection.Contains(id);
+            }
         }
 
         private void CreateNativeHandle()
