@@ -5,6 +5,7 @@ compatible-codegen
 --exclude
 JPH_AABox
 JPH_Activation
+JPH_ActiveEdgeMode
 JPH_AllowedDOFs
 JPH_BackFaceMode
 JPH_BodyID
@@ -51,6 +52,7 @@ bool=NativeBool
 size_t=ulong
 JPH_AABox=AABox
 JPH_Activation=Activation
+JPH_ActiveEdgeMode=ActiveEdgeMode
 JPH_AllowedDOFs=AllowedDOFs
 JPH_BackFaceMode=BackFaceMode
 JPH_BodyID=BodyID

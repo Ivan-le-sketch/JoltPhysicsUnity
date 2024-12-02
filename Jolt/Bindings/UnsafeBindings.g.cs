@@ -4,14 +4,6 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    internal enum JPH_ActiveEdgeMode
-    {
-        JPH_ActiveEdgeMode_CollideOnlyWithActive,
-        JPH_ActiveEdgeMode_CollideWithAll,
-        _JPH_ActiveEdgeMode_Count,
-        _JPH_ActiveEdgeMode_Force32 = 0x7FFFFFFF,
-    }
-
     internal enum JPH_CollectFacesMode
     {
         JPH_CollectFacesMode_CollectFaces,
@@ -69,7 +61,8 @@ namespace Jolt
 
     internal partial struct JPH_CollideSettingsBase
     {
-        public JPH_ActiveEdgeMode activeEdgeMode;
+        [NativeTypeName("JPH_ActiveEdgeMode")]
+        public ActiveEdgeMode activeEdgeMode;
 
         public JPH_CollectFacesMode collectFacesMode;
 
