@@ -4,14 +4,6 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    internal enum JPH_CollectFacesMode
-    {
-        JPH_CollectFacesMode_CollectFaces,
-        JPH_CollectFacesMode_NoFaces,
-        _JPH_CollectFacesMode_Count,
-        _JPH_CollectFacesMode_Force32 = 0x7FFFFFFF,
-    }
-
     internal enum JPH_SoftBodyConstraintColor
     {
         JPH_SoftBodyConstraintColor_ConstraintType,
@@ -64,7 +56,8 @@ namespace Jolt
         [NativeTypeName("JPH_ActiveEdgeMode")]
         public ActiveEdgeMode activeEdgeMode;
 
-        public JPH_CollectFacesMode collectFacesMode;
+        [NativeTypeName("JPH_CollectFacesMode")]
+        public CollectFacesMode collectFacesMode;
 
         public float collisionTolerance;
 

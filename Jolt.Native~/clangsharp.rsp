@@ -12,6 +12,7 @@ JPH_BodyID
 JPH_BodyType
 JPH_BroadPhaseCastResult
 JPH_BroadPhaseLayer
+JPH_CollectFacesMode
 JPH_CollidePointResult
 JPH_CollideShapeResult
 JPH_CollisionCollectorType
@@ -59,6 +60,7 @@ JPH_BodyID=BodyID
 JPH_BodyType=BodyType
 JPH_BroadPhaseCastResult=BroadPhaseCastResult
 JPH_BroadPhaseLayer=BroadPhaseLayer
+JPH_CollectFacesMode=CollectFacesMode
 JPH_CollidePointResult=CollidePointResult
 JPH_CollideShapeResult=CollideShapeResult
 JPH_CollisionCollectorType=CollisionCollectorType
