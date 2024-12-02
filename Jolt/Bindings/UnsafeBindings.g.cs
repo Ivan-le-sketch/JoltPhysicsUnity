@@ -51,25 +51,10 @@ namespace Jolt
         JPH_StateRecorderState_All = JPH_StateRecorderState_Global | JPH_StateRecorderState_Bodies | JPH_StateRecorderState_Contacts | JPH_StateRecorderState_Constraints,
     }
 
-    internal partial struct JPH_CollideSettingsBase
-    {
-        [NativeTypeName("JPH_ActiveEdgeMode")]
-        public ActiveEdgeMode activeEdgeMode;
-
-        [NativeTypeName("JPH_CollectFacesMode")]
-        public CollectFacesMode collectFacesMode;
-
-        public float collisionTolerance;
-
-        public float penetrationTolerance;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 activeEdgeMovementDirection;
-    }
-
     internal partial struct JPH_CollideShapeSettings
     {
-        public JPH_CollideSettingsBase @base;
+        [NativeTypeName("JPH_CollideSettingsBase")]
+        public CollideSettingsBase @base;
 
         public float maxSeparationDistance;
 
@@ -79,7 +64,8 @@ namespace Jolt
 
     internal partial struct JPH_ShapeCastSettings
     {
-        public JPH_CollideSettingsBase @base;
+        [NativeTypeName("JPH_CollideSettingsBase")]
+        public CollideSettingsBase @base;
 
         [NativeTypeName("JPH_BackFaceMode")]
         public BackFaceMode backFaceModeTriangles;

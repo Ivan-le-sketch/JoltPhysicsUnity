@@ -14,6 +14,7 @@ JPH_BroadPhaseCastResult
 JPH_BroadPhaseLayer
 JPH_CollectFacesMode
 JPH_CollidePointResult
+JPH_CollideSettingsBase
 JPH_CollideShapeResult
 JPH_CollisionCollectorType
 JPH_ConstraintSpace
@@ -62,6 +63,7 @@ JPH_BroadPhaseCastResult=BroadPhaseCastResult
 JPH_BroadPhaseLayer=BroadPhaseLayer
 JPH_CollectFacesMode=CollectFacesMode
 JPH_CollidePointResult=CollidePointResult
+JPH_CollideSettingsBase=CollideSettingsBase
 JPH_CollideShapeResult=CollideShapeResult
 JPH_CollisionCollectorType=CollisionCollectorType
 JPH_ConstraintSpace=ConstraintSpace
