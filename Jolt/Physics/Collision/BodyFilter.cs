@@ -9,12 +9,16 @@ namespace Jolt
     /// </summary>
     public unsafe class BodyFilter : IDisposable
     {
+        public enum FilterMode
+        {
+            CollideWithSelection,
+            IgnoreSelection,
+        }
+
         internal NativeHandle<JPH_BodyFilter> Handle;
 
-        /// <summary>
-        /// HashSet determining body ids to ignore.
-        /// </summary>
-        private HashSet<BodyID> ignoredBodyIDs = new HashSet<BodyID>();
+        private FilterMode mode;
+        private HashSet<BodyID> bodyIDSelection = new HashSet<BodyID>();
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate bool ShouldCollide(IntPtr context, BodyID bodyID);
@@ -31,14 +35,16 @@ namespace Jolt
             CreateNativeHandle();
         }
 
-        public BodyFilter(List<BodyID> bodyIDs)
+        public BodyFilter(IEnumerable<BodyID> bodyIDs, FilterMode filterMode)
         {
             CreateNativeHandle();
 
             foreach (BodyID bodyID in bodyIDs)
             {
-                AddIgnoredBodyID(bodyID);
+                AddBodyIDToSelection(bodyID);
             }
+
+            mode = filterMode;
         }
 
         public void Dispose()
@@ -46,31 +52,52 @@ namespace Jolt
             Bindings.JPH_BodyFilter_Destroy(Handle);
         }
 
-        public void AddIgnoredBodyID(BodyID bodyID)
+        public void SetFilterMode(FilterMode filterMode)
         {
-            ignoredBodyIDs.Add(bodyID);
+            mode = filterMode;
         }
 
-        public void RemoveIgnoredBodyID(BodyID bodyID)
+        public void AddBodyIDToSelection(BodyID bodyID)
         {
-            ignoredBodyIDs.Remove(bodyID);
+            bodyIDSelection.Add(bodyID);
         }
 
-        public void ClearIgnoredBodyID()
+        public void RemoveBodyIDFromSelection(BodyID bodyID)
         {
-            ignoredBodyIDs.Clear();
+            bodyIDSelection.Remove(bodyID);
+        }
+
+        public void ClearBodyIDSelection()
+        {
+            bodyIDSelection.Clear();
         }
 
         internal bool ShouldCollideCallback(IntPtr context, BodyID bodyID)
         {
-            return !ignoredBodyIDs.Contains(bodyID);
+            if (mode == FilterMode.CollideWithSelection)
+            {
+                return bodyIDSelection.Contains(bodyID);
+            }
+            else
+            {
+                return !bodyIDSelection.Contains(bodyID);
+            }
         }
 
         internal bool ShouldCollideLockedCallback(IntPtr context, JPH_Body* body)
         {
             var bodyHandle = new Body(new NativeHandle<JPH_Body>(body));
 
-            bool result = !ignoredBodyIDs.Contains(bodyHandle.GetID());
+            bool result = true;
+
+            if (mode == FilterMode.CollideWithSelection)
+            {
+                result = bodyIDSelection.Contains(bodyHandle.GetID());
+            }
+            else
+            {
+                result = !bodyIDSelection.Contains(bodyHandle.GetID());
+            }
 
             bodyHandle.Handle.Dispose();
 
