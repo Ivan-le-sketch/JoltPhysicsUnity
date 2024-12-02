@@ -16,6 +16,7 @@ JPH_CollectFacesMode
 JPH_CollidePointResult
 JPH_CollideSettingsBase
 JPH_CollideShapeResult
+JPH_CollideShapeSettings
 JPH_CollisionCollectorType
 JPH_ConstraintSpace
 JPH_ConstraintSubType
@@ -65,6 +66,7 @@ JPH_CollectFacesMode=CollectFacesMode
 JPH_CollidePointResult=CollidePointResult
 JPH_CollideSettingsBase=CollideSettingsBase
 JPH_CollideShapeResult=CollideShapeResult
+JPH_CollideShapeSettings=CollideShapeSettings
 JPH_CollisionCollectorType=CollisionCollectorType
 JPH_ConstraintSpace=ConstraintSpace
 JPH_ConstraintSubType=ConstraintSubType
