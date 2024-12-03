@@ -44,7 +44,7 @@ namespace Jolt
         }
 
         /// <summary>
-        /// Get the body interface, which allows creating and removing bodies and changing their properties.
+        /// Gets the body interface, which allows creating and removing bodies and changing their properties.
         /// </summary>
         public BodyInterface GetBodyInterface()
         {
@@ -52,11 +52,20 @@ namespace Jolt
         }
 
         /// <summary>
-        /// Get a non-locking version of the body interface. Use with great care!
+        /// Gets a non-locking version of the body interface. Use with great care!
         /// </summary>
         public BodyInterface GetBodyInterfaceNoLock()
         {
             return new BodyInterface(JPH_PhysicsSystem_GetBodyInterfaceNoLock(Handle));
+        }
+
+        /// <summary>
+        /// Gets the narrow phase query.
+        /// </summary>
+        /// <returns></returns>
+        public NarrowPhaseQuery GetNarrowPhaseQuery()
+        {
+            return new NarrowPhaseQuery(JPH_PhysicsSystem_GetNarrowPhaseQuery(Handle));
         }
 
         public void SetContactListener(IContactListener listener)
