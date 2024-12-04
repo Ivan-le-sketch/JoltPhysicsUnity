@@ -495,6 +495,10 @@ namespace Jolt
     {
     }
 
+    internal partial struct JPH_StateRecorderFilter
+    {
+    }
+
     internal unsafe partial struct JPH_BodyLockRead
     {
         [NativeTypeName("const JPH_BodyLockInterface *")]
@@ -819,6 +823,21 @@ namespace Jolt
 
         [NativeTypeName("void (*)(void *, const JPH_CharacterVirtual *, const JPH_CharacterVirtual *, const JPH_SubShapeID, const JPH_RVec3 *, const JPH_Vec3 *, const JPH_Vec3 *, const JPH_PhysicsMaterial *, const JPH_Vec3 *, JPH_Vec3 *) __attribute__((cdecl))")]
         public IntPtr OnCharacterContactSolve;
+    }
+
+    internal partial struct JPH_StateRecorderFilter_Procs
+    {
+        [NativeTypeName("bool (*)(void *, const JPH_Body *) __attribute__((cdecl))")]
+        public IntPtr ShouldSaveBody;
+
+        [NativeTypeName("bool (*)(void *, const JPH_Constraint *) __attribute__((cdecl))")]
+        public IntPtr ShouldSaveConstraint;
+
+        [NativeTypeName("bool (*)(void *, const JPH_BodyID, const JPH_BodyID) __attribute__((cdecl))")]
+        public IntPtr ShouldSaveContact;
+
+        [NativeTypeName("bool (*)(void *, const JPH_BodyID, const JPH_BodyID) __attribute__((cdecl))")]
+        public IntPtr ShouldRestoreContact;
     }
 
     internal partial struct JPH_DebugRenderer_Procs
@@ -3056,6 +3075,12 @@ namespace Jolt
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("size_t")]
         public static extern ulong JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_DebugRenderer* JPH_DebugRenderer_Create(JPH_DebugRenderer_Procs procs, void* userData);
