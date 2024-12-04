@@ -1034,7 +1034,7 @@ public:
 		return true;
 	}
 
-	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const
+	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
 		if (procs.ShouldCollide2)
 		{
@@ -7094,6 +7094,86 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 {
 	if (listener)
 		delete reinterpret_cast<ManagedCharacterContactListener*>(listener);
+}
+
+/* StateRecorderFilter */
+class ManagedStateRecorderFilter final : JPH::StateRecorderFilter
+{
+public:
+	bool ShouldSaveBody(const Body& inBody) const override
+	{
+		if (procs.ShouldSaveBody)
+		{
+			return procs.ShouldSaveBody
+			(
+				userData,
+				reinterpret_cast<const JPH_Body*>(&inBody)
+			);
+		}
+
+		return true;
+	}
+
+	bool ShouldSaveConstraint(const Constraint& inConstraint) const override
+	{
+		if (procs.ShouldSaveConstraint)
+		{
+			return procs.ShouldSaveConstraint
+			(
+				userData,
+				reinterpret_cast<const JPH_Constraint*>(&inConstraint)
+			);
+		}
+
+		return true;
+	}
+
+	bool ShouldSaveContact(const BodyID& inBodyID1, const BodyID& inBodyID2) const override
+	{
+		if (procs.ShouldSaveContact)
+		{
+			return procs.ShouldSaveContact
+			(
+				userData,
+				(JPH_BodyID)inBodyID1.GetIndexAndSequenceNumber(),
+				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber()
+			);
+		}
+
+		return true;
+	}
+
+	bool ShouldRestoreContact(const BodyID& inBodyID1, const BodyID& inBodyID2) const override
+	{
+		if (procs.ShouldRestoreContact)
+		{
+			return procs.ShouldRestoreContact
+			(
+				userData,
+				(JPH_BodyID)inBodyID1.GetIndexAndSequenceNumber(),
+				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber()
+			);
+		}
+
+		return true;
+	}
+
+	JPH_StateRecorderFilter_Procs procs = {};
+	void* userData = nullptr;
+};
+
+JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData)
+{
+	auto impl = new ManagedStateRecorderFilter();
+	impl->procs = procs;
+	impl->userData = userData;
+	return reinterpret_cast<JPH_StateRecorderFilter*>(impl);
+}
+
+void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter)
+{
+	if (filter)
+		delete reinterpret_cast<ManagedStateRecorderFilter*>(filter);
 }
 
 /* StateRecorder */

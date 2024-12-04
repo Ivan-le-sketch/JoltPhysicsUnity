@@ -665,6 +665,7 @@ typedef struct JPH_SharedMutex                      JPH_SharedMutex;
 typedef struct JPH_DebugRenderer                    JPH_DebugRenderer;
 
 typedef struct JPH_StateRecorder					JPH_StateRecorder;
+typedef struct JPH_StateRecorderFilter				JPH_StateRecorderFilter;
 
 typedef struct JPH_BodyLockRead
 {
@@ -1989,6 +1990,17 @@ JPH_CAPI bool JPH_StateRecorder_IsEqual(JPH_StateRecorder* recorder, JPH_StateRe
 JPH_CAPI void JPH_StateRecorder_WriteBytes(JPH_StateRecorder* recorder, const void* data, size_t size);
 JPH_CAPI void JPH_StateRecorder_ReadBytes(JPH_StateRecorder* recorder, void* data, size_t size);
 JPH_CAPI size_t JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder);
+
+/* StateRecorderFilter */
+typedef struct JPH_StateRecorderFilter_Procs {
+	bool (JPH_API_CALL* ShouldSaveBody)(void* userData, const JPH_Body* body);
+	bool (JPH_API_CALL* ShouldSaveConstraint)(void* userData, const JPH_Constraint* constraint);
+	bool (JPH_API_CALL* ShouldSaveContact)(void* userData, const JPH_BodyID bodyID1, const JPH_BodyID bodyID2);
+	bool (JPH_API_CALL* ShouldRestoreContact)(void* userData, const JPH_BodyID bodyID1, const JPH_BodyID bodyID2);
+} JPH_StateRecorderFilter_Procs;
+
+JPH_CAPI JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
+JPH_CAPI void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
 /* DebugRenderer */
 typedef struct JPH_DebugRenderer_Procs {
