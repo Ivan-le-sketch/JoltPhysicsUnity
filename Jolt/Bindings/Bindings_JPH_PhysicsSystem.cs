@@ -63,6 +63,11 @@ namespace Jolt
             return CreateOwnedHandle(system, UnsafeBindings.JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(system));
         }
 
+        public static NativeHandle<JPH_BroadPhaseQuery> JPH_PhysicsSystem_GetBroadPhaseQuery(NativeHandle<JPH_PhysicsSystem> system)
+        {
+            return CreateHandle(UnsafeBindings.JPH_PhysicsSystem_GetBroadPhaseQuery(system));
+        }
+
         public static NativeHandle<JPH_NarrowPhaseQuery> JPH_PhysicsSystem_GetNarrowPhaseQuery(NativeHandle<JPH_PhysicsSystem> system)
         {
             return CreateOwnedHandle(system, UnsafeBindings.JPH_PhysicsSystem_GetNarrowPhaseQuery(system));
@@ -152,14 +157,14 @@ namespace Jolt
             throw new NotImplementedException();
         }
 
-        public static void JPH_PhysicsSystem_SaveState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, JPH_StateRecorderState state)
+        public static void JPH_PhysicsSystem_SaveState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, JPH_StateRecorderState state, NativeHandle<JPH_StateRecorderFilter> filter)
         {
-            UnsafeBindings.JPH_PhysicsSystem_SaveState(system, recorder, state);
+            UnsafeBindings.JPH_PhysicsSystem_SaveState(system, recorder, state, filter);
         }
 
-        public static void JPH_PhysicsSystem_RestoreState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder)
+        public static void JPH_PhysicsSystem_RestoreState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, NativeHandle<JPH_StateRecorderFilter> filter)
         {
-            UnsafeBindings.JPH_PhysicsSystem_RestoreState(system, recorder);
+            UnsafeBindings.JPH_PhysicsSystem_RestoreState(system, recorder, filter);
         }
     }
 }
