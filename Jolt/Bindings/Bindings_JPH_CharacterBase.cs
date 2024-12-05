@@ -101,5 +101,15 @@ namespace Jolt
         {
             return UnsafeBindings.JPH_CharacterBase_GetGroundUserData(character);
         }
+
+        public static void JPH_CharacterBase_SaveState(NativeHandle<JPH_CharacterBase> character, NativeHandle<JPH_StateRecorder> recorder)
+        {
+            UnsafeBindings.JPH_CharacterBase_SaveState(character, recorder);
+        }
+
+        public static void JPH_CharacterBase_RestoreState(NativeHandle<JPH_CharacterBase> character, NativeHandle<JPH_StateRecorder> recorder)
+        {
+            UnsafeBindings.JPH_CharacterBase_RestoreState(character, recorder);
+        }
     }
 }

@@ -26,8 +26,6 @@ namespace Jolt
         
         #region JPH_Character
         
-        public Character Create(rvec3 position, quaternion rotation, ulong userData, PhysicsSystem system) => new Character(Bindings.JPH_Character_Create(Handle.Reinterpret<JPH_CharacterSettings>(), position, rotation, userData, system.Handle));
-        
         public void AddToPhysicsSystem(Activation activationMode, bool lockBodies) => Bindings.JPH_Character_AddToPhysicsSystem(Handle, activationMode, lockBodies);
         
         public void RemoveFromPhysicsSystem(bool lockBodies) => Bindings.JPH_Character_RemoveFromPhysicsSystem(Handle, lockBodies);
@@ -71,6 +69,10 @@ namespace Jolt
         public SubShapeID GetGroundSubShapeId() => Bindings.JPH_CharacterBase_GetGroundSubShapeId(Handle.Reinterpret<JPH_CharacterBase>());
         
         public ulong GetGroundUserData() => Bindings.JPH_CharacterBase_GetGroundUserData(Handle.Reinterpret<JPH_CharacterBase>());
+        
+        public void SaveState(StateRecorder recorder) => Bindings.JPH_CharacterBase_SaveState(Handle.Reinterpret<JPH_CharacterBase>(), recorder.Handle);
+        
+        public void RestoreState(StateRecorder recorder) => Bindings.JPH_CharacterBase_RestoreState(Handle.Reinterpret<JPH_CharacterBase>(), recorder.Handle);
         
         #endregion
         

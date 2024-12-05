@@ -58,6 +58,10 @@ namespace Jolt
         
         public ulong GetGroundUserData() => Bindings.JPH_CharacterBase_GetGroundUserData(Handle);
         
+        public void SaveState(StateRecorder recorder) => Bindings.JPH_CharacterBase_SaveState(Handle, recorder.Handle);
+        
+        public void RestoreState(StateRecorder recorder) => Bindings.JPH_CharacterBase_RestoreState(Handle, recorder.Handle);
+        
         #endregion
         
     }

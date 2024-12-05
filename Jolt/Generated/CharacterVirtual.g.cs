@@ -86,10 +86,6 @@ namespace Jolt
         
         public void RefreshContacts(ObjectLayer layer, PhysicsSystem system) => Bindings.JPH_CharacterVirtual_RefreshContacts(Handle, layer, system.Handle);
         
-        public void SaveState(StateRecorder recorder) => Bindings.JPH_CharacterVirtual_SaveState(Handle, recorder.Handle);
-        
-        public void RestoreState(StateRecorder recorder) => Bindings.JPH_CharacterVirtual_RestoreState(Handle, recorder.Handle);
-        
         #endregion
         
         #region JPH_CharacterBase
@@ -125,6 +121,10 @@ namespace Jolt
         public SubShapeID GetGroundSubShapeId() => Bindings.JPH_CharacterBase_GetGroundSubShapeId(Handle.Reinterpret<JPH_CharacterBase>());
         
         public ulong GetGroundUserData() => Bindings.JPH_CharacterBase_GetGroundUserData(Handle.Reinterpret<JPH_CharacterBase>());
+        
+        public void SaveState(StateRecorder recorder) => Bindings.JPH_CharacterBase_SaveState(Handle.Reinterpret<JPH_CharacterBase>(), recorder.Handle);
+        
+        public void RestoreState(StateRecorder recorder) => Bindings.JPH_CharacterBase_RestoreState(Handle.Reinterpret<JPH_CharacterBase>(), recorder.Handle);
         
         #endregion
         

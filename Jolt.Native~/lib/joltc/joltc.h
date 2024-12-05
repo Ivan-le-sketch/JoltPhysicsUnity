@@ -1821,6 +1821,9 @@ JPH_CAPI JPH_BodyID JPH_CharacterBase_GetGroundBodyId(JPH_CharacterBase* charact
 JPH_CAPI JPH_SubShapeID JPH_CharacterBase_GetGroundSubShapeId(JPH_CharacterBase* character);
 JPH_CAPI uint64_t JPH_CharacterBase_GetGroundUserData(JPH_CharacterBase* character);
 
+JPH_CAPI void JPH_CharacterBase_SaveState(JPH_CharacterBase* character, JPH_StateRecorder* recorder);
+JPH_CAPI void JPH_CharacterBase_RestoreState(JPH_CharacterBase* character, JPH_StateRecorder* recorder);
+
 /* CharacterSettings */
 JPH_CAPI void JPH_CharacterSettings_Init(JPH_CharacterSettings* settings);
 
@@ -1913,9 +1916,6 @@ JPH_CAPI bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character,
 	const JPH_BodyFilter* bodyFilter, const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character);
-
-JPH_CAPI void JPH_CharacterVirtual_SaveState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder);
-JPH_CAPI void JPH_CharacterVirtual_RestoreState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder);
 
 /* CharacterContactListener */
 typedef struct JPH_CharacterContactListener_Procs {

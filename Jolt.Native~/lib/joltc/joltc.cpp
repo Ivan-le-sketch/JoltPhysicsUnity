@@ -6359,6 +6359,22 @@ uint64_t JPH_CharacterBase_GetGroundUserData(JPH_CharacterBase* character)
 	return joltCharacter->GetGroundUserData();
 }
 
+void JPH_CharacterBase_SaveState(JPH_CharacterBase* character, JPH_StateRecorder* recorder)
+{
+	auto jolt_character = reinterpret_cast<JPH::CharacterBase*>(character);
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+
+	jolt_character->SaveState(*jolt_recorder);
+}
+
+void JPH_CharacterBase_RestoreState(JPH_CharacterBase* character, JPH_StateRecorder* recorder)
+{
+	auto jolt_character = reinterpret_cast<JPH::CharacterBase*>(character);
+	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
+
+	jolt_character->RestoreState(*jolt_recorder);
+}
+
 /* CharacterSettings */
 void JPH_CharacterSettings_Init(JPH_CharacterSettings* settings)
 {
@@ -6882,22 +6898,6 @@ bool JPH_CharacterVirtual_StickToFloor(JPH_CharacterVirtual* character, const JP
 void JPH_CharacterVirtual_UpdateGroundVelocity(JPH_CharacterVirtual* character)
 {
 	AsCharacterVirtual(character)->UpdateGroundVelocity();
-}
-
-void JPH_CharacterVirtual_SaveState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder)
-{
-	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
-
-	jolt_character->SaveState(*jolt_recorder);
-}
-
-void JPH_CharacterVirtual_RestoreState(JPH_CharacterVirtual* character, JPH_StateRecorder* recorder)
-{
-	auto jolt_character = reinterpret_cast<JPH::CharacterVirtual*>(character);
-	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
-
-	jolt_character->RestoreState(*jolt_recorder);
 }
 
 /* CharacterContactListener */
