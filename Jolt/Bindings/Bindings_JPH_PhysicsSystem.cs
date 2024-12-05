@@ -31,6 +31,20 @@ namespace Jolt
             system.Dispose();
         }
 
+        public static JPH_PhysicsSettings JPH_PhysicsSystem_GetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system)
+        {
+            JPH_PhysicsSettings settings;
+
+            UnsafeBindings.JPH_PhysicsSystem_GetPhysicsSettings(system, &settings);
+
+            return settings;
+        }
+
+        public static void JPH_PhysicsSystem_SetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system, JPH_PhysicsSettings settings)
+        {
+            UnsafeBindings.JPH_PhysicsSystem_SetPhysicsSettings(system, &settings);
+        }
+
         public static void JPH_PhysicsSystem_OptimizeBroadPhase(NativeHandle<JPH_PhysicsSystem> system)
         {
             UnsafeBindings.JPH_PhysicsSystem_OptimizeBroadPhase(system);
