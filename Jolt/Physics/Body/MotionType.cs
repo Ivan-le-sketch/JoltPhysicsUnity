@@ -3,7 +3,7 @@
     /// <summary>
     /// Motion type of a physics body.
     /// </summary>
-    public enum MotionType : uint
+    public enum MotionType : byte
     {
         /// <summary>
         /// Non-movable
