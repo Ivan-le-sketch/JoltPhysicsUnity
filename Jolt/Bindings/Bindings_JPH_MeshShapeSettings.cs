@@ -1,4 +1,6 @@
 ﻿using System;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -20,6 +22,21 @@ namespace Jolt
             {
                 return CreateHandle(UnsafeBindings.JPH_MeshShapeSettings_Create2(verticesPtr, (uint)vertices.Length, trianglesPtr, (uint)triangles.Length));
             }
+        }
+
+        public static NativeHandle<JPH_MeshShapeSettings> JPH_MeshShapeSettings_Create(NativeArray<Triangle> triangles)
+        {
+            Triangle* trianglesPtr = (Triangle*)triangles.GetUnsafePtr();
+
+            return CreateHandle(UnsafeBindings.JPH_MeshShapeSettings_Create(trianglesPtr, (uint)triangles.Length));
+        }
+
+        public static NativeHandle<JPH_MeshShapeSettings> JPH_MeshShapeSettings_Create(NativeArray<float3> vertices, NativeArray<IndexedTriangle> triangles)
+        {
+            float3* verticesPtr = (float3*)vertices.GetUnsafePtr();
+            IndexedTriangle* trianglesPtr = (IndexedTriangle*)triangles.GetUnsafePtr();
+
+            return CreateHandle(UnsafeBindings.JPH_MeshShapeSettings_Create2(verticesPtr, (uint)vertices.Length, trianglesPtr, (uint)triangles.Length));
         }
 
         public static void JPH_MeshShapeSettings_Sanitize(NativeHandle<JPH_MeshShapeSettings> settings)
