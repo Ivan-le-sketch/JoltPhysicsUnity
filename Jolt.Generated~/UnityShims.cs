@@ -57,6 +57,19 @@ namespace Unity.Collections
         public void Dispose() { }
     }
 
+    public unsafe struct NativeArray<T> : System.IDisposable
+    {
+        public NativeArray(int _, Allocator __) { }
+
+        public bool IsCreated => true;
+
+        public int Length => 0;
+
+        public void Dispose() { }
+
+        public void* GetUnsafePtr() => null;
+    }
+
     public struct NativeHashSet<T> : System.IDisposable
     {
         public NativeHashSet(int _, Allocator __) { }
@@ -74,4 +87,14 @@ namespace Unity.Collections
     {
         Temp, Persistent,
     }
+}
+
+namespace Unity.Collections.LowLevel
+{
+
+}
+
+namespace Unity.Collections.LowLevel.Unsafe
+{
+
 }
