@@ -48,6 +48,10 @@ namespace Jolt
         
         public void SetMotionType(MotionType value) => Bindings.JPH_BodyCreationSettings_SetMotionType(Handle, value);
         
+        public MotionQuality GetMotionQuality() => Bindings.JPH_BodyCreationSettings_GetMotionQuality(Handle);
+        
+        public void SetMotionQuality(MotionQuality value) => Bindings.JPH_BodyCreationSettings_SetMotionQuality(Handle, value);
+        
         public AllowedDOFs GetAllowedDOFs() => Bindings.JPH_BodyCreationSettings_GetAllowedDOFs(Handle);
         
         public void SetAllowedDOFs(AllowedDOFs value) => Bindings.JPH_BodyCreationSettings_SetAllowedDOFs(Handle, value);

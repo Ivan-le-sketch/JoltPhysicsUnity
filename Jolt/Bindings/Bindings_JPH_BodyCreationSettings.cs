@@ -84,6 +84,16 @@ namespace Jolt
             UnsafeBindings.JPH_BodyCreationSettings_SetMotionType(settings, value);
         }
 
+        public static MotionQuality JPH_BodyCreationSettings_GetMotionQuality(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetMotionQuality(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetMotionQuality(NativeHandle<JPH_BodyCreationSettings> settings, MotionQuality value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetMotionQuality(settings, value);
+        }
+
         public static AllowedDOFs JPH_BodyCreationSettings_GetAllowedDOFs(NativeHandle<JPH_BodyCreationSettings> settings)
         {
             return UnsafeBindings.JPH_BodyCreationSettings_GetAllowedDOFs(settings);
