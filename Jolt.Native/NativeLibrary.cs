@@ -46,6 +46,7 @@ namespace Jolt.Native
 
             string libname;
 
+#if UNITY_EDITOR
             if (IsWindows())
             {
                 libname = "windows-x64\\joltc.dll";
@@ -62,11 +63,29 @@ namespace Jolt.Native
             {
                 throw new Exception("Unrecognized platform, unable to load native lib.");
             }
+#else
+            if (IsWindows())
+            {
+                libname = "joltc.dll";
+            }
+            else if (IsLinux())
+            {
+                libname = "libjoltc.so";
+            }
+            else if (IsMacOS())
+            {
+                libname = "libjoltc.dylib";
+            }
+            else
+            {
+                throw new Exception("Unrecognized platform, unable to load native lib.");
+            }
+#endif
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             var paths = EditorLibraryPaths();
-            #else
-            var paths = RuntimePackagePaths();
+#else
+            var paths = RuntimeLibraryPaths();
             #endif
 
             foreach (var path in paths)
