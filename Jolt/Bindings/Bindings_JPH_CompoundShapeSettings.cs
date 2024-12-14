@@ -23,10 +23,5 @@ namespace Jolt
         {
             return CreateHandle(UnsafeBindings.JPH_MutableCompoundShapeSettings_Create());
         }
-
-        public static NativeHandle<JPH_MutableCompoundShape> JPH_MutableCompoundShape_Create(NativeHandle<JPH_MutableCompoundShapeSettings> settings)
-        {
-            return CreateHandle(UnsafeBindings.JPH_MutableCompoundShape_Create(settings));
-        }
     }
 }
