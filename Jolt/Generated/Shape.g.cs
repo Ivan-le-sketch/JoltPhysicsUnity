@@ -26,8 +26,6 @@ namespace Jolt
         
         #region JPH_Shape
         
-        public void Destroy() => Bindings.JPH_Shape_Destroy(Handle);
-        
         public new ShapeType GetType() => Bindings.JPH_Shape_GetType(Handle);
         
         public ShapeSubType GetSubType() => Bindings.JPH_Shape_GetSubType(Handle);

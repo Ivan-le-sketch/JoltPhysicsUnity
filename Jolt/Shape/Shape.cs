@@ -1,4 +1,6 @@
-﻿namespace Jolt
+﻿using UnityEngine;
+
+namespace Jolt
 {
     /// <summary>
     /// A widened Shape instance handle.
@@ -6,6 +8,34 @@
     [GenerateHandle("JPH_Shape"), GenerateBindings("JPH_Shape")]
     public readonly partial struct Shape
     {
+        public void AddUser()
+        {
+            var userCount = GetUserData();
+            userCount++;
+            SetUserData(userCount);
+        }
+
+        public void RemoveUser()
+        {
+            var userCount = GetUserData();
+            if (userCount > 0) userCount--;
+            if (userCount == 0)
+            {
+                Destroy();
+            }
+            else
+            {
+                SetUserData(userCount);
+            }
+        }
+
+        [OverrideBinding("JPH_Shape_Destroy")]
+        public void Destroy()
+        {
+            Debug.Log("Destroying shape");
+            Bindings.JPH_Shape_Destroy(Handle);
+        }
+
         public static implicit operator Shape(BoxShape shape)
         {
             return new Shape(shape.Handle.Reinterpret<JPH_Shape>());
