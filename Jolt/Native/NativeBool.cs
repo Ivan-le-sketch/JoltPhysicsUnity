@@ -5,7 +5,7 @@
     /// </summary>
     internal struct NativeBool
     {
-        public uint Value;
+        public byte Value;
 
         public static implicit operator bool(NativeBool value)
         {
@@ -14,7 +14,7 @@
 
         public static implicit operator NativeBool(bool value)
         {
-            return new NativeBool { Value = value ? 1u : 0u };
+            return new NativeBool { Value = value ? (byte)1 : (byte)0 };
         }
     }
 }
