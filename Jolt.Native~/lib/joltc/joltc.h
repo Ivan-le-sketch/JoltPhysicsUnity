@@ -314,7 +314,7 @@ typedef enum JPH_DebugRenderer_DrawMode {
 	_JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Force32 = 0x7FFFFFFF
 } JPH_DebugRenderer_DrawMode;
 
-typedef enum JPH_StateRecorderState
+typedef enum JPH_StateRecorderState : uint8_t
 {
 	JPH_StateRecorderState_None = 0,
 	JPH_StateRecorderState_Global = 1,
@@ -883,7 +883,7 @@ JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_B
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
 JPH_CAPI void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state, const JPH_StateRecorderFilter* filter);
-JPH_CAPI void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, const JPH_StateRecorderFilter* filter);
+JPH_CAPI bool JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, const JPH_StateRecorderFilter* filter);
 
 JPH_CAPI void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, const JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, const JPH_BodyDrawFilter* bodyFilter /* = nullptr */);
 JPH_CAPI void JPH_PhysicsSystem_DrawConstraints(JPH_PhysicsSystem* system, JPH_DebugRenderer* renderer);

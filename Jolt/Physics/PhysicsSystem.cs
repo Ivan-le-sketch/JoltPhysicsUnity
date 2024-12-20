@@ -36,6 +36,11 @@ namespace Jolt
             BroadPhaseLayerInterface = settings.BroadPhaseLayerInterface;
 
             ObjectVsBroadPhaseLayerFilter = settings.ObjectVsBroadPhaseLayerFilter;
+
+            var physicsSettings = JPH_PhysicsSystem_GetPhysicsSettings(Handle);
+            physicsSettings.numVelocitySteps = 6;
+
+            JPH_PhysicsSystem_SetPhysicsSettings(Handle, physicsSettings);
         }
 
         public void OptimizeBroadPhase()
@@ -152,9 +157,9 @@ namespace Jolt
             JPH_PhysicsSystem_SaveState(Handle, recorder.Handle, JPH_StateRecorderState.JPH_StateRecorderState_All, filter.Handle);
         }
 
-        public void RestoreState(StateRecorder recorder, StateRecorderFilter filter)
+        public bool RestoreState(StateRecorder recorder, StateRecorderFilter filter)
         {
-            JPH_PhysicsSystem_RestoreState(Handle, recorder.Handle, filter.Handle);
+            return JPH_PhysicsSystem_RestoreState(Handle, recorder.Handle, filter.Handle);
         }
 
         public void Dispose()

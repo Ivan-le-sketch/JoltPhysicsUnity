@@ -52,7 +52,7 @@ namespace Jolt
 
         public static PhysicsUpdateError JPH_PhysicsSystem_Update(NativeHandle<JPH_PhysicsSystem> system, float deltaTime, int collisionSteps, NativeHandle<JPH_JobSystem> jobSystem)
         {
-            return UnsafeBindings.JPH_PhysicsSystem_Update(system.IntoPointer(), deltaTime, collisionSteps, jobSystem.IntoPointer());
+            return UnsafeBindings.JPH_PhysicsSystem_Update(system, deltaTime, collisionSteps, jobSystem);
         }
 
         // JPH_PhysicsSystem_Step excluded, does same thing as JPH_PhysicsSystem_Update
@@ -176,9 +176,9 @@ namespace Jolt
             UnsafeBindings.JPH_PhysicsSystem_SaveState(system, recorder, state, filter);
         }
 
-        public static void JPH_PhysicsSystem_RestoreState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, NativeHandle<JPH_StateRecorderFilter> filter)
+        public static bool JPH_PhysicsSystem_RestoreState(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_StateRecorder> recorder, NativeHandle<JPH_StateRecorderFilter> filter)
         {
-            UnsafeBindings.JPH_PhysicsSystem_RestoreState(system, recorder, filter);
+            return UnsafeBindings.JPH_PhysicsSystem_RestoreState(system, recorder, filter);
         }
     }
 }

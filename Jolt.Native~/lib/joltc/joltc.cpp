@@ -839,22 +839,16 @@ const JPH_BodyLockInterface* JPH_PhysicsSystem_GetBodyLockInterfaceNoLock(const 
 
 void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state, const JPH_StateRecorderFilter* filter)
 {
-	//JPH_ASSERT(system);
-	//JPH_ASSERT(recorder);
-
 	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
 	auto jolt_filter = reinterpret_cast<const JPH::StateRecorderFilter*>(filter);
 	system->physicsSystem->SaveState(*jolt_recorder, static_cast<JPH::EStateRecorderState>(state), jolt_filter);
 }
 
-void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, const JPH_StateRecorderFilter* filter)
+bool JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, const JPH_StateRecorderFilter* filter)
 {
-	//JPH_ASSERT(system);
-	//JPH_ASSERT(recorder);
-
 	auto jolt_recorder = reinterpret_cast<JPH::StateRecorder*>(recorder);
 	auto jolt_filter = reinterpret_cast<const JPH::StateRecorderFilter*>(filter);
-	system->physicsSystem->RestoreState(*jolt_recorder, jolt_filter);
+	return system->physicsSystem->RestoreState(*jolt_recorder, jolt_filter);
 }
 
 /* JPH_BroadPhaseLayerFilter */

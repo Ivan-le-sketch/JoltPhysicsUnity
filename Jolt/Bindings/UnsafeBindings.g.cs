@@ -41,7 +41,8 @@ namespace Jolt
         _JPH_DebugRenderer_JPH_DebugRenderer_DrawMode_Force32 = 0x7FFFFFFF,
     }
 
-    internal enum JPH_StateRecorderState
+    [NativeTypeName("uint8_t")]
+    internal enum JPH_StateRecorderState : byte
     {
         JPH_StateRecorderState_None = 0,
         JPH_StateRecorderState_Global = 1,
@@ -1018,7 +1019,8 @@ namespace Jolt
         public static extern void JPH_PhysicsSystem_SaveState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, JPH_StateRecorderState state, [NativeTypeName("const JPH_StateRecorderFilter *")] JPH_StateRecorderFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, [NativeTypeName("const JPH_StateRecorderFilter *")] JPH_StateRecorderFilter* filter);
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_PhysicsSystem_RestoreState(JPH_PhysicsSystem* system, JPH_StateRecorder* recorder, [NativeTypeName("const JPH_StateRecorderFilter *")] JPH_StateRecorderFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_PhysicsSystem_DrawBodies(JPH_PhysicsSystem* system, [NativeTypeName("const JPH_DrawSettings *")] JPH_DrawSettings* settings, JPH_DebugRenderer* renderer, [NativeTypeName("const JPH_BodyDrawFilter *")] JPH_BodyDrawFilter* bodyFilter);
