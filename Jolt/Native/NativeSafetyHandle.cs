@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Unity.Collections;
 using UnityEngine;
 
@@ -24,7 +25,8 @@ namespace Jolt
 
         public uint Index;
 
-        private static uint nextHandleIndex;
+        private static int nextHandleInternal;
+        private static readonly object lockObject = new object();
 
         private static NativeHashSet<uint> disposed;
 
@@ -47,26 +49,35 @@ namespace Jolt
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NativeSafetyHandle Create()
         {
-            return new NativeSafetyHandle { Index = nextHandleIndex++ };
+            int newIndex = Interlocked.Increment(ref nextHandleInternal);
+            uint safeIndex = unchecked((uint)newIndex - 1);
+
+            return new NativeSafetyHandle { Index = safeIndex };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Release(in NativeSafetyHandle handle)
         {
-            if (disposed.Contains(handle.Index))
+            lock (lockObject)
             {
-                Debug.LogWarning("A NativeSafetyHandle is being released for a handle index that was already released.");
+                if (disposed.Contains(handle.Index))
+                {
+                    Debug.LogWarning("A NativeSafetyHandle is being released for a handle index that was already released.");
+                    return;
+                }
+                disposed.Add(handle.Index);
             }
-
-            disposed.Add(handle.Index);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AssertExists(in NativeSafetyHandle handle)
         {
-            if (disposed.Contains(handle.Index))
+            lock (lockObject)
             {
-                throw new ObjectDisposedException("The native resource has been disposed.");
+                if (disposed.Contains(handle.Index))
+                {
+                    throw new ObjectDisposedException("The native resource has been disposed.");
+                }
             }
         }
     }
