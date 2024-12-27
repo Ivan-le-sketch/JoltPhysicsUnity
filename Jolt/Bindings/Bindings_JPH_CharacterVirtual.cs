@@ -169,6 +169,11 @@ namespace Jolt
             UnsafeBindings.JPH_CharacterVirtual_SetUserData(character, value);
         }
 
+        public static BodyID JPH_CharacterVirtual_GetInnerBodyID(NativeHandle<JPH_CharacterVirtual> character)
+        {
+            return UnsafeBindings.JPH_CharacterVirtual_GetInnerBodyID(character);
+        }
+
         public static void JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(NativeHandle<JPH_CharacterVirtual> character, float3 desiredVelocity, float3 velocity)
         {
             UnsafeBindings.JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(character, &desiredVelocity, &velocity);

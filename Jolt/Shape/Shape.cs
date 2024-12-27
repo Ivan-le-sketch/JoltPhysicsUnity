@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Jolt
+﻿namespace Jolt
 {
     /// <summary>
     /// A widened Shape instance handle.
@@ -32,7 +30,6 @@ namespace Jolt
         [OverrideBinding("JPH_Shape_Destroy")]
         public void Destroy()
         {
-            Debug.Log("Destroying shape");
             Bindings.JPH_Shape_Destroy(Handle);
         }
 

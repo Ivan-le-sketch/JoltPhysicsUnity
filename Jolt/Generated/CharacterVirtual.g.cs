@@ -78,6 +78,8 @@ namespace Jolt
         
         public void SetUserData(ulong value) => Bindings.JPH_CharacterVirtual_SetUserData(Handle, value);
         
+        public BodyID GetInnerBodyID() => Bindings.JPH_CharacterVirtual_GetInnerBodyID(Handle);
+        
         public void CancelVelocityTowardsSteepSlopes(float3 desiredVelocity, float3 velocity) => Bindings.JPH_CharacterVirtual_CancelVelocityTowardsSteepSlopes(Handle, desiredVelocity, velocity);
         
         public void Update(float deltaTime, ObjectLayer layer, PhysicsSystem system) => Bindings.JPH_CharacterVirtual_Update(Handle, deltaTime, layer, system.Handle);
