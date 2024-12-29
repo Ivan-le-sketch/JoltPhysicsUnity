@@ -1697,7 +1697,7 @@ JPH_CAPI JPH_Body* JPH_Body_GetFixedToWorldBody(void);
 
 /* JPH_BroadPhaseLayerFilter_Procs */
 typedef struct JPH_BroadPhaseLayerFilter_Procs {
-	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
+	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer& layer);
 } JPH_BroadPhaseLayerFilter_Procs;
 
 JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs procs, void* userData);
@@ -1705,7 +1705,7 @@ JPH_CAPI void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filte
 
 /* JPH_ObjectLayerFilter */
 typedef struct JPH_ObjectLayerFilter_Procs {
-	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer layer);
+	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer& layer);
 } JPH_ObjectLayerFilter_Procs;
 
 JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(JPH_ObjectLayerFilter_Procs procs, void* userData);

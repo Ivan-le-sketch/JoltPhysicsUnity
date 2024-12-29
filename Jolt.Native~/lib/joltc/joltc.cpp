@@ -872,7 +872,8 @@ public:
 	{
 		if (procs.ShouldCollide)
 		{
-			return procs.ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
+			JPH_BroadPhaseLayer tempLayer = static_cast<JPH_BroadPhaseLayer>(inLayer);
+			return procs.ShouldCollide(userData, tempLayer) == 1;
 		}
 
 		return true;
@@ -919,7 +920,8 @@ public:
 	{
 		if (procs.ShouldCollide)
 		{
-			return procs.ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
+			JPH_ObjectLayer tempLayer = static_cast<JPH_ObjectLayer>(inLayer);
+			return procs.ShouldCollide(userData, tempLayer) == 1;
 		}
 
 		return true;
