@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Jolt;
+using System;
 using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Jolt
@@ -7,7 +10,8 @@ namespace Jolt
     /// <summary>
     /// Represents a filter using a bitmask for determining which <see cref="ObjectLayer"/>s to ignore in a collision query.
     /// </summary>
-    public unsafe class ObjectLayerFilter : IDisposable
+    [BurstCompile]
+    public unsafe struct ObjectLayerFilter : IDisposable
     {
         /// <summary>
         /// Enumerates the modes for constructing a collision mask.
@@ -27,24 +31,76 @@ namespace Jolt
 
         internal NativeHandle<JPH_ObjectLayerFilter> Handle;
 
-        private readonly ulong collisionMask = 0xFFFFFFFFFFFFFFFF;
+        internal IntPtr UnmanagedPointer;
 
-        private delegate NativeBool ShouldCollide(IntPtr userData, ObjectLayer layer);
+        private readonly ulong collisionMask;
 
-        private ShouldCollide shouldCollideDelegate;
+        private delegate bool ShouldCollideSignature(void* context, ref ObjectLayer layer);
 
-        public ObjectLayerFilter()
+        private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFuncPointer;
+
+        static ObjectLayerFilter()
         {
-            CreateNativeHandle();
+            shouldCollideFuncPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class with a specified collision mask.
         /// </summary>
         /// <param name="collisionMask">The mask used to determine layer collisions.</param>
-        public ObjectLayerFilter(ulong collisionMask)
+        public static ObjectLayerFilter Create(ulong collisionMask)
         {
-            CreateNativeHandle();
+            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
+            ObjectLayerFilter filter = new ObjectLayerFilter(collisionMask);
+            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+
+            filter.UnmanagedPointer = unmanagedPointer;
+
+            var ptr = (ObjectLayerFilter*)unmanagedPointer.ToPointer();
+
+            var procs = new JPH_ObjectLayerFilter_Procs
+            {
+                ShouldCollide = shouldCollideFuncPointer.Value
+            };
+
+            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, ptr);
+
+            return filter;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class specifying layers to either ignore or collide with.
+        /// </summary>
+        /// <param name="layers">The layers to include or exclude from collisions.</param>
+        /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
+        public static ObjectLayerFilter Create(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
+            ObjectLayerFilter filter = new ObjectLayerFilter(layers, constructorMode);
+            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+
+            filter.UnmanagedPointer = unmanagedPointer;
+
+            var ptr = (ObjectLayerFilter*)unmanagedPointer.ToPointer();
+
+            var procs = new JPH_ObjectLayerFilter_Procs
+            {
+                ShouldCollide = shouldCollideFuncPointer.Value
+            };
+
+            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, ptr);
+
+            return filter;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class with a specified collision mask.
+        /// </summary>
+        /// <param name="collisionMask">The mask used to determine layer collisions.</param>
+        internal ObjectLayerFilter(ulong collisionMask)
+        {
+            Handle = default;
+            UnmanagedPointer = default;
 
             this.collisionMask = collisionMask;
         }
@@ -54,9 +110,10 @@ namespace Jolt
         /// </summary>
         /// <param name="layers">The layers to include or exclude from collisions.</param>
         /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
-        public ObjectLayerFilter(ObjectLayer[] layers, MaskInitializationMode constructorMode)
+        internal ObjectLayerFilter(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
         {
-            CreateNativeHandle();
+            Handle = default;
+            UnmanagedPointer = default;
 
             if (constructorMode == MaskInitializationMode.IgnoreLayers)
             {
@@ -98,27 +155,39 @@ namespace Jolt
             }
         }
 
-        public void Dispose()
+        /// <summary>
+        /// <para>
+        /// Callback method for the Jolt physics engine to call.
+        /// </para>
+        /// Returns if an <see cref="ObjectLayer"/> should collide.
+        /// </summary>
+        /// <param name="context">Pointer to an instance of <see cref="ObjectLayerFilter"/></param>
+        /// <param name="layer"></param>
+        /// <returns></returns>
+        [BurstCompile]
+        internal static bool ShouldCollide(void* context, ref ObjectLayer layer)
         {
-            Bindings.JPH_ObjectLayerFilter_Destroy(Handle);
+            ObjectLayerFilter* implPtr = (ObjectLayerFilter*)context;
+            ObjectLayerFilter impl = *implPtr;
+
+            return impl.ShouldCollide(layer);
         }
 
-        internal NativeBool ShouldCollideCallback(IntPtr userData, ObjectLayer layer)
+        /// <summary>
+        /// Returns if an <see cref="ObjectLayer"/> should collide.
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <returns></returns>
+        internal bool ShouldCollide(ObjectLayer layer)
         {
             // Shift 1 left by the number of the layer's value, then AND it with the collision mask to see if that bit is set.
             return (collisionMask & (1u << layer.Value)) != 0;
         }
 
-        private void CreateNativeHandle()
+        public void Dispose()
         {
-            shouldCollideDelegate = ShouldCollideCallback;
-
-            JPH_ObjectLayerFilter_Procs procs = new JPH_ObjectLayerFilter_Procs
-            {
-                ShouldCollide = Marshal.GetFunctionPointerForDelegate(shouldCollideDelegate),
-            };
-
-            Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, null);
+            Bindings.JPH_ObjectLayerFilter_Destroy(Handle);
+            Marshal.FreeHGlobal(UnmanagedPointer);
         }
     }
 }
