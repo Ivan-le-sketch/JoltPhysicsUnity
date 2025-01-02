@@ -31,139 +31,139 @@ namespace Jolt
         #region JPH_NarrowPhaseQuery
 
         public bool CastRay(float3 origin, float3 direction, out RayCastResult hit,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null)
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null)
         {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CastRay(Handle, origin, direction, out hit, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle);
         }
 
         public bool CastRay(float3 origin, float3 direction, RayCastSettings settings,
-            ref CollisionCollector<RayCastResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
+            ref RayCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
         {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CastRay2(Handle, origin, direction, settings, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
         public bool CastRay(float3 origin, float3 direction, RayCastSettings settings,
-            CollisionCollectorType collectorType, ref CollisionCollector<RayCastResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
+            CollisionCollectorType collectorType, ref RayCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
         {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CastRay3(Handle, origin, direction, settings, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CollidePoint(float3 origin,
-            ref CollisionCollector<CollidePointResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
-        {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
-
-            return Bindings.JPH_NarrowPhaseQuery_CollidePoint(Handle, origin, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
-        }
-
-        public bool CollidePoint(float3 origin,
-            CollisionCollectorType collectorType, ref CollisionCollector<CollidePointResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
-        {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
-
-            return Bindings.JPH_NarrowPhaseQuery_CollidePoint2(Handle, origin, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
-        }
-
-        public bool CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
-            CollideShapeSettings settings, rvec3 baseOffset,
-            ref CollisionCollector<CollideShapeResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
-        {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
-
-            return Bindings.JPH_NarrowPhaseQuery_CollideShape(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
-        }
-
-        public bool CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
-            CollideShapeSettings settings, rvec3 baseOffset,
-            CollisionCollectorType collectorType, ref CollisionCollector<CollideShapeResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
-        {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
-
-            return Bindings.JPH_NarrowPhaseQuery_CollideShape2(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
-        }
-
         public bool CastShape(Shape shape, float4x4 worldTransform, float3 direction,
             ShapeCastSettings settings, rvec3 baseOffset,
-            ref CollisionCollector<ShapeCastResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
+            ref ShapeCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
         {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CastShape(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
         public bool CastShape(Shape shape, float4x4 worldTransform, float3 direction,
             ShapeCastSettings settings, rvec3 baseOffset,
-            CollisionCollectorType collectorType, ref CollisionCollector<ShapeCastResult> collector,
-            BroadPhaseLayerFilter broadPhaseLayerFilter = null,
-            ObjectLayerFilter objectLayerFilter = null,
-            BodyFilter bodyFilter = null,
-            ShapeFilter shapeFilter = null)
+            CollisionCollectorType collectorType, ref ShapeCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
         {
-            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Handle;
-            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Handle;
-            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Handle;
-            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Handle;
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CastShape(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CollidePoint(float3 origin,
+            ref CollidePointResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CollidePoint(Handle, origin, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CollidePoint(float3 origin,
+            CollisionCollectorType collectorType, ref CollidePointResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CollidePoint2(Handle, origin, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
+            CollideShapeSettings settings, rvec3 baseOffset,
+            ref CollideShapeResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CollideShape(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
+            CollideShapeSettings settings, rvec3 baseOffset,
+            CollisionCollectorType collectorType, ref CollideShapeResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CollideShape2(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
         #endregion
     }
