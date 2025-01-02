@@ -28,79 +28,30 @@ namespace Jolt
             IgnoreLayers,
         }
 
+        /// <summary>
+        /// A handle to a native broadphase layer filter.
+        /// </summary>
         internal NativeHandle<JPH_BroadPhaseLayerFilter> Handle;
 
+        /// <summary>
+        /// A pointer to a <see cref="BroadPhaseLayerFilter"/> instance allocated on the unmanaged heap.
+        /// This instance is safe to use in interoperation context as it is not managed.
+        /// </summary>
         internal IntPtr UnmanagedPointer;
 
         // Using a 64-bit integer to represent the layers that should collide.
         // Each bit in this mask can represent a layer. For example, if the first bit is set (0x1), it allows collision with layer 0.
         private readonly ulong collisionMask;
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool ShouldCollideSignature(void* userData, ref BroadPhaseLayer layer);
-
-        private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFuncPointer;
+        private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFunctionPointer;
 
         static BroadPhaseLayerFilter()
         {
-            shouldCollideFuncPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
+            shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BroadPhaseLayerFilter"/> class with a specified collision mask.
-        /// </summary>
-        /// <param name="collisionMask">The mask used to determine layer collisions.</param>
-        public static BroadPhaseLayerFilter Create(ulong collisionMask)
-        {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
-            BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(collisionMask);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
-
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_BroadPhaseLayerFilter_Procs
-            {
-                ShouldCollide = shouldCollideFuncPointer.Value,
-            };
-
-            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
-
-            return filter;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BroadPhaseLayerFilter"/> class specifying layers to either ignore or collide with.
-        /// </summary>
-        /// <param name="layers">The layers to include or exclude from collisions.</param>
-        /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
-        public static BroadPhaseLayerFilter Create(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
-        {
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
-            BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(layers, constructorMode);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
-
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_BroadPhaseLayerFilter_Procs
-            {
-                ShouldCollide = shouldCollideFuncPointer.Value,
-            };
-
-            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
-
-            return filter;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BroadPhaseLayerFilter"/> class with a specified collision mask.
-        /// </summary>
-        /// <remarks>
-        /// This should never be called outside of <see cref="Create(ulong)"/>.
-        /// </remarks>
-        /// <param name="collisionMask">The mask used to determine layer collisions.</param>
         internal BroadPhaseLayerFilter(ulong collisionMask)
         {
             Handle = default;
@@ -109,14 +60,6 @@ namespace Jolt
             this.collisionMask = collisionMask;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BroadPhaseLayerFilter"/> class specifying layers to either ignore or collide with.
-        /// </summary>
-        /// <remarks>
-        /// This should never be called outside of <see cref="Create(NativeList{BroadPhaseLayer}, MaskInitializationMode)"/>.
-        /// </remarks>
-        /// <param name="layers">The layers to include or exclude from collisions.</param>
-        /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
         internal BroadPhaseLayerFilter(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
         {
             Handle = default;
@@ -127,8 +70,10 @@ namespace Jolt
                 // Start with all bits set to 1 (assume 64-bit mask)
                 ulong mask = 0xFFFFFFFFFFFFFFFF;
 
-                foreach (var layer in layers)
+                for (int i = 0; i < layers.Length; i++)
                 {
+                    var layer = layers[i];
+
                     if (layer.Value >= 0 && layer.Value < 64)
                     {
                         mask &= ~(1UL << layer.Value); // Clear the bit for each layer to ignore
@@ -146,8 +91,10 @@ namespace Jolt
                 // Start with all bits set to 0 (assume 64-bit mask)
                 ulong mask = 0x0;
 
-                foreach (var layer in layers)
+                for (int i = 0; i < layers.Length; i++)
                 {
+                    var layer = layers[i];
+
                     if (layer.Value >= 0 && layer.Value < 64)
                     {
                         mask |= (1UL << layer.Value); // Set the bit for each layer to collide
@@ -160,6 +107,55 @@ namespace Jolt
 
                 collisionMask = mask;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="BroadPhaseLayerFilter"/> instance with a specified collision mask.
+        /// </summary>
+        /// <param name="collisionMask">The mask used to determine layer collisions.</param>
+        public static BroadPhaseLayerFilter Create(ulong collisionMask)
+        {
+            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
+            BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(collisionMask);
+            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+
+            filter.UnmanagedPointer = unmanagedPointer;
+
+            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
+
+            var procs = new JPH_BroadPhaseLayerFilter_Procs
+            {
+                ShouldCollide = shouldCollideFunctionPointer.Value,
+            };
+
+            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
+
+            return filter;
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="BroadPhaseLayerFilter"/> instance specifying layers to either ignore or collide with.
+        /// </summary>
+        /// <param name="layers">The layers to include or exclude from collisions.</param>
+        /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
+        public static BroadPhaseLayerFilter Create(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
+        {
+            IntPtr unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
+            BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(layers, constructorMode);
+            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+
+            filter.UnmanagedPointer = unmanagedPointer;
+
+            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
+
+            var procs = new JPH_BroadPhaseLayerFilter_Procs
+            {
+                ShouldCollide = shouldCollideFunctionPointer.Value,
+            };
+
+            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
+
+            return filter;
         }
 
         /// <summary>

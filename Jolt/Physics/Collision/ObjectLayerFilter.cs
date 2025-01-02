@@ -44,6 +44,63 @@ namespace Jolt
             shouldCollideFuncPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
         }
 
+        internal ObjectLayerFilter(ulong collisionMask)
+        {
+            Handle = default;
+            UnmanagedPointer = default;
+
+            this.collisionMask = collisionMask;
+        }
+
+        internal ObjectLayerFilter(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
+        {
+            Handle = default;
+            UnmanagedPointer = default;
+
+            if (constructorMode == MaskInitializationMode.IgnoreLayers)
+            {
+                // Start with all bits set to 1 (assume 64-bit mask)
+                ulong mask = 0xFFFFFFFFFFFFFFFF;
+
+                for (int i = 0; i < layers.Length; i++)
+                {
+                    var layer = layers[i];
+
+                    if (layer.Value >= 0 && layer.Value < 64)
+                    {
+                        mask &= ~(1UL << layer.Value);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Trying to set an invalid layer in the filter mask.");
+                    }
+                }
+
+                collisionMask = mask;
+            }
+            else
+            {
+                // Start with all bits set to 0 (assume 64-bit mask)
+                ulong mask = 0x0;
+
+                for (int i = 0; i < layers.Length; i++)
+                {
+                    var layer = layers[i];
+
+                    if (layer.Value >= 0 && layer.Value < 64)
+                    {
+                        mask |= (1UL << layer.Value); // Set the bit for each layer to collide
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Trying to set an invalid layer in the filter mask.");
+                    }
+                }
+
+                collisionMask = mask;
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class with a specified collision mask.
         /// </summary>
@@ -91,68 +148,6 @@ namespace Jolt
             filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, ptr);
 
             return filter;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class with a specified collision mask.
-        /// </summary>
-        /// <param name="collisionMask">The mask used to determine layer collisions.</param>
-        internal ObjectLayerFilter(ulong collisionMask)
-        {
-            Handle = default;
-            UnmanagedPointer = default;
-
-            this.collisionMask = collisionMask;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectLayerFilter"/> class specifying layers to either ignore or collide with.
-        /// </summary>
-        /// <param name="layers">The layers to include or exclude from collisions.</param>
-        /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
-        internal ObjectLayerFilter(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
-        {
-            Handle = default;
-            UnmanagedPointer = default;
-
-            if (constructorMode == MaskInitializationMode.IgnoreLayers)
-            {
-                // Start with all bits set to 1 (assume 64-bit mask)
-                ulong mask = 0xFFFFFFFFFFFFFFFF;
-
-                foreach (var layer in layers)
-                {
-                    if (layer.Value >= 0 && layer.Value < 64)
-                    {
-                        mask &= ~(1UL << layer.Value); // Clear the bit for each layer to ignore
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Trying to set an invalid layer in the filter mask.");
-                    }
-                }
-
-                collisionMask = mask;
-            }
-            else
-            {
-                // Start with all bits set to 0 (assume 64-bit mask)
-                ulong mask = 0x0;
-
-                foreach (var layer in layers)
-                {
-                    if (layer.Value >= 0 && layer.Value < 64)
-                    {
-                        mask |= (1UL << layer.Value); // Set the bit for each layer to collide
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Trying to set an invalid layer in the filter mask.");
-                    }
-                }
-
-                collisionMask = mask;
-            }
         }
 
         /// <summary>
