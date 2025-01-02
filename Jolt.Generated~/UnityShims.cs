@@ -50,11 +50,21 @@ namespace Unity.Collections
 
         public bool IsCreated => true;
 
+        public int Length => 0;
+
+        public void Dispose() { }
+
         public void Add(T _) { }
+
+        public bool Remove(T _) => true;
 
         public bool Contains(T _) => true;
 
-        public void Dispose() { }
+        public void Clear() { }
+
+        public T this[int index] => dummy;
+
+        private static T dummy;
     }
 
     public unsafe struct NativeArray<T> : System.IDisposable
@@ -67,6 +77,8 @@ namespace Unity.Collections
 
         public void Dispose() { }
 
+        public void Clear() { }
+
         public void* GetUnsafePtr() => null;
     }
 
@@ -76,16 +88,54 @@ namespace Unity.Collections
 
         public bool IsCreated => true;
 
+        public int Length => 0;
+
+        public void Dispose() { }
+
         public void Add(T _) { }
+
+        public bool Remove(T _) => true;
 
         public bool Contains(T _) => true;
 
-        public void Dispose() { }
+        public void Clear() { }
     }
 
     public enum Allocator
     {
         Temp, Persistent,
+    }
+}
+
+namespace Unity.Burst
+{
+    public class BurstCompileAttribute : System.Attribute { }
+
+    public static class BurstCompiler
+    {
+        public static unsafe FunctionPointer<T> CompileFunctionPointer<T>(T delegateMethod) where T : class
+        {
+            return new FunctionPointer<T>();
+        }
+    }
+
+    public interface IFunctionPointer { }
+
+    public struct FunctionPointer<T> : IFunctionPointer
+    {
+        public System.IntPtr Value;
+    }
+
+    public unsafe struct SharedStatic<T> where T : struct
+    {
+        private static T data;
+
+        public ref T Data => ref data;
+
+        public static SharedStatic<T> GetOrCreate<TContext, TSubContext>(uint alignment = 0)
+        {
+            return new SharedStatic<T>();
+        }
     }
 }
 
