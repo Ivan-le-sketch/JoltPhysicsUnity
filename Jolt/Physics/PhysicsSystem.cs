@@ -43,6 +43,9 @@ namespace Jolt
             JPH_PhysicsSystem_SetPhysicsSettings(Handle, physicsSettings);
         }
 
+        /// <summary>
+        /// Optimizes the broadphase. This method should be used with caution as it is quite expensive.
+        /// </summary>
         public void OptimizeBroadPhase()
         {
             JPH_PhysicsSystem_OptimizeBroadPhase(Handle);
@@ -62,6 +65,15 @@ namespace Jolt
         public BodyInterface GetBodyInterfaceNoLock()
         {
             return new BodyInterface(JPH_PhysicsSystem_GetBodyInterfaceNoLock(Handle));
+        }
+
+        /// <summary>
+        /// Gets the body lock interface which gives access to the system bodies.
+        /// </summary>
+        /// <returns></returns>
+        public BodyLockInterface GetBodyLockInterface()
+        {
+            return new BodyLockInterface(JPH_PhysicsSystem_GetBodyLockInterface(Handle));
         }
 
         /// <summary>
