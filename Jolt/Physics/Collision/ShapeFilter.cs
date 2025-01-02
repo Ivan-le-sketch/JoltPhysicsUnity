@@ -1,38 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Unity.Burst;
+using Unity.Collections;
 
 namespace Jolt
 {
-    public unsafe class ShapeFilter : IDisposable
+    /// <summary>
+    /// Filter defining shapes to ignore in a collision query.
+    /// </summary>
+    [BurstCompile]
+    public unsafe struct ShapeFilter : IDisposable
     {
+        /// <summary>
+        /// Enumerates the modes of filtering for <see cref="ShapeFilter"/>.
+        /// </summary>
         public enum FilterMode
         {
             CollideWithSelection,
             IgnoreSelection,
         }
 
+        /// <summary>
+        /// A handle to a native shape filter.
+        /// </summary>
         internal NativeHandle<JPH_ShapeFilter> Handle;
 
+        /// <summary>
+        /// A pointer to a <see cref="ShapeFilter"/> instance allocated on the unmanaged heap.
+        /// This instance is safe to use in interoperation context as it is not managed.
+        /// Every modifications affect this instance. 
+        /// </summary>
+        internal IntPtr UnmanagedPointer;
+
+        /// <summary>
+        /// The filtering mode.
+        /// </summary>
         private FilterMode mode;
-        private HashSet<SubShapeID> subShapeIDSelection = new HashSet<SubShapeID>();
+        /// <summary>
+        /// A selection of <see cref="SubShapeID"/> to either ignore or collide with depending on <see cref="mode"/>.
+        /// </summary>
+        private NativeHashSet<SubShapeID> subShapeIDSelection;
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate bool ShouldCollide(IntPtr userData, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2);
+        private delegate bool ShouldCollideSignature(void* context, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        internal delegate bool ShouldCollide2(IntPtr userData, JPH_Shape* shape1, SubShapeID* subShapeIDOfShape1, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2);
+        private delegate bool ShouldCollide2Signature(void* context, JPH_Shape* shape1, SubShapeID* subShapeIDOfShape1, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2);
 
-        private ShouldCollide shouldeCollideDelegate;
-        private ShouldCollide2 shouldCollide2Delegate;
+        private static FunctionPointer<ShouldCollideSignature> shouldCollideFunctionPointer;
+        private static FunctionPointer<ShouldCollide2Signature> shouldCollide2FunctionPointer;
 
-        public ShapeFilter()
+        static ShapeFilter()
         {
-            CreateNativeHandle();
+            shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
+            shouldCollide2FunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollide2Signature>(ShouldCollide2);
         }
 
         public ShapeFilter(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
         {
-            CreateNativeHandle();
+            Handle = default;
+            UnmanagedPointer = default;
+
+            subShapeIDSelection = new NativeHashSet<SubShapeID>(8, Allocator.Persistent);
 
             foreach (SubShapeID subShape in subShapes)
             {
@@ -42,51 +71,71 @@ namespace Jolt
             mode = filterMode;
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Initializes a new <see cref="ShapeFilter"/> instance on the unmanaged heap.
+        /// </summary>
+        /// <param name="subShapes"></param>
+        /// <param name="filterMode"></param>
+        /// <returns></returns>
+        public static ShapeFilter Create(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
         {
-            Bindings.JPH_ShapeFilter_Destroy(Handle);
-        }
+            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ShapeFilter)));
+            ShapeFilter filter = new ShapeFilter(subShapes, filterMode);
+            Marshal.StructureToPtr(filter, unmanagedPointer, false);
 
-        internal bool ShouldCollideCallback(IntPtr userData, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2)
-        {
-            var id = *subShapeIDOfShape2;
+            filter.UnmanagedPointer = unmanagedPointer;
 
-            if (mode == FilterMode.CollideWithSelection)
-            {
-                return subShapeIDSelection.Contains(id);
-            }
-            else
-            {
-                return !subShapeIDSelection.Contains(id);
-            }
-        }
-
-        internal bool ShouldCollide2Callback(IntPtr userData, JPH_Shape* shape1, SubShapeID* subShapeIDOfShape1, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2)
-        {
-            var id = *subShapeIDOfShape2;
-
-            if (mode == FilterMode.CollideWithSelection)
-            {
-                return subShapeIDSelection.Contains(id);
-            }
-            else
-            {
-                return !subShapeIDSelection.Contains(id);
-            }
-        }
-
-        private void CreateNativeHandle()
-        {
-            shouldeCollideDelegate = ShouldCollideCallback;
-            shouldCollide2Delegate = ShouldCollide2Callback;
+            var ptr = (ShapeFilter*)unmanagedPointer.ToPointer();
 
             var procs = new JPH_ShapeFilter_Procs
             {
-                ShouldCollide = Marshal.GetFunctionPointerForDelegate(shouldeCollideDelegate),
-                ShouldCollide2 = Marshal.GetFunctionPointerForDelegate(shouldCollide2Delegate),
+                ShouldCollide = shouldCollideFunctionPointer.Value,
+                ShouldCollide2 = shouldCollide2FunctionPointer.Value,
             };
 
-            Handle = Bindings.JPH_ShapeFilter_Create(procs);
+            filter.Handle = Bindings.JPH_ShapeFilter_Create(procs, ptr);
+
+            return filter;
+        }
+
+        [BurstCompile]
+        internal static bool ShouldCollide(void* context, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2)
+        {
+            var id = *subShapeIDOfShape2;
+
+            var implPtr = (ShapeFilter*)context;
+            var impl = *implPtr;
+
+            return impl.ShouldCollide(id);
+        }
+
+        [BurstCompile]
+        internal static bool ShouldCollide2(void* context, JPH_Shape* shape1, SubShapeID* subShapeIDOfShape1, JPH_Shape* shape2, SubShapeID* subShapeIDOfShape2)
+        {
+            var id = *subShapeIDOfShape2;
+
+            var implPtr = (ShapeFilter*)context;
+            var impl = *implPtr;
+
+            return impl.ShouldCollide(id);
+        }
+
+        public bool ShouldCollide(SubShapeID id)
+        {
+            if (mode == FilterMode.CollideWithSelection)
+            {
+                return subShapeIDSelection.Contains(id);
+            }
+            else
+            {
+                return !subShapeIDSelection.Contains(id);
+            }
+        }
+
+        public void Dispose()
+        {
+            Bindings.JPH_ShapeFilter_Destroy(Handle);
+            Marshal.FreeHGlobal(UnmanagedPointer);
         }
     }
 }
