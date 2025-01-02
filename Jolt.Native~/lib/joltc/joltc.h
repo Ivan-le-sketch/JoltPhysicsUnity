@@ -1448,6 +1448,8 @@ JPH_CAPI void JPH_BodyLockInterface_UnlockRead(const JPH_BodyLockInterface* lock
 JPH_CAPI void JPH_BodyLockInterface_LockWrite(const JPH_BodyLockInterface* lockInterface, JPH_BodyID bodyID, JPH_BodyLockWrite* outLock);
 JPH_CAPI void JPH_BodyLockInterface_UnlockWrite(const JPH_BodyLockInterface* lockInterface, JPH_BodyLockWrite* ioLock);
 
+JPH_CAPI JPH_Body* JPH_BodyLockInterface_TryGetBody(const JPH_BodyLockInterface* lockInterface, const JPH_BodyID bodyID);
+
 //--------------------------------------------------------------------------------------------------
 // JPH_MotionProperties
 //--------------------------------------------------------------------------------------------------
