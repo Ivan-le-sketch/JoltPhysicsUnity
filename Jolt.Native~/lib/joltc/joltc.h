@@ -2007,6 +2007,30 @@ typedef struct JPH_StateRecorderFilter_Procs {
 JPH_CAPI JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
+/* CollisionDispatch */
+JPH_CAPI bool JPH_CollisionDispatch_CollideShapeVsShape(
+	const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassTransform1, JPH_Matrix4x4* inCenterOfMassTransform2,
+	const JPH_CollideShapeSettings* inCollideShapeSettings,
+	JPH_CollideShapeCollector* callback, void* userData, const JPH_ShapeFilter* inShapeFilter);
+
+JPH_CAPI bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(
+	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1InShape2LocalSpace, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* inShapeCastSettings,
+	JPH_CastShapeCollector* callback, void* userData,
+	const JPH_ShapeFilter* inShapeFilter);
+
+JPH_CAPI bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
+	JPH_Vec3* inDirection, const JPH_Shape* inShape1, const JPH_Shape* inShape2,
+	JPH_Vec3* inScale1, JPH_Vec3* inScale2,
+	JPH_Matrix4x4* inCenterOfMassWorldTransform1, JPH_Matrix4x4* inCenterOfMassWorldTransform2,
+	const JPH_ShapeCastSettings* inShapeCastSettings,
+	JPH_CastShapeCollector* callback, void* userData,
+	const JPH_ShapeFilter* inShapeFilter);
+
 /* DebugRenderer */
 typedef struct JPH_DebugRenderer_Procs {
 	void (JPH_API_CALL* DrawLine)(void* userData, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color);

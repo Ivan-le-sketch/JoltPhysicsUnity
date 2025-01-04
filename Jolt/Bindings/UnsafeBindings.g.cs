@@ -3095,6 +3095,18 @@ namespace Jolt
         public static extern void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_CollisionDispatch_CollideShapeVsShape([NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape1, [NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape2, [NativeTypeName("JPH_Vec3 *")] float3* inScale1, [NativeTypeName("JPH_Vec3 *")] float3* inScale2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassTransform1, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassTransform2, [NativeTypeName("const JPH_CollideShapeSettings *")] CollideShapeSettings* inCollideShapeSettings, [NativeTypeName("JPH_CollideShapeCollector *")] IntPtr callback, void* userData, [NativeTypeName("const JPH_ShapeFilter *")] JPH_ShapeFilter* inShapeFilter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace([NativeTypeName("JPH_Vec3 *")] float3* inDirection, [NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape1, [NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape2, [NativeTypeName("JPH_Vec3 *")] float3* inScale1InShape2LocalSpace, [NativeTypeName("JPH_Vec3 *")] float3* inScale2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassTransform1InShape2LocalSpace, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassWorldTransform2, [NativeTypeName("const JPH_ShapeCastSettings *")] ShapeCastSettings* inShapeCastSettings, [NativeTypeName("JPH_CastShapeCollector *")] IntPtr callback, void* userData, [NativeTypeName("const JPH_ShapeFilter *")] JPH_ShapeFilter* inShapeFilter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace([NativeTypeName("JPH_Vec3 *")] float3* inDirection, [NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape1, [NativeTypeName("const JPH_Shape *")] JPH_Shape* inShape2, [NativeTypeName("JPH_Vec3 *")] float3* inScale1, [NativeTypeName("JPH_Vec3 *")] float3* inScale2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassWorldTransform1, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* inCenterOfMassWorldTransform2, [NativeTypeName("const JPH_ShapeCastSettings *")] ShapeCastSettings* inShapeCastSettings, [NativeTypeName("JPH_CastShapeCollector *")] IntPtr callback, void* userData, [NativeTypeName("const JPH_ShapeFilter *")] JPH_ShapeFilter* inShapeFilter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_DebugRenderer* JPH_DebugRenderer_Create(JPH_DebugRenderer_Procs procs, void* userData);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
