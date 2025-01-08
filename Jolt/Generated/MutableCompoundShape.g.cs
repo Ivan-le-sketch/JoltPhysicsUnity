@@ -44,6 +44,8 @@ namespace Jolt
         
         public uint GetNumSubShapes() => Bindings.JPH_CompoundShape_GetNumSubShapes(Handle.Reinterpret<JPH_CompoundShape>());
         
+        public uint GetSubShapeIndexFromID(SubShapeID id, out SubShapeID remainder) => Bindings.JPH_CompoundShape_GetSubShapeIndexFromID(Handle.Reinterpret<JPH_CompoundShape>(), id, out remainder);
+        
         #endregion
         
         #region JPH_Shape

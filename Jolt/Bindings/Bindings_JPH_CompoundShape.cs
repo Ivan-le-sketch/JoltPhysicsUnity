@@ -9,7 +9,7 @@ namespace Jolt
             return UnsafeBindings.JPH_CompoundShape_GetNumSubShapes(shape);
         }
 
-        public static void JPH_CompoundShape_GetSubShape(NativeHandle<JPH_CompoundShape> shape, uint index, out NativeHandle<JPH_Shape> subShape, out float3 positionCOM, out quaternion rotation, uint userData)
+        public static void JPH_CompoundShape_GetSubShape(NativeHandle<JPH_CompoundShape> shape, uint index, out NativeHandle<JPH_Shape> subShape, out float3 positionCOM, out quaternion rotation, out uint userData)
         {
             var sub = new JPH_Shape();
             var ptrToSub = &sub;
