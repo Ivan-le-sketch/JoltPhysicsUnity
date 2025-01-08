@@ -10,5 +10,15 @@ namespace Jolt
         public float maxSeparationDistance;
 
         public BackFaceMode backFaceMode;
+
+        public static CollideShapeSettings Default()
+        {
+            return new CollideShapeSettings
+            {
+                @base = CollideSettingsBase.Default(),
+                maxSeparationDistance = 0.0f,
+                backFaceMode = BackFaceMode.IgnoreBackFaces
+            };
+        }
     }
 }

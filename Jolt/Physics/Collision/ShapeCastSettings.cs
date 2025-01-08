@@ -26,5 +26,17 @@ namespace Jolt
             get => returnDeepestPoint;
             set => returnDeepestPoint = value;
         }
+
+        public static ShapeCastSettings Default()
+        {
+            return new ShapeCastSettings
+            {
+                @base = CollideSettingsBase.Default(),
+                backFaceModeTriangles = BackFaceMode.IgnoreBackFaces,
+                backFaceModeConvex = BackFaceMode.IgnoreBackFaces,
+                useShrunkenShapeAndConvexRadius = false,
+                returnDeepestPoint = false,
+            };
+        }
     }
 }
