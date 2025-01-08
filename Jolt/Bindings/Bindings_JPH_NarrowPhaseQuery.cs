@@ -84,5 +84,14 @@ namespace Jolt
                 return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShape2(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, collectorType, CollideShapeResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
+
+        public static bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, float3 scale, rmatrix4x4 centerOfMassTransform, CollideShapeSettings settings, rvec3 baseOffset, ref CollideShapeResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        {
+            fixed (CollideShapeResultCollector* ptr = &collector)
+            {
+                void* vPtr = ptr;
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, CollideShapeResultCollector.AddResultWithEarlyOutUpdateFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+            }
+        }
     }
 }
