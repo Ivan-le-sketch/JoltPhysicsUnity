@@ -19,7 +19,10 @@ namespace Unity.Mathematics
 
     public struct float4 { }
 
-    public struct float4x4 { }
+    public struct float4x4 
+    {
+        public float4x4(quaternion q, float3 v) { }
+    }
 
     public struct quaternion { }
 
