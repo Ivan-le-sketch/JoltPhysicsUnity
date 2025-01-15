@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Jolt
 {
@@ -8,5 +9,11 @@ namespace Jolt
         public BodyID BodyID;
 
         public SubShapeID SubShapeID;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float GetEarlyOutFraction()
+        {
+            return 0.0f;
+        }
     }
 }

@@ -61,9 +61,11 @@ namespace Jolt
 
         public float AddResultWithEarlyOutUpdate(RayCastResult* result)
         {
-            Results.Add(*result);
+            RayCastResult res = *result;
 
-            return 1f;
+            Results.Add(res);
+
+            return res.Fraction;
         }
     }
 
@@ -124,9 +126,11 @@ namespace Jolt
 
         public float AddResultWithEarlyOutUpdate(ShapeCastResult* result)
         {
-            Results.Add(*result);
+            ShapeCastResult res = *result;
 
-            return 1f;
+            Results.Add(res);
+
+            return res.GetEarlyOutFraction();
         }
     }
 
@@ -187,9 +191,11 @@ namespace Jolt
 
         public float AddResultWithEarlyOutUpdate(CollidePointResult* result)
         {
-            Results.Add(*result);
+            CollidePointResult res = *result;
 
-            return 1f;
+            Results.Add(res);
+
+            return res.GetEarlyOutFraction();
         }
     }
 
@@ -250,9 +256,11 @@ namespace Jolt
 
         public float AddResultWithEarlyOutUpdate(CollideShapeResult* result)
         {
-            Results.Add(*result);
+            CollideShapeResult res = *result;
 
-            return 1f;
+            Results.Add(res);
+
+            return res.GetEarlyOutFraction();
         }
     }
 }

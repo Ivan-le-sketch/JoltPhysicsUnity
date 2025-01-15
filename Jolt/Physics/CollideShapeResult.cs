@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -19,5 +20,11 @@ namespace Jolt
         public SubShapeID SubShapeID2;
 
         public BodyID BodyID2;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float GetEarlyOutFraction()
+        {
+            return -PenetrationDepth;
+        }
     }
 }

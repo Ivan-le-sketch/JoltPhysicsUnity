@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -25,5 +26,11 @@ namespace Jolt
         private NativeBool isBackFaceHit; // proxied by bool getter to avoid leaking NativeBool
 
         public bool IsBackFaceHit => isBackFaceHit;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public float GetEarlyOutFraction()
+        {
+            return Fraction > 0f ? Fraction : -PenetrationDepth;
+        }
     }
 }
