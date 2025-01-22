@@ -247,7 +247,9 @@ typedef enum JPH_CollisionCollectorType {
 	JPH_CollisionCollectorType_AllHit = 0,
 	JPH_CollisionCollectorType_AllHitSorted = 1,
 	JPH_CollisionCollectorType_ClosestHit = 2,
-	JPH_CollisionCollectorType_AnyHit = 3,
+	JPH_CollisionCollectorType_ClosestHitPerBody = 3,
+	JPH_CollisionCollectorType_ClosestHitPerBodySorted = 4,
+	JPH_CollisionCollectorType_AnyHit = 5,
 
 	_JPH_CollisionCollectorType_Count,
 	_JPH_CollisionCollectorType_Force32 = 0x7FFFFFFF
@@ -1602,6 +1604,18 @@ JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	const JPH_ShapeFilter* shapeFilter);
 
 JPH_CAPI bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
+	const JPH_Shape* shape,
+	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
+	const JPH_ShapeCastSettings* settings,
+	JPH_RVec3* baseOffset,
+	JPH_CollisionCollectorType collectorType,
+	JPH_CastShapeResultCallback* callback, void* userData,
+	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
+	JPH_ObjectLayerFilter* objectLayerFilter,
+	const JPH_BodyFilter* bodyFilter,
+	const JPH_ShapeFilter* shapeFilter);
+
+JPH_CAPI bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape,
 	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
 	const JPH_ShapeCastSettings* settings,
