@@ -49,6 +49,15 @@ namespace Jolt
             }
         }
 
+        public static bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, rmatrix4x4 worldTransform, float3 direction, ShapeCastSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref ShapeCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        {
+            fixed (ShapeCastResultCollector* ptr = &collector)
+            {
+                void* vPtr = ptr;
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(query, shape, &worldTransform, &direction, &settings, &baseOffset, collectorType, ShapeCastResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+            }
+        }
+
         public static bool JPH_NarrowPhaseQuery_CollidePoint(NativeHandle<JPH_NarrowPhaseQuery> query, rvec3 point, ref CollidePointResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (CollidePointResultCollector* ptr = &collector)

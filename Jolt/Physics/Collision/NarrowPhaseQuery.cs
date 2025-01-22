@@ -104,6 +104,22 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CastShape(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
+        public bool CastShapeIgnoreInitialOverlap(Shape shape, float4x4 worldTransform, float3 direction,
+            ShapeCastSettings settings, rvec3 baseOffset,
+            CollisionCollectorType collectorType, ref ShapeCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
         public bool CollidePoint(float3 origin,
             ref CollidePointResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
