@@ -178,14 +178,9 @@ pub fn compile(options: Options, b: *Build, lib: *Build.Step.Compile) void {
         jolt_dir ++ "Jolt/Skeleton/Skeleton.cpp",
         jolt_dir ++ "Jolt/Skeleton/SkeletonMapper.cpp",
         jolt_dir ++ "Jolt/Skeleton/SkeletonPose.cpp",
-        jolt_dir ++ "Jolt/TriangleGrouper/TriangleGrouperClosestCentroid.cpp",
-        jolt_dir ++ "Jolt/TriangleGrouper/TriangleGrouperMorton.cpp",
         jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitter.cpp",
         jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitterBinning.cpp",
-        jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitterFixedLeafSize.cpp",
-        jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitterLongestAxis.cpp",
         jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitterMean.cpp",
-        jolt_dir ++ "Jolt/TriangleSplitter/TriangleSplitterMorton.cpp"
     }, flags);
 
     b.installArtifact(lib);
