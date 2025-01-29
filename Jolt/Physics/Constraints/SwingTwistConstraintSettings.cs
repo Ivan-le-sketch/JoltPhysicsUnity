@@ -1,12 +1,39 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+using Unity.Mathematics;
+
+namespace Jolt
 {
-    [GenerateHandle("JPH_SwingTwistConstraintSettings"), GenerateBindings("JPH_SwingTwistConstraintSettings", "JPH_TwoBodyConstraintSettings", "JPH_ConstraintSettings")]
-    public readonly partial struct SwingTwistConstraintSettings
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SwingTwistConstraintSettings
     {
-        [OverrideBinding("JPH_SwingTwistConstraintSettings_Create")]
-        public static SwingTwistConstraintSettings Create()
+        public ConstraintSettings @base;
+
+        public ConstraintSpace space;
+        public rvec3 position1;
+        public float3 twistAxis1;
+        public float3 planeAxis1;
+        public rvec3 position2;
+        public float3 twistAxis2;
+        public float3 planeAxis2;
+        public SwingType swingType;
+        public float normalHalfConeAngle;
+        public float planeHalfConeAngle;
+        public float twistMinAngle;
+        public float twistMaxAngle;
+        public float maxFrictionTorque;
+        public MotorSettings swingMotorSettings;
+        public MotorSettings twistMotorSettings;
+
+        public static SwingTwistConstraintSettings Default()
         {
-            return new SwingTwistConstraintSettings(Bindings.JPH_SwingTwistConstraintSettings_Create());
+            Bindings.JPH_SwingTwistConstraintSettings_Init(out var settings);
+
+            return settings;
+        }
+
+        public void Init()
+        {
+            Bindings.JPH_SwingTwistConstraintSettings_Init(out this);
         }
     }
 }

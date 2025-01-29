@@ -13,14 +13,6 @@ namespace Jolt
         _JPH_JPH_OverrideMassProperties_Force32 = 0x7FFFFFFF,
     }
 
-    internal enum JPH_SwingType
-    {
-        JPH_SwingType_Cone,
-        JPH_SwingType_Pyramid,
-        _JPH_SwingType_Count,
-        _JPH_SwingType_Force32 = 0x7FFFFFFF,
-    }
-
     internal enum JPH_SoftBodyConstraintColor
     {
         JPH_SoftBodyConstraintColor_ConstraintType,
@@ -519,330 +511,6 @@ namespace Jolt
 
     internal partial struct JPH_Ragdoll
     {
-    }
-
-    internal partial struct JPH_ConstraintSettings
-    {
-        [NativeTypeName("bool")]
-        public NativeBool enabled;
-
-        public uint constraintPriority;
-
-        public uint numVelocityStepsOverride;
-
-        public uint numPositionStepsOverride;
-
-        public float drawConstraintSize;
-
-        [NativeTypeName("uint64_t")]
-        public ulong userData;
-    }
-
-    internal partial struct JPH_FixedConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("bool")]
-        public NativeBool autoDetectPoint;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisX1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisY1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisX2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisY2;
-    }
-
-    internal partial struct JPH_DistanceConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-
-        public float minDistance;
-
-        public float maxDistance;
-
-        [NativeTypeName("JPH_SpringSettings")]
-        public SpringSettings limitsSpringSettings;
-    }
-
-    internal partial struct JPH_PointConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-    }
-
-    internal partial struct JPH_HingeConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 hingeAxis1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 normalAxis1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 hingeAxis2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 normalAxis2;
-
-        public float limitsMin;
-
-        public float limitsMax;
-
-        [NativeTypeName("JPH_SpringSettings")]
-        public SpringSettings limitsSpringSettings;
-
-        public float maxFrictionTorque;
-
-        [NativeTypeName("JPH_MotorSettings")]
-        public MotorSettings motorSettings;
-    }
-
-    internal partial struct JPH_SliderConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("bool")]
-        public NativeBool autoDetectPoint;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 sliderAxis1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 normalAxis1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 sliderAxis2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 normalAxis2;
-
-        public float limitsMin;
-
-        public float limitsMax;
-
-        [NativeTypeName("JPH_SpringSettings")]
-        public SpringSettings limitsSpringSettings;
-
-        public float maxFrictionForce;
-
-        [NativeTypeName("JPH_MotorSettings")]
-        public MotorSettings motorSettings;
-    }
-
-    internal partial struct JPH_ConeConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 twistAxis1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 point2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 twistAxis2;
-
-        public float halfConeAngle;
-    }
-
-    internal partial struct JPH_SwingTwistConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 position1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 twistAxis1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 planeAxis1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 position2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 twistAxis2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 planeAxis2;
-
-        public JPH_SwingType swingType;
-
-        public float normalHalfConeAngle;
-
-        public float planeHalfConeAngle;
-
-        public float twistMinAngle;
-
-        public float twistMaxAngle;
-
-        public float maxFrictionTorque;
-
-        [NativeTypeName("JPH_MotorSettings")]
-        public MotorSettings swingMotorSettings;
-
-        [NativeTypeName("JPH_MotorSettings")]
-        public MotorSettings twistMotorSettings;
-    }
-
-    internal unsafe partial struct JPH_SixDOFConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 position1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisX1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisY1;
-
-        [NativeTypeName("JPH_RVec3")]
-        public rvec3 position2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisX2;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 axisY2;
-
-        [NativeTypeName("float[6]")]
-        public fixed float maxFriction[6];
-
-        public JPH_SwingType swingType;
-
-        [NativeTypeName("float[6]")]
-        public fixed float limitMin[6];
-
-        [NativeTypeName("float[6]")]
-        public fixed float limitMax[6];
-
-        [NativeTypeName("JPH_SpringSettings[3]")]
-        public _limitsSpringSettings_e__FixedBuffer limitsSpringSettings;
-
-        [NativeTypeName("JPH_MotorSettings[6]")]
-        public _motorSettings_e__FixedBuffer motorSettings;
-
-        public partial struct _limitsSpringSettings_e__FixedBuffer
-        {
-            public SpringSettings e0;
-            public SpringSettings e1;
-            public SpringSettings e2;
-
-            public unsafe ref SpringSettings this[int index]
-            {
-                get
-                {
-                    fixed (SpringSettings* pThis = &e0)
-                    {
-                        return ref pThis[index];
-                    }
-                }
-            }
-        }
-
-        public partial struct _motorSettings_e__FixedBuffer
-        {
-            public MotorSettings e0;
-            public MotorSettings e1;
-            public MotorSettings e2;
-            public MotorSettings e3;
-            public MotorSettings e4;
-            public MotorSettings e5;
-
-            public unsafe ref MotorSettings this[int index]
-            {
-                get
-                {
-                    fixed (MotorSettings* pThis = &e0)
-                    {
-                        return ref pThis[index];
-                    }
-                }
-            }
-        }
-    }
-
-    internal partial struct JPH_GearConstraintSettings
-    {
-        public JPH_ConstraintSettings @base;
-
-        [NativeTypeName("JPH_ConstraintSpace")]
-        public ConstraintSpace space;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 hingeAxis1;
-
-        [NativeTypeName("JPH_Vec3")]
-        public float3 hingeAxis2;
-
-        public float ratio;
     }
 
     internal unsafe partial struct JPH_BodyLockRead
@@ -2328,13 +1996,13 @@ namespace Jolt
         public static extern void JPH_TwoBodyConstraint_GetConstraintToBody2Matrix([NativeTypeName("const JPH_TwoBodyConstraint *")] JPH_TwoBodyConstraint* constraint, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_FixedConstraintSettings_Init(JPH_FixedConstraintSettings* settings);
+        public static extern void JPH_FixedConstraintSettings_Init([NativeTypeName("JPH_FixedConstraintSettings *")] FixedConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_FixedConstraint* JPH_FixedConstraint_Create([NativeTypeName("const JPH_FixedConstraintSettings *")] JPH_FixedConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_FixedConstraint* JPH_FixedConstraint_Create([NativeTypeName("const JPH_FixedConstraintSettings *")] FixedConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_FixedConstraint_GetSettings([NativeTypeName("const JPH_FixedConstraint *")] JPH_FixedConstraint* constraint, JPH_FixedConstraintSettings* settings);
+        public static extern void JPH_FixedConstraint_GetSettings([NativeTypeName("const JPH_FixedConstraint *")] JPH_FixedConstraint* constraint, [NativeTypeName("JPH_FixedConstraintSettings *")] FixedConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_FixedConstraint_GetTotalLambdaPosition([NativeTypeName("const JPH_FixedConstraint *")] JPH_FixedConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
@@ -2343,13 +2011,13 @@ namespace Jolt
         public static extern void JPH_FixedConstraint_GetTotalLambdaRotation([NativeTypeName("const JPH_FixedConstraint *")] JPH_FixedConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_DistanceConstraintSettings_Init(JPH_DistanceConstraintSettings* settings);
+        public static extern void JPH_DistanceConstraintSettings_Init([NativeTypeName("JPH_DistanceConstraintSettings *")] DistanceConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_DistanceConstraint* JPH_DistanceConstraint_Create([NativeTypeName("const JPH_DistanceConstraintSettings *")] JPH_DistanceConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_DistanceConstraint* JPH_DistanceConstraint_Create([NativeTypeName("const JPH_DistanceConstraintSettings *")] DistanceConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_DistanceConstraint_GetSettings([NativeTypeName("const JPH_DistanceConstraint *")] JPH_DistanceConstraint* constraint, JPH_DistanceConstraintSettings* settings);
+        public static extern void JPH_DistanceConstraint_GetSettings([NativeTypeName("const JPH_DistanceConstraint *")] JPH_DistanceConstraint* constraint, [NativeTypeName("JPH_DistanceConstraintSettings *")] DistanceConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_DistanceConstraint_SetDistance(JPH_DistanceConstraint* constraint, float minDistance, float maxDistance);
@@ -2370,13 +2038,13 @@ namespace Jolt
         public static extern float JPH_DistanceConstraint_GetTotalLambdaPosition([NativeTypeName("const JPH_DistanceConstraint *")] JPH_DistanceConstraint* constraint);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_PointConstraintSettings_Init(JPH_PointConstraintSettings* settings);
+        public static extern void JPH_PointConstraintSettings_Init([NativeTypeName("JPH_PointConstraintSettings *")] PointConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_PointConstraint* JPH_PointConstraint_Create([NativeTypeName("const JPH_PointConstraintSettings *")] JPH_PointConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_PointConstraint* JPH_PointConstraint_Create([NativeTypeName("const JPH_PointConstraintSettings *")] PointConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_PointConstraint_GetSettings([NativeTypeName("const JPH_PointConstraint *")] JPH_PointConstraint* constraint, JPH_PointConstraintSettings* settings);
+        public static extern void JPH_PointConstraint_GetSettings([NativeTypeName("const JPH_PointConstraint *")] JPH_PointConstraint* constraint, [NativeTypeName("JPH_PointConstraintSettings *")] PointConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_PointConstraint_SetPoint1(JPH_PointConstraint* constraint, [NativeTypeName("JPH_ConstraintSpace")] ConstraintSpace space, [NativeTypeName("JPH_RVec3 *")] rvec3* value);
@@ -2394,13 +2062,13 @@ namespace Jolt
         public static extern void JPH_PointConstraint_GetTotalLambdaPosition([NativeTypeName("const JPH_PointConstraint *")] JPH_PointConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_HingeConstraintSettings_Init(JPH_HingeConstraintSettings* settings);
+        public static extern void JPH_HingeConstraintSettings_Init([NativeTypeName("JPH_HingeConstraintSettings *")] HingeConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_HingeConstraint* JPH_HingeConstraint_Create([NativeTypeName("const JPH_HingeConstraintSettings *")] JPH_HingeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_HingeConstraint* JPH_HingeConstraint_Create([NativeTypeName("const JPH_HingeConstraintSettings *")] HingeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_HingeConstraint_GetSettings(JPH_HingeConstraint* constraint, JPH_HingeConstraintSettings* settings);
+        public static extern void JPH_HingeConstraint_GetSettings(JPH_HingeConstraint* constraint, [NativeTypeName("JPH_HingeConstraintSettings *")] HingeConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_HingeConstraint_GetLocalSpacePoint1([NativeTypeName("const JPH_HingeConstraint *")] JPH_HingeConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
@@ -2486,16 +2154,16 @@ namespace Jolt
         public static extern float JPH_HingeConstraint_GetTotalLambdaMotor([NativeTypeName("const JPH_HingeConstraint *")] JPH_HingeConstraint* constraint);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SliderConstraintSettings_Init(JPH_SliderConstraintSettings* settings);
+        public static extern void JPH_SliderConstraintSettings_Init([NativeTypeName("JPH_SliderConstraintSettings *")] SliderConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SliderConstraintSettings_SetSliderAxis(JPH_SliderConstraintSettings* settings, [NativeTypeName("const JPH_Vec3 *")] float3* axis);
+        public static extern void JPH_SliderConstraintSettings_SetSliderAxis([NativeTypeName("JPH_SliderConstraintSettings *")] SliderConstraintSettings* settings, [NativeTypeName("const JPH_Vec3 *")] float3* axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_SliderConstraint* JPH_SliderConstraint_Create([NativeTypeName("const JPH_SliderConstraintSettings *")] JPH_SliderConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_SliderConstraint* JPH_SliderConstraint_Create([NativeTypeName("const JPH_SliderConstraintSettings *")] SliderConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SliderConstraint_GetSettings(JPH_SliderConstraint* constraint, JPH_SliderConstraintSettings* settings);
+        public static extern void JPH_SliderConstraint_GetSettings(JPH_SliderConstraint* constraint, [NativeTypeName("JPH_SliderConstraintSettings *")] SliderConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern float JPH_SliderConstraint_GetCurrentPosition(JPH_SliderConstraint* constraint);
@@ -2563,13 +2231,13 @@ namespace Jolt
         public static extern float JPH_SliderConstraint_GetTotalLambdaMotor([NativeTypeName("const JPH_SliderConstraint *")] JPH_SliderConstraint* constraint);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_ConeConstraintSettings_Init(JPH_ConeConstraintSettings* settings);
+        public static extern void JPH_ConeConstraintSettings_Init([NativeTypeName("JPH_ConeConstraintSettings *")] ConeConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_ConeConstraint* JPH_ConeConstraint_Create([NativeTypeName("const JPH_ConeConstraintSettings *")] JPH_ConeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_ConeConstraint* JPH_ConeConstraint_Create([NativeTypeName("const JPH_ConeConstraintSettings *")] ConeConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_ConeConstraint_GetSettings(JPH_ConeConstraint* constraint, JPH_ConeConstraintSettings* settings);
+        public static extern void JPH_ConeConstraint_GetSettings(JPH_ConeConstraint* constraint, [NativeTypeName("JPH_ConeConstraintSettings *")] ConeConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ConeConstraint_SetHalfConeAngle(JPH_ConeConstraint* constraint, float halfConeAngle);
@@ -2584,13 +2252,13 @@ namespace Jolt
         public static extern float JPH_ConeConstraint_GetTotalLambdaRotation([NativeTypeName("const JPH_ConeConstraint *")] JPH_ConeConstraint* constraint);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SwingTwistConstraintSettings_Init(JPH_SwingTwistConstraintSettings* settings);
+        public static extern void JPH_SwingTwistConstraintSettings_Init([NativeTypeName("JPH_SwingTwistConstraintSettings *")] SwingTwistConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_SwingTwistConstraint* JPH_SwingTwistConstraint_Create([NativeTypeName("const JPH_SwingTwistConstraintSettings *")] JPH_SwingTwistConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_SwingTwistConstraint* JPH_SwingTwistConstraint_Create([NativeTypeName("const JPH_SwingTwistConstraintSettings *")] SwingTwistConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SwingTwistConstraint_GetSettings(JPH_SwingTwistConstraint* constraint, JPH_SwingTwistConstraintSettings* settings);
+        public static extern void JPH_SwingTwistConstraint_GetSettings(JPH_SwingTwistConstraint* constraint, [NativeTypeName("JPH_SwingTwistConstraintSettings *")] SwingTwistConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern float JPH_SwingTwistConstraint_GetNormalHalfConeAngle(JPH_SwingTwistConstraint* constraint);
@@ -2611,30 +2279,30 @@ namespace Jolt
         public static extern void JPH_SwingTwistConstraint_GetTotalLambdaMotor([NativeTypeName("const JPH_SwingTwistConstraint *")] JPH_SwingTwistConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SixDOFConstraintSettings_Init(JPH_SixDOFConstraintSettings* settings);
+        public static extern void JPH_SixDOFConstraintSettings_Init([NativeTypeName("JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SixDOFConstraintSettings_MakeFreeAxis(JPH_SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("bool")]
-        public static extern NativeBool JPH_SixDOFConstraintSettings_IsFreeAxis([NativeTypeName("const JPH_SixDOFConstraintSettings *")] JPH_SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SixDOFConstraintSettings_MakeFixedAxis(JPH_SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
+        public static extern void JPH_SixDOFConstraintSettings_MakeFreeAxis([NativeTypeName("JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
-        public static extern NativeBool JPH_SixDOFConstraintSettings_IsFixedAxis([NativeTypeName("const JPH_SixDOFConstraintSettings *")] JPH_SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
+        public static extern NativeBool JPH_SixDOFConstraintSettings_IsFreeAxis([NativeTypeName("const JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SixDOFConstraintSettings_SetLimitedAxis(JPH_SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis, float min, float max);
+        public static extern void JPH_SixDOFConstraintSettings_MakeFixedAxis([NativeTypeName("JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_SixDOFConstraint* JPH_SixDOFConstraint_Create([NativeTypeName("const JPH_SixDOFConstraintSettings *")] JPH_SixDOFConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_SixDOFConstraintSettings_IsFixedAxis([NativeTypeName("const JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_SixDOFConstraint_GetSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintSettings* settings);
+        public static extern void JPH_SixDOFConstraintSettings_SetLimitedAxis([NativeTypeName("JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis, float min, float max);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_SixDOFConstraint* JPH_SixDOFConstraint_Create([NativeTypeName("const JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SixDOFConstraint_GetSettings(JPH_SixDOFConstraint* constraint, [NativeTypeName("JPH_SixDOFConstraintSettings *")] SixDOFConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern float JPH_SixDOFConstraint_GetLimitsMin(JPH_SixDOFConstraint* constraint, [NativeTypeName("JPH_SixDOFConstraintAxis")] SixDOFConstraintAxis axis);
@@ -2655,13 +2323,13 @@ namespace Jolt
         public static extern void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation([NativeTypeName("const JPH_SixDOFConstraint *")] JPH_SixDOFConstraint* constraint, [NativeTypeName("JPH_Vec3 *")] float3* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_GearConstraintSettings_Init(JPH_GearConstraintSettings* settings);
+        public static extern void JPH_GearConstraintSettings_Init([NativeTypeName("JPH_GearConstraintSettings *")] GearConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_GearConstraint* JPH_GearConstraint_Create([NativeTypeName("const JPH_GearConstraintSettings *")] JPH_GearConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
+        public static extern JPH_GearConstraint* JPH_GearConstraint_Create([NativeTypeName("const JPH_GearConstraintSettings *")] GearConstraintSettings* settings, JPH_Body* body1, JPH_Body* body2);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_GearConstraint_GetSettings(JPH_GearConstraint* constraint, JPH_GearConstraintSettings* settings);
+        public static extern void JPH_GearConstraint_GetSettings(JPH_GearConstraint* constraint, [NativeTypeName("JPH_GearConstraintSettings *")] GearConstraintSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_GearConstraint_SetConstraints(JPH_GearConstraint* constraint, [NativeTypeName("const JPH_Constraint *")] JPH_Constraint* gear1, [NativeTypeName("const JPH_Constraint *")] JPH_Constraint* gear2);

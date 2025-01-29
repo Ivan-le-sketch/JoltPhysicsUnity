@@ -1,12 +1,26 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+
+namespace Jolt
 {
-    [GenerateHandle("JPH_PointConstraintSettings"), GenerateBindings("JPH_PointConstraintSettings", "JPH_TwoBodyConstraintSettings", "JPH_ConstraintSettings")]
-    public readonly partial struct PointConstraintSettings
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PointConstraintSettings
     {
-        [OverrideBinding("JPH_PointConstraintSettings_Create")]
-        public static PointConstraintSettings Create()
+        public ConstraintSettings @base;
+
+        public ConstraintSpace space;
+        public rvec3 point1;
+        public rvec3 point2;
+
+        public static PointConstraintSettings Default()
         {
-            return new PointConstraintSettings(Bindings.JPH_PointConstraintSettings_Create());
+            Bindings.JPH_PointConstraintSettings_Init(out var settings);
+
+            return settings;
+        }
+
+        public void Init()
+        {
+            Bindings.JPH_PointConstraintSettings_Init(out this);
         }
     }
 }

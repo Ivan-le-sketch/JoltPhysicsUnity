@@ -1,12 +1,30 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+using Unity.Mathematics;
+
+namespace Jolt
 {
-    [GenerateHandle("JPH_ConeConstraintSettings"), GenerateBindings("JPH_ConeConstraintSettings", "JPH_TwoBodyConstraintSettings", "JPH_ConstraintSettings")]
-    public readonly partial struct ConeConstraintSettings
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ConeConstraintSettings
     {
-        [OverrideBinding("JPH_ConeConstraintSettings_Create")]
-        public static ConeConstraintSettings Create()
+        public ConstraintSettings @base;
+
+        public ConstraintSpace space;
+        public rvec3 point1;
+        public float3 twistAxis1;
+        public rvec3 point2;
+        public float3 twistAxis2;
+        public float halfConeAngle;
+
+        public static ConeConstraintSettings Default()
         {
-            return new ConeConstraintSettings(Bindings.JPH_ConeConstraintSettings_Create());
+            Bindings.JPH_ConeConstraintSettings_Init(out var settings);
+
+            return settings;
+        }
+
+        public void Init()
+        {
+            Bindings.JPH_ConeConstraintSettings_Init(out this);
         }
     }
 }

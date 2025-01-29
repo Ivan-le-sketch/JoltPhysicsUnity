@@ -1,12 +1,40 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+using Unity.Mathematics;
+
+namespace Jolt
 {
-    [GenerateHandle("JPH_SliderConstraintSettings"), GenerateBindings("JPH_SliderConstraintSettings", "JPH_TwoBodyConstraintSettings", "JPH_ConstraintSettings")]
-    public readonly partial struct SliderConstraintSettings
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SliderConstraintSettings
     {
-        [OverrideBinding("JPH_SliderConstraintSettings_Create")]
-        public static SliderConstraintSettings Create()
+        public ConstraintSettings @base;
+
+        public ConstraintSpace space;
+        internal NativeBool autoDetectPoint;
+        public rvec3 point1;
+        public float3 sliderAxis1;
+        public float3 normalAxis1;
+        public rvec3 point2;
+        public float3 sliderAxis2;
+        public float3 normalAxis2;
+        public float limitsMin;
+        public float limitsMax;
+        public SpringSettings limitsSpringSettings;
+        public float maxFrictionForce;
+        public MotorSettings motorSettings;
+
+        // This property allows not exposing the internal NativeBool field. Making the NativeBool type public under consideration.
+        public bool AutoDetectPoint { get => autoDetectPoint; set => autoDetectPoint = value; }
+
+        public static SliderConstraintSettings Default()
         {
-            return new SliderConstraintSettings(Bindings.JPH_SliderConstraintSettings_Create());
+            Bindings.JPH_SliderConstraintSettings_Init(out var settings);
+
+            return settings;
+        }
+
+        public void Init()
+        {
+            Bindings.JPH_SliderConstraintSettings_Init(out this);
         }
     }
 }

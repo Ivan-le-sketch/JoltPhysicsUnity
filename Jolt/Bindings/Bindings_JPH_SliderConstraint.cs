@@ -4,9 +4,17 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_SliderConstraintSettings> JPH_SliderConstraint_GetSettings(NativeHandle<JPH_SliderConstraint> constraint)
+        public static NativeHandle<JPH_SliderConstraint> JPH_SliderConstraint_Create(SliderConstraintSettings settings, NativeHandle<JPH_Body> body1, NativeHandle<JPH_Body> body2)
         {
-            return CreateHandle(UnsafeBindings.JPH_SliderConstraint_GetSettings(constraint)); // TODO reuse existing safety handle
+            return CreateHandle(UnsafeBindings.JPH_SliderConstraint_Create(&settings, body1, body2));
+        }
+
+        public static SliderConstraintSettings JPH_SliderConstraint_GetSettings(NativeHandle<JPH_SliderConstraint> constraint)
+        {
+            SliderConstraintSettings settings = new SliderConstraintSettings();
+            UnsafeBindings.JPH_SliderConstraint_GetSettings(constraint, &settings);
+
+            return settings;
         }
 
         public static float JPH_SliderConstraint_GetCurrentPosition(NativeHandle<JPH_SliderConstraint> constraint) 
@@ -98,15 +106,13 @@ namespace Jolt
             UnsafeBindings.JPH_SliderConstraint_SetLimitsSpringSettings(constraint, &settings);
         }
 
-        public static void JPH_SliderConstraint_GetTotalLambdaPosition(NativeHandle<JPH_SliderConstraint> constraint, out float x, out float y)
+        public static void JPH_SliderConstraint_GetTotalLambdaPosition(NativeHandle<JPH_SliderConstraint> constraint, out float position)
         {
-            x = default;
-            y = default;
+            position = default;
 
-            fixed (float* xptr = &x)
-            fixed (float* yptr = &y)
+            fixed (float* positionPtr = &position)
             {
-                UnsafeBindings.JPH_SliderConstraint_GetTotalLambdaPosition(constraint, xptr, yptr);   
+                UnsafeBindings.JPH_SliderConstraint_GetTotalLambdaPosition(constraint, positionPtr);   
             }
         }
 

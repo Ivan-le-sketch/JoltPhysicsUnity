@@ -26,7 +26,19 @@ namespace Jolt
         
         #region JPH_HingeConstraint
         
-        public HingeConstraintSettings GetSettings() => new HingeConstraintSettings(Bindings.JPH_HingeConstraint_GetSettings(Handle));
+        public HingeConstraintSettings GetSettings() => Bindings.JPH_HingeConstraint_GetSettings(Handle);
+        
+        public float3 GetLocalSpacePoint1() => Bindings.JPH_HingeConstraint_GetLocalSpacePoint1(Handle);
+        
+        public float3 GetLocalSpacePoint2() => Bindings.JPH_HingeConstraint_GetLocalSpacePoint2(Handle);
+        
+        public float3 GetLocalSpaceHingeAxis1() => Bindings.JPH_HingeConstraint_GetLocalSpaceHingeAxis1(Handle);
+        
+        public float3 GetLocalSpaceHingeAxis2() => Bindings.JPH_HingeConstraint_GetLocalSpaceHingeAxis2(Handle);
+        
+        public float3 GetLocalSpaceNormalAxis1() => Bindings.JPH_HingeConstraint_GetLocalSpaceNormalAxis1(Handle);
+        
+        public float3 GetLocalSpaceNormalAxis2() => Bindings.JPH_HingeConstraint_GetLocalSpaceNormalAxis2(Handle);
         
         public float GetCurrentAngle() => Bindings.JPH_HingeConstraint_GetCurrentAngle(Handle);
         
@@ -64,7 +76,7 @@ namespace Jolt
         
         public float3 GetTotalLambdaPosition() => Bindings.JPH_HingeConstraint_GetTotalLambdaPosition(Handle);
         
-        public float2 GetTotalLambdaRotation() => Bindings.JPH_HingeConstraint_GetTotalLambdaRotation(Handle);
+        public float GetTotalLambdaRotation() => Bindings.JPH_HingeConstraint_GetTotalLambdaRotation(Handle);
         
         public float GetTotalLambdaRotationLimits() => Bindings.JPH_HingeConstraint_GetTotalLambdaRotationLimits(Handle);
         
@@ -86,7 +98,7 @@ namespace Jolt
         
         #region JPH_Constraint
         
-        public ConstraintSettings GetConstraintSettings() => new ConstraintSettings(Bindings.JPH_Constraint_GetConstraintSettings(Handle.Reinterpret<JPH_Constraint>()));
+        public void Destroy() => Bindings.JPH_Constraint_Destroy(Handle.Reinterpret<JPH_Constraint>());
         
         public new ConstraintType GetType() => Bindings.JPH_Constraint_GetType(Handle.Reinterpret<JPH_Constraint>());
         
@@ -95,6 +107,14 @@ namespace Jolt
         public uint GetConstraintPriority() => Bindings.JPH_Constraint_GetConstraintPriority(Handle.Reinterpret<JPH_Constraint>());
         
         public void SetConstraintPriority(uint priority) => Bindings.JPH_Constraint_SetConstraintPriority(Handle.Reinterpret<JPH_Constraint>(), priority);
+        
+        public uint GetNumVelocityStepsOverride() => Bindings.JPH_Constraint_GetNumVelocityStepsOverride(Handle.Reinterpret<JPH_Constraint>());
+        
+        public void SetNumVelocityStepsOverride(uint value) => Bindings.JPH_Constraint_SetNumVelocityStepsOverride(Handle.Reinterpret<JPH_Constraint>(), value);
+        
+        public uint GetNumPositionStepsOverride() => Bindings.JPH_Constraint_GetNumPositionStepsOverride(Handle.Reinterpret<JPH_Constraint>());
+        
+        public void SetNumPositionStepsOverride(uint value) => Bindings.JPH_Constraint_SetNumPositionStepsOverride(Handle.Reinterpret<JPH_Constraint>(), value);
         
         public bool GetEnabled() => Bindings.JPH_Constraint_GetEnabled(Handle.Reinterpret<JPH_Constraint>());
         
@@ -106,7 +126,17 @@ namespace Jolt
         
         public void NotifyShapeChanged(BodyID bodyID, float3 deltaCOM) => Bindings.JPH_Constraint_NotifyShapeChanged(Handle.Reinterpret<JPH_Constraint>(), bodyID, deltaCOM);
         
-        public void Destroy() => Bindings.JPH_Constraint_Destroy(Handle.Reinterpret<JPH_Constraint>());
+        public void ResetWarmStart() => Bindings.JPH_Constraint_ResetWarmStart(Handle.Reinterpret<JPH_Constraint>());
+        
+        public bool IsActive() => Bindings.JPH_Constraint_IsActive(Handle.Reinterpret<JPH_Constraint>());
+        
+        public void SetupVelocityConstraint(float deltaTime) => Bindings.JPH_Constraint_SetupVelocityConstraint(Handle.Reinterpret<JPH_Constraint>(), deltaTime);
+        
+        public void WarmStartVelocityConstraint(float warmStartInpulseRatio) => Bindings.JPH_Constraint_WarmStartVelocityConstraint(Handle.Reinterpret<JPH_Constraint>(), warmStartInpulseRatio);
+        
+        public bool SolveVelocityConstraint(float deltaTime) => Bindings.JPH_Constraint_SolveVelocityConstraint(Handle.Reinterpret<JPH_Constraint>(), deltaTime);
+        
+        public bool SolvePositionConstraint(float deltaTime, float baumgarte) => Bindings.JPH_Constraint_SolvePositionConstraint(Handle.Reinterpret<JPH_Constraint>(), deltaTime, baumgarte);
         
         #endregion
         

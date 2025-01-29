@@ -1,5 +1,18 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+
+namespace Jolt
 {
-    [GenerateHandle("JPH_ConstraintSettings"), GenerateBindings("JPH_ConstraintSettings")]
-    public readonly partial struct ConstraintSettings { }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ConstraintSettings
+    {
+        internal NativeBool enabled;
+        public uint constraintPriority;
+        public uint numVelocityStepsOverride;
+        public uint numPositionStepsOverride;
+        public float drawConstraintSize;
+        public ulong userData;
+
+        // This property allows not exposing the internal NativeBool field. Making the NativeBool type public under consideration.
+        public bool Enabled { get => enabled; set => enabled = value; }
+    }
 }

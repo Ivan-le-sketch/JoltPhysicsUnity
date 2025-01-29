@@ -2,14 +2,12 @@
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_SwingTwistConstraintSettings> JPH_SwingTwistConstraintSettings_Create()
+        public static void JPH_SwingTwistConstraintSettings_Init(out SwingTwistConstraintSettings settings)
         {
-            return CreateHandle(UnsafeBindings.JPH_SwingTwistConstraintSettings_Create());
-        }
-
-        public static NativeHandle<JPH_SwingTwistConstraint> JPH_SwingTwistConstraintSettings_CreateConstraint(NativeHandle<JPH_SwingTwistConstraintSettings> settings, NativeHandle<JPH_Body> bodyA, NativeHandle<JPH_Body> bodyB)
-        {
-            return CreateHandle(UnsafeBindings.JPH_SwingTwistConstraintSettings_CreateConstraint(settings, bodyA, bodyB));
+            fixed (SwingTwistConstraintSettings* settingsPtr = &settings)
+            {
+                UnsafeBindings.JPH_SwingTwistConstraintSettings_Init(settingsPtr);
+            }
         }
     }
 }

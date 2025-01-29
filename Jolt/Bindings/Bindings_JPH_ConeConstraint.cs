@@ -4,6 +4,19 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
+        public static NativeHandle<JPH_ConeConstraint> JPH_ConeConstraint_Create(ConeConstraintSettings settings, NativeHandle<JPH_Body> body1, NativeHandle<JPH_Body> body2)
+        {
+            return CreateHandle(UnsafeBindings.JPH_ConeConstraint_Create(&settings, body1, body2));
+        }
+
+        public static ConeConstraintSettings JPH_ConeConstraint_GetSettings(NativeHandle<JPH_ConeConstraint> constraint)
+        {
+            var settings = new ConeConstraintSettings();
+            UnsafeBindings.JPH_ConeConstraint_GetSettings(constraint, &settings);
+
+            return settings;
+        }
+
         public static void JPH_ConeConstraint_SetHalfConeAngle(NativeHandle<JPH_ConeConstraint> constraint, float halfConeAngle)
         {
             UnsafeBindings.JPH_ConeConstraint_SetHalfConeAngle(constraint, halfConeAngle);

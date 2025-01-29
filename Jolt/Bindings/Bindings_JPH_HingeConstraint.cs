@@ -4,9 +4,65 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_HingeConstraintSettings> JPH_HingeConstraint_GetSettings(NativeHandle<JPH_HingeConstraint> constraint)
+        public static NativeHandle<JPH_HingeConstraint> JPH_HingeConstraint_Create(HingeConstraintSettings settings, NativeHandle<JPH_Body> body1, NativeHandle<JPH_Body> body2)
         {
-            return CreateHandle(UnsafeBindings.JPH_HingeConstraint_GetSettings(constraint)); // TODO share safety handle with existing HingeConstraintSettings if able
+            return CreateHandle(UnsafeBindings.JPH_HingeConstraint_Create(&settings, body1, body2));
+        }
+
+        public static HingeConstraintSettings JPH_HingeConstraint_GetSettings(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            var settings = new HingeConstraintSettings();
+            UnsafeBindings.JPH_HingeConstraint_GetSettings(constraint, &settings);
+
+            return settings;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpacePoint1(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpacePoint1(constraint, &result);
+
+            return result;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpacePoint2(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpacePoint2(constraint, &result);
+
+            return result;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpaceHingeAxis1(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpaceHingeAxis1(constraint, &result);
+
+            return result;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpaceHingeAxis2(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpaceHingeAxis2(constraint, &result);
+
+            return result;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpaceNormalAxis1(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpaceNormalAxis1(constraint, &result);
+
+            return result;
+        }
+
+        public static float3 JPH_HingeConstraint_GetLocalSpaceNormalAxis2(NativeHandle<JPH_HingeConstraint> constraint)
+        {
+            float3 result;
+            UnsafeBindings.JPH_HingeConstraint_GetLocalSpaceNormalAxis2(constraint, &result);
+
+            return result;
         }
 
         public static float JPH_HingeConstraint_GetCurrentAngle(NativeHandle<JPH_HingeConstraint> constraint)
@@ -105,12 +161,11 @@ namespace Jolt
             return result;
         }
 
-        public static float2 JPH_HingeConstraint_GetTotalLambdaRotation(NativeHandle<JPH_HingeConstraint> constraint)
+        public static float JPH_HingeConstraint_GetTotalLambdaRotation(NativeHandle<JPH_HingeConstraint> constraint)
         {
-            float x;
-            float y;
-            UnsafeBindings.JPH_HingeConstraint_GetTotalLambdaRotation(constraint, &x, &y);
-            return new float2(x, y);
+            float rotation;
+            UnsafeBindings.JPH_HingeConstraint_GetTotalLambdaRotation(constraint, &rotation);
+            return rotation;
         }
 
         public static float JPH_HingeConstraint_GetTotalLambdaRotationLimits(NativeHandle<JPH_HingeConstraint> constraint)
