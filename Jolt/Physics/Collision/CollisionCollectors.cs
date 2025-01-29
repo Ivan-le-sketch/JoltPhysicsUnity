@@ -13,12 +13,12 @@ namespace Jolt
         public NativeList<RayCastResult> Results { get; private set; }
 
         internal readonly static FunctionPointer<JPH_CastRayResultCallback> AddResultFuncPointer;
-        internal readonly static FunctionPointer<JPH_CastRayCollector> AddResultWithEarlyOutUpdateFuncPointer;
+        internal readonly static FunctionPointer<JPH_CastRayCollectorCallback> AddResultWithEarlyOutUpdateFuncPointer;
 
         static RayCastResultCollector()
         {
             AddResultFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastRayResultCallback>(AddResult);
-            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastRayCollector>(AddResultWithEarlyOutUpdate);
+            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastRayCollectorCallback>(AddResultWithEarlyOutUpdate);
         }
 
         public RayCastResultCollector(int initialCapacity, Allocator allocator)
@@ -78,12 +78,12 @@ namespace Jolt
         public NativeList<ShapeCastResult> Results { get; private set; }
 
         internal static FunctionPointer<JPH_CastShapeResultCallback> AddResultFuncPointer;
-        internal static FunctionPointer<JPH_CastShapeCollector> AddResultWithEarlyOutUpdateFuncPointer;
+        internal static FunctionPointer<JPH_CastShapeCollectorCallback> AddResultWithEarlyOutUpdateFuncPointer;
 
         static ShapeCastResultCollector()
         {
             AddResultFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastShapeResultCallback>(AddResult);
-            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastShapeCollector>(AddResultWithEarlyOutUpdate);
+            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CastShapeCollectorCallback>(AddResultWithEarlyOutUpdate);
         }
 
         public ShapeCastResultCollector(int initialCapacity, Allocator allocator)
@@ -143,12 +143,12 @@ namespace Jolt
         public NativeList<CollidePointResult> Results { get; private set; }
 
         internal readonly static FunctionPointer<JPH_CollidePointResultCallback> AddResultFuncPointer;
-        internal readonly static FunctionPointer<JPH_CollidePointCollector> AddResultWithEarlyOutUpdateFuncPointer;
+        internal readonly static FunctionPointer<JPH_CollidePointCollectorCallback> AddResultWithEarlyOutUpdateFuncPointer;
 
         static CollidePointResultCollector()
         {
             AddResultFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollidePointResultCallback>(AddResult);
-            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollidePointCollector>(AddResultWithEarlyOutUpdate);
+            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollidePointCollectorCallback>(AddResultWithEarlyOutUpdate);
         }
 
         public CollidePointResultCollector(int initialCapacity, Allocator allocator)
@@ -208,12 +208,12 @@ namespace Jolt
         public NativeList<CollideShapeResult> Results { get; private set; }
 
         internal readonly static FunctionPointer<JPH_CollideShapeResultCallback> AddResultFuncPointer;
-        internal readonly static FunctionPointer<JPH_CollideShapeCollector> AddResultWithEarlyOutUpdateFuncPointer;
+        internal readonly static FunctionPointer<JPH_CollideShapeCollectorCallback> AddResultWithEarlyOutUpdateFuncPointer;
 
         static CollideShapeResultCollector()
         {
             AddResultFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollideShapeResultCallback>(AddResult);
-            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollideShapeCollector>(AddResultWithEarlyOutUpdate);
+            AddResultWithEarlyOutUpdateFuncPointer = BurstCompiler.CompileFunctionPointer<JPH_CollideShapeCollectorCallback>(AddResultWithEarlyOutUpdate);
         }
 
         public CollideShapeResultCollector(int initialCapacity, Allocator allocator)

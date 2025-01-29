@@ -106,6 +106,22 @@ namespace Jolt
 
         public bool CastShapeIgnoreInitialOverlap(Shape shape, float4x4 worldTransform, float3 direction,
             ShapeCastSettings settings, rvec3 baseOffset,
+            ref ShapeCastResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CastShapeIgnoreInitialOverlap(Shape shape, float4x4 worldTransform, float3 direction,
+            ShapeCastSettings settings, rvec3 baseOffset,
             CollisionCollectorType collectorType, ref ShapeCastResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
             ObjectLayerFilter? objectLayerFilter = null,
@@ -196,6 +212,22 @@ namespace Jolt
             NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
 
             return Bindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
+        }
+
+        public bool CollideShapeWithInternalEdgeRemoval(Shape shape, float3 scale, float4x4 centerOfMassTransform,
+            CollideShapeSettings settings, rvec3 baseOffset,
+            CollisionCollectorType collectorType, ref CollideShapeResultCollector collector,
+            BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
+            ObjectLayerFilter? objectLayerFilter = null,
+            BodyFilter? bodyFilter = null,
+            ShapeFilter? shapeFilter = null)
+        {
+            NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilterHandle = broadPhaseLayerFilter == null ? null : broadPhaseLayerFilter.Value.Handle;
+            NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilterHandle = objectLayerFilter == null ? null : objectLayerFilter.Value.Handle;
+            NativeHandle<JPH_BodyFilter>? bodyFilterHandle = bodyFilter == null ? null : bodyFilter.Value.Handle;
+            NativeHandle<JPH_ShapeFilter>? shapeFilterHandle = shapeFilter == null ? null : shapeFilter.Value.Handle;
+
+            return Bindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, collectorType, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
         #endregion
     }
