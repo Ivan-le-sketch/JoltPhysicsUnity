@@ -11,9 +11,9 @@ namespace Jolt
             return CreateHandle(UnsafeBindings.JPH_MutableCompoundShape_Create(settings));
         }
 
-        public static uint JPH_MutableCompoundShape_AddShape(NativeHandle<JPH_MutableCompoundShape> shape, float3 position, quaternion rotation, NativeHandle<JPH_Shape> child, uint userData)
+        public static uint JPH_MutableCompoundShape_AddShape(NativeHandle<JPH_MutableCompoundShape> shape, float3 position, quaternion rotation, NativeHandle<JPH_Shape> child, uint userData, uint index)
         {
-            return UnsafeBindings.JPH_MutableCompoundShape_AddShape(shape, &position, &rotation, child, userData);
+            return UnsafeBindings.JPH_MutableCompoundShape_AddShape(shape, &position, &rotation, child, userData, index);
         }
 
         public static void JPH_MutableCompoundShape_RemoveShape(NativeHandle<JPH_MutableCompoundShape> shape, uint index)

@@ -28,7 +28,7 @@ namespace Jolt
         
         public MutableCompoundShape Create() => new MutableCompoundShape(Bindings.JPH_MutableCompoundShape_Create(Handle.Reinterpret<JPH_MutableCompoundShapeSettings>()));
         
-        public uint AddShape(float3 position, quaternion rotation, Shape child, uint userData) => Bindings.JPH_MutableCompoundShape_AddShape(Handle, position, rotation, child.Handle, userData);
+        public uint AddShape(float3 position, quaternion rotation, Shape child, uint userData, uint index) => Bindings.JPH_MutableCompoundShape_AddShape(Handle, position, rotation, child.Handle, userData, index);
         
         public void RemoveShape(uint index) => Bindings.JPH_MutableCompoundShape_RemoveShape(Handle, index);
         
