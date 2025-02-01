@@ -102,11 +102,9 @@ namespace Jolt
             JPH_PhysicsSystem_SetContactListener(Handle, listener.Handle);
         }
 
-        public void SetBodyActivationListener(IBodyActivationListener listener)
+        public void SetBodyActivationListener(BodyActivationListener listener)
         {
-            var listenerNativeHandle = JPH_BodyActivationListener_Create(listener);
-
-            JPH_PhysicsSystem_SetBodyActivationListener(Handle, listenerNativeHandle);
+            JPH_PhysicsSystem_SetBodyActivationListener(Handle, listener.Handle);
         }
 
         /// <summary>
