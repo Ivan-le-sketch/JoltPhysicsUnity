@@ -4,7 +4,7 @@ using static Jolt.Bindings;
 
 namespace Jolt
 {
-    public partial struct PhysicsSystem : IEquatable<PhysicsSystem>, IDisposable
+    public partial struct PhysicsSystem : IEquatable<PhysicsSystem>
     {
         internal readonly NativeHandle<JPH_PhysicsSystem> Handle;
 
@@ -41,6 +41,14 @@ namespace Jolt
             physicsSettings.numVelocitySteps = 6;
 
             JPH_PhysicsSystem_SetPhysicsSettings(Handle, physicsSettings);
+        }
+
+        /// <summary>
+        /// Destroys the system.
+        /// </summary>
+        public void Destroy()
+        {
+            JPH_PhysicsSystem_Destroy(Handle);
         }
 
         /// <summary>
@@ -85,11 +93,13 @@ namespace Jolt
             return new NarrowPhaseQuery(JPH_PhysicsSystem_GetNarrowPhaseQuery(Handle));
         }
 
-        public void SetContactListener(IContactListener listener)
+        /// <summary>
+        /// Sets the contact listener.
+        /// </summary>
+        /// <param name="listener"></param>
+        public void SetContactListener(ContactListener listener)
         {
-            var listenerNativeHandle = JPH_ContactListener_Create(listener);
-
-            JPH_PhysicsSystem_SetContactListener(Handle, listenerNativeHandle);
+            JPH_PhysicsSystem_SetContactListener(Handle, listener.Handle);
         }
 
         public void SetBodyActivationListener(IBodyActivationListener listener)
@@ -172,13 +182,6 @@ namespace Jolt
         public bool RestoreState(StateRecorder recorder, StateRecorderFilter filter)
         {
             return JPH_PhysicsSystem_RestoreState(Handle, recorder.Handle, filter.Handle);
-        }
-
-        public void Dispose()
-        {
-            JPH_PhysicsSystem_Destroy(Handle);
-            JPH_ContactListener_DestroyAll(); // Unimplemented
-            JPH_BodyActivationListener_DestroyAll(); // Unimplemented
         }
 
         #region IEquatable
