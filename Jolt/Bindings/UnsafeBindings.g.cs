@@ -413,6 +413,10 @@ namespace Jolt
     {
     }
 
+    internal partial struct JPH_CollisionEstimationResult
+    {
+    }
+
     internal partial struct JPH_BodyActivationListener
     {
     }
@@ -3592,5 +3596,41 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_CollisionEstimationResult_Destroy([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetLinearVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetLinearVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetAngularVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetAngularVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetTangent1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_Vec3")]
+        public static extern float3 JPH_CollisionEstimationResult_GetTangent2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern uint JPH_CollisionEstimationResult_GetImpulsesCount([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_CollisionEstimationResult_GetImpulse([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, uint index, [NativeTypeName("JPH_CollisionEstimationResultImpulse *")] CollisionEstimationResult.Impulse* impulse);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_CollisionEstimationResult* JPH_EstimateCollisionResponse(JPH_Body* body1, JPH_Body* body2, JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint numIterations);
     }
 }

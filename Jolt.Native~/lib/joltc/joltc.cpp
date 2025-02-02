@@ -26,6 +26,7 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/CollideShape.h"
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include <Jolt/Physics/Collision/CollisionDispatch.h>
+#include <Jolt/Physics/Collision/EstimateCollisionResponse.h>
 #include <Jolt/Physics/Collision/ShapeCast.h>
 #include "Jolt/Physics/Collision/Shape/PlaneShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
@@ -9512,6 +9513,75 @@ size_t JPH_StateRecorder_GetSize(JPH_StateRecorder* recorder)
 {
 	auto jolt_recorder = reinterpret_cast<JPH::StateRecorderImpl*>(recorder);
 	return jolt_recorder->GetData().size();
+}
+
+/* CollisionEstimationResult */
+void JPH_CollisionEstimationResult_Destroy(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	if (collisionEstimationResult)
+		delete reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mLinearVelocity1);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mLinearVelocity2);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mAngularVelocity1);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mAngularVelocity2);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetTangent1(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mTangent1);
+}
+
+JPH_Vec3 JPH_CollisionEstimationResult_GetTangent2(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return FromJolt(jolt_result->mTangent2);
+}
+
+uint32_t JPH_CollisionEstimationResult_GetImpulsesCount(JPH_CollisionEstimationResult* collisionEstimationResult)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	return jolt_result->mImpulses.size();
+}
+
+void JPH_CollisionEstimationResult_GetImpulse(JPH_CollisionEstimationResult* collisionEstimationResult, uint32_t index, JPH_CollisionEstimationResultImpulse* impulse)
+{
+	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
+	auto jolt_impulse = jolt_result->mImpulses[index];
+
+	impulse->ContactImpulse = jolt_impulse.mContactImpulse;
+	impulse->FrictionImpulse1 = jolt_impulse.mFrictionImpulse1;
+	impulse->FrictionImpulse2 = jolt_impulse.mFrictionImpulse2;
+}
+
+JPH_CollisionEstimationResult* JPH_EstimateCollisionResponse(JPH_Body* body1, JPH_Body* body2, JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations)
+{
+	auto jolt_manifold = reinterpret_cast<JPH::ContactManifold*>(manifold);
+	JPH::CollisionEstimationResult* jolt_result = new JPH::CollisionEstimationResult();
+
+	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2), *jolt_manifold, *jolt_result, combinedFriction, combinedRestitution, minVelocityForRestitution, numIterations);
+
+	return reinterpret_cast<JPH_CollisionEstimationResult*>(jolt_result);
 }
 
 JPH_SUPPRESS_WARNING_POP

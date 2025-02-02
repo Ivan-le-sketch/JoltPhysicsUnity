@@ -667,6 +667,14 @@ typedef struct JPH_ContactListener                  JPH_ContactListener;
 typedef struct JPH_ContactManifold                  JPH_ContactManifold;
 typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 
+typedef struct JPH_CollisionEstimationResult		JPH_CollisionEstimationResult;
+
+typedef struct JPH_CollisionEstimationResultImpulse {
+	float ContactImpulse;
+	float FrictionImpulse1;
+	float FrictionImpulse2;
+} JPH_CollisionEstimationResultImpulse;
+
 typedef struct JPH_BodyActivationListener           JPH_BodyActivationListener;
 typedef struct JPH_BodyDrawFilter                   JPH_BodyDrawFilter;
 
@@ -2490,5 +2498,18 @@ typedef struct JPH_StateRecorderFilter_Procs {
 
 JPH_CAPI JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
 JPH_CAPI void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
+
+/* CollisionEstimationResult */
+JPH_CAPI void JPH_CollisionEstimationResult_Destroy(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetTangent1(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetTangent2(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI uint32_t JPH_CollisionEstimationResult_GetImpulsesCount(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI void JPH_CollisionEstimationResult_GetImpulse(const JPH_CollisionEstimationResult* collisionEstimationResult, uint32_t index, JPH_CollisionEstimationResultImpulse* impulse);
+
+JPH_CAPI JPH_CollisionEstimationResult* JPH_EstimateCollisionResponse(JPH_Body* body1, JPH_Body* body2, JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations);
 
 #endif /* JOLT_C_H_ */
