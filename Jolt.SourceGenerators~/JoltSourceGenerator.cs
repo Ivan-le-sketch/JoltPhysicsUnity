@@ -272,8 +272,13 @@ internal class JoltSourceGenerator : ISourceGenerator
 
                     internalParam = internalParamName;
                     declaredParam = $"{declaredParamType} {declaredParamName}";
-                    
-                    if (p.Modifiers.Any(SyntaxKind.OutKeyword))
+
+                    if (p.Modifiers.Any(SyntaxKind.RefKeyword))
+                    {
+                        internalParam = $"ref {internalParam}";
+                        declaredParam = $"ref {declaredParam}";
+                    }
+                    else if (p.Modifiers.Any(SyntaxKind.OutKeyword))
                     {
                         internalParam = $"out {internalParam}";
                         declaredParam = $"out {declaredParam}";
