@@ -36,11 +36,6 @@ namespace Jolt
             BroadPhaseLayerInterface = settings.BroadPhaseLayerInterface;
 
             ObjectVsBroadPhaseLayerFilter = settings.ObjectVsBroadPhaseLayerFilter;
-
-            var physicsSettings = JPH_PhysicsSystem_GetPhysicsSettings(Handle);
-            physicsSettings.numVelocitySteps = 6;
-
-            JPH_PhysicsSystem_SetPhysicsSettings(Handle, physicsSettings);
         }
 
         /// <summary>
@@ -49,6 +44,24 @@ namespace Jolt
         public void Destroy()
         {
             JPH_PhysicsSystem_Destroy(Handle);
+        }
+
+        /// <summary>
+        /// Gets this system physics settings.
+        /// </summary>
+        /// <returns></returns>
+        public PhysicsSettings GetPhysicsSettings()
+        {
+            return JPH_PhysicsSystem_GetPhysicsSettings(Handle);
+        }
+
+        /// <summary>
+        /// Sets this system physics settings.
+        /// </summary>
+        /// <param name="settings"></param>
+        public void SetPhysicsSettings(PhysicsSettings settings)
+        {
+            JPH_PhysicsSystem_SetPhysicsSettings(Handle, settings);
         }
 
         /// <summary>
