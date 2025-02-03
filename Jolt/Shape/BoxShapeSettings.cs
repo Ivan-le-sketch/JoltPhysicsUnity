@@ -8,7 +8,7 @@ namespace Jolt
     public readonly partial struct BoxShapeSettings
     {
         [OverrideBinding("JPH_BoxShapeSettings_Create")]
-        public static BoxShapeSettings Create(float3 halfExtent, float convexRadius = PhysicsSettings.DefaultConvexRadius)
+        public static BoxShapeSettings Create(float3 halfExtent, float convexRadius = JoltPhysicsSettings.DefaultConvexRadius)
         {
             return new BoxShapeSettings(JPH_BoxShapeSettings_Create(halfExtent, convexRadius));
         }

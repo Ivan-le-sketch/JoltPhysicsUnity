@@ -753,68 +753,6 @@ namespace Jolt
         public JPH_ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter;
     }
 
-    internal partial struct JPH_PhysicsSettings
-    {
-        public int maxInFlightBodyPairs;
-
-        public int stepListenersBatchSize;
-
-        public int stepListenerBatchesPerJob;
-
-        public float baumgarte;
-
-        public float speculativeContactDistance;
-
-        public float penetrationSlop;
-
-        public float linearCastThreshold;
-
-        public float linearCastMaxPenetration;
-
-        public float manifoldToleranceSq;
-
-        public float maxPenetrationDistance;
-
-        public float bodyPairCacheMaxDeltaPositionSq;
-
-        public float bodyPairCacheCosMaxDeltaRotationDiv2;
-
-        public float contactNormalCosMaxDeltaRotation;
-
-        public float contactPointPreserveLambdaMaxDistSq;
-
-        public uint numVelocitySteps;
-
-        public uint numPositionSteps;
-
-        public float minVelocityForRestitution;
-
-        public float timeBeforeSleep;
-
-        public float pointVelocitySleepThreshold;
-
-        [NativeTypeName("bool")]
-        public NativeBool deterministicSimulation;
-
-        [NativeTypeName("bool")]
-        public NativeBool constraintWarmStart;
-
-        [NativeTypeName("bool")]
-        public NativeBool useBodyPairContactCache;
-
-        [NativeTypeName("bool")]
-        public NativeBool useManifoldReduction;
-
-        [NativeTypeName("bool")]
-        public NativeBool useLargeIslandSplitter;
-
-        [NativeTypeName("bool")]
-        public NativeBool allowSleeping;
-
-        [NativeTypeName("bool")]
-        public NativeBool checkActiveEdges;
-    }
-
     internal partial struct JPH_BroadPhaseLayerFilter_Procs
     {
         [NativeTypeName("bool (*)(void *, JPH_BroadPhaseLayer) __attribute__((cdecl))")]
@@ -1036,10 +974,10 @@ namespace Jolt
         public static extern void JPH_PhysicsSystem_Destroy(JPH_PhysicsSystem* system);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JPH_PhysicsSettings* settings);
+        public static extern void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, [NativeTypeName("JPH_PhysicsSettings *")] PhysicsSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_PhysicsSettings* result);
+        public static extern void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, [NativeTypeName("JPH_PhysicsSettings *")] PhysicsSettings* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system);

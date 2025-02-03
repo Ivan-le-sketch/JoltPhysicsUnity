@@ -1,17 +1,46 @@
-﻿namespace Jolt
+﻿using System.Runtime.InteropServices;
+
+namespace Jolt
 {
-    public class PhysicsSettings
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct PhysicsSettings
     {
-        public const float DefaultConvexRadius = 0.05f;
+        public int MaxInFlightBodyPairs;
+        public int StepListenersBatchSize;
+        public int StepListenerBatchesPerJob;
+        public float Baumgarte;
+        public float SpeculativeContactDistance;
+        public float PenetrationSlop;
+        public float LinearCastThreshold;
+        public float LinearCastMaxPenetration;
+        public float ManifoldToleranceSq;
+        public float MaxPenetrationDistance;
+        public float BodyPairCacheMaxDeltaPositionSq;
+        public float BodyPairCacheCosMaxDeltaRotationDiv2;
+        public float ContactNormalCosMaxDeltaRotation;
+        public float ContactPointPreserveLambdaMaxDistSq;
+        public uint NumVelocitySteps;
+        public uint NumPositionSteps;
+        public float MinVelocityForRestitution;
+        public float TimeBeforeSleep;
+        public float PointVelocitySleepThreshold;
 
-        public const float DefaultCollisionTolerance = 1.0e-4f;
+        // Using bool properties while keeping NativeBool as private since currently NativeBool is internal
 
-        public const float DefaultPenetrationTolerance = 1.0e-4f; ///< Stop when there's less than 1% change
+        private NativeBool deterministicSimulation;
+        private NativeBool constraintWarmStart;
+        private NativeBool useBodyPairContactCache;
+        private NativeBool useManifoldReduction;
+        private NativeBool useLargeIslandSplitter;
+        private NativeBool allowSleeping;
+        private NativeBool checkActiveEdges;
 
-        public const float CapsuleProjectionSlop = 0.02f;
-
-        public const int MaxPhysicsJobs = 2048;
-
-        public const int MaxPhysicsBarriers = 8;
+        public bool DeterministicSimulation { get => deterministicSimulation; set => deterministicSimulation = value; }
+        public bool ConstraintWarmStart { get => constraintWarmStart; set => constraintWarmStart = value; }
+        public bool UseBodyPairContactCache { get => useBodyPairContactCache; set => useBodyPairContactCache = value; }
+        public bool UseManifoldReduction { get => useManifoldReduction; set => useManifoldReduction = value; }
+        public bool UseLargeIslandSplitter { get => useLargeIslandSplitter; set => useLargeIslandSplitter = value; }
+        public bool AllowSleeping { get => allowSleeping; set => allowSleeping = value; }
+        public bool CheckActiveEdges { get => checkActiveEdges; set => checkActiveEdges = value; }
     }
 }

@@ -38,6 +38,7 @@ JPH_MotionType
 JPH_MotionQuality
 JPH_MotorSettings
 JPH_MotorState
+JPH_PhysicsSettings
 JPH_PhysicsUpdateError
 JPH_Plane
 JPH_PointConstraintSettings
@@ -102,6 +103,7 @@ JPH_MotionQuality=MotionQuality
 JPH_MotorSettings=MotorSettings
 JPH_MotorState=MotorState
 JPH_ObjectLayer=ObjectLayer
+JPH_PhysicsSettings=PhysicsSettings
 JPH_PhysicsUpdateError=PhysicsUpdateError
 JPH_PointConstraintSettings=PointConstraintSettings
 JPH_Plane=Plane

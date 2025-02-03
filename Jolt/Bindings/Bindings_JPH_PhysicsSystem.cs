@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -31,16 +30,16 @@ namespace Jolt
             system.Dispose();
         }
 
-        public static JPH_PhysicsSettings JPH_PhysicsSystem_GetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system)
+        public static PhysicsSettings JPH_PhysicsSystem_GetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system)
         {
-            JPH_PhysicsSettings settings;
+            PhysicsSettings settings;
 
             UnsafeBindings.JPH_PhysicsSystem_GetPhysicsSettings(system, &settings);
 
             return settings;
         }
 
-        public static void JPH_PhysicsSystem_SetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system, JPH_PhysicsSettings settings)
+        public static void JPH_PhysicsSystem_SetPhysicsSettings(NativeHandle<JPH_PhysicsSystem> system, PhysicsSettings settings)
         {
             UnsafeBindings.JPH_PhysicsSystem_SetPhysicsSettings(system, &settings);
         }
