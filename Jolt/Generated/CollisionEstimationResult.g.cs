@@ -42,6 +42,8 @@ namespace Jolt
         
         public uint GetImpulsesCount() => Bindings.JPH_CollisionEstimationResult_GetImpulsesCount(Handle);
         
+        public CollisionEstimationResult.Impulse GetImpulse(uint index) => Bindings.JPH_CollisionEstimationResult_GetImpulse(Handle, index);
+        
         #endregion
         
     }

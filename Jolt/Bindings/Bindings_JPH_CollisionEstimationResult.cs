@@ -56,7 +56,7 @@ namespace Jolt
             return UnsafeBindings.JPH_CollisionEstimationResult_GetImpulsesCount(collisionEstimationResult);
         }
 
-        public static CollisionEstimationResult.Impulse JPHCollisionEstimationResult_GetImpulse(NativeHandle<JPH_CollisionEstimationResult> collisionEstimationResult, uint index)
+        public static CollisionEstimationResult.Impulse JPH_CollisionEstimationResult_GetImpulse(NativeHandle<JPH_CollisionEstimationResult> collisionEstimationResult, uint index)
         {
             var impulse = new CollisionEstimationResult.Impulse();
 
