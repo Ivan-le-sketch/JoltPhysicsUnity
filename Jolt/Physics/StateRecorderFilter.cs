@@ -26,6 +26,11 @@ namespace Jolt
             CreateNativeHandle();
         }
 
+        public void Destroy()
+        {
+            Bindings.JPH_StateRecorderFilter_Destroy(Handle);
+        }
+
         public virtual bool ShouldSaveBodyCallbackImplementation(Body body)
         {
             return true;
