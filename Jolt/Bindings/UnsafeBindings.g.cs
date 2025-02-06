@@ -4,15 +4,6 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    internal enum JPH_OverrideMassProperties
-    {
-        JPH_OverrideMassProperties_CalculateMassAndInertia,
-        JPH_OverrideMassProperties_CalculateInertia,
-        JPH_OverrideMassProperties_MassAndInertiaProvided,
-        _JPH_JPH_OverrideMassProperties_Count,
-        _JPH_JPH_OverrideMassProperties_Force32 = 0x7FFFFFFF,
-    }
-
     internal enum JPH_SoftBodyConstraintColor
     {
         JPH_SoftBodyConstraintColor_ConstraintType,
@@ -1835,10 +1826,11 @@ namespace Jolt
         public static extern void JPH_BodyCreationSettings_SetNumPositionStepsOverride(JPH_BodyCreationSettings* settings, uint value);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_OverrideMassProperties JPH_BodyCreationSettings_GetOverrideMassProperties([NativeTypeName("const JPH_BodyCreationSettings *")] JPH_BodyCreationSettings* settings);
+        [return: NativeTypeName("JPH_OverrideMassProperties")]
+        public static extern OverrideMassProperties JPH_BodyCreationSettings_GetOverrideMassProperties([NativeTypeName("const JPH_BodyCreationSettings *")] JPH_BodyCreationSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_BodyCreationSettings_SetOverrideMassProperties(JPH_BodyCreationSettings* settings, JPH_OverrideMassProperties value);
+        public static extern void JPH_BodyCreationSettings_SetOverrideMassProperties(JPH_BodyCreationSettings* settings, [NativeTypeName("JPH_OverrideMassProperties")] OverrideMassProperties value);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern float JPH_BodyCreationSettings_GetInertiaMultiplier([NativeTypeName("const JPH_BodyCreationSettings *")] JPH_BodyCreationSettings* settings);

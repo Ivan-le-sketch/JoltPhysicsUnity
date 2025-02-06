@@ -74,6 +74,26 @@ namespace Jolt
             UnsafeBindings.JPH_BodyCreationSettings_SetAngularVelocity(settings, &velocity);
         }
 
+        public static ulong JPH_BodyCreationSettings_GetUserData(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetUserData(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetUserData(NativeHandle<JPH_BodyCreationSettings> settings, ulong userData)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetUserData(settings, userData);
+        }
+
+        public static ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetObjectLayer(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetObjectLayer(NativeHandle<JPH_BodyCreationSettings> settings, ObjectLayer objectLayer)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetObjectLayer(settings, objectLayer);
+        }
+
         public static MotionType JPH_BodyCreationSettings_GetMotionType(NativeHandle<JPH_BodyCreationSettings> settings)
         {
             return UnsafeBindings.JPH_BodyCreationSettings_GetMotionType(settings);
@@ -82,6 +102,65 @@ namespace Jolt
         public static void JPH_BodyCreationSettings_SetMotionType(NativeHandle<JPH_BodyCreationSettings> settings, MotionType value)
         {
             UnsafeBindings.JPH_BodyCreationSettings_SetMotionType(settings, value);
+        }
+
+        public static AllowedDOFs JPH_BodyCreationSettings_GetAllowedDOFs(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetAllowedDOFs(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetAllowedDOFs(NativeHandle<JPH_BodyCreationSettings> settings, AllowedDOFs value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetAllowedDOFs(settings, value);
+        }
+
+        public static bool JPH_BodyCreationSettings_GetAllowDynamicOrKinematic(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetAllowDynamicOrKinematic(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetAllowDynamicOrKinematic(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetAllowDynamicOrKinematic(settings, value);
+        }
+        public static bool JPH_BodyCreationSettings_GetIsSensor(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetIsSensor(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetIsSensor(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetIsSensor(settings, value);
+        }
+
+        public static bool JPH_BodyCreationSettings_GetCollideKinematicVsNonDynamic(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetCollideKinematicVsNonDynamic(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetCollideKinematicVsNonDynamic(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetCollideKinematicVsNonDynamic(settings, value);
+        }
+
+        public static bool JPH_BodyCreationSettings_GetUseManifoldReduction(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetUseManifoldReduction(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetUseManifoldReduction(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetUseManifoldReduction(settings, value);
+        }
+
+        public static bool JPH_BodyCreationSettings_GetApplyGyroscopicForce(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetApplyGyroscopicForce(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetApplyGyroscopicForce(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetApplyGyroscopicForce(settings, value);
         }
 
         public static MotionQuality JPH_BodyCreationSettings_GetMotionQuality(NativeHandle<JPH_BodyCreationSettings> settings)
@@ -94,14 +173,147 @@ namespace Jolt
             UnsafeBindings.JPH_BodyCreationSettings_SetMotionQuality(settings, value);
         }
 
-        public static AllowedDOFs JPH_BodyCreationSettings_GetAllowedDOFs(NativeHandle<JPH_BodyCreationSettings> settings)
+        public static bool JPH_BodyCreationSettings_GetEnhancedInternalEdgeRemoval(NativeHandle<JPH_BodyCreationSettings> settings)
         {
-            return UnsafeBindings.JPH_BodyCreationSettings_GetAllowedDOFs(settings);
+            return UnsafeBindings.JPH_BodyCreationSettings_GetEnhancedInternalEdgeRemoval(settings);
         }
 
-        public static void JPH_BodyCreationSettings_SetAllowedDOFs(NativeHandle<JPH_BodyCreationSettings> settings, AllowedDOFs value)
+        public static void JPH_BodyCreationSettings_SetEnhancedInternalEdgeRemoval(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
         {
-            UnsafeBindings.JPH_BodyCreationSettings_SetAllowedDOFs(settings, value);
+            UnsafeBindings.JPH_BodyCreationSettings_SetEnhancedInternalEdgeRemoval(settings, value);
+        }
+
+        public static bool JPH_BodyCreationSettings_GetAllowSleeping(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetAllowSleeping(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetAllowSleeping(NativeHandle<JPH_BodyCreationSettings> settings, bool value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetAllowSleeping(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetFriction(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetFriction(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetFriction(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetFriction(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetRestitution(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetRestitution(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetRestitution(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetRestitution(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetLinearDamping(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetLinearDamping(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetLinearDamping(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetLinearDamping(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetAngularDamping(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetAngularDamping(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetAngularDamping(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetAngularDamping(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetMaxLinearVelocity(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetMaxLinearVelocity(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetMaxLinearVelocity(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetMaxLinearVelocity(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetMaxAngularVelocity(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetMaxAngularVelocity(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetMaxAngularVelocity(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetMaxAngularVelocity(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetGravityFactor(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetGravityFactor(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetGravityFactor(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetGravityFactor(settings, value);
+        }
+
+        public static uint JPH_BodyCreationSettings_GetNumVelocityStepsOverride(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetNumVelocityStepsOverride(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetNumVelocityStepsOverride(NativeHandle<JPH_BodyCreationSettings> settings, uint value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetNumVelocityStepsOverride(settings, value);
+        }
+
+        public static uint JPH_BodyCreationSettings_GetNumPositionStepsOverride(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetNumPositionStepsOverride(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetNumPositionStepsOverride(NativeHandle<JPH_BodyCreationSettings> settings, uint value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetNumPositionStepsOverride(settings, value);
+        }
+
+        public static OverrideMassProperties JPH_BodyCreationSettings_GetOverrideMassProperties(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetOverrideMassProperties(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetOverrideMassProperties(NativeHandle<JPH_BodyCreationSettings> settings, OverrideMassProperties value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetOverrideMassProperties(settings, value);
+        }
+
+        public static float JPH_BodyCreationSettings_GetInertiaMultiplier(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            return UnsafeBindings.JPH_BodyCreationSettings_GetInertiaMultiplier(settings);
+        }
+
+        public static void JPH_BodyCreationSettings_SetInertiaMultiplier(NativeHandle<JPH_BodyCreationSettings> settings, float value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetInertiaMultiplier(settings, value);
+        }
+
+        public static MassProperties JPH_BodyCreationSettings_GetMassPropertiesOverride(NativeHandle<JPH_BodyCreationSettings> settings)
+        {
+            var massProperties = new MassProperties();
+            UnsafeBindings.JPH_BodyCreationSettings_GetMassPropertiesOverride(settings, &massProperties);
+
+            return massProperties;
+        }
+
+        public static void JPH_BodyCreationSettings_SetMassPropertiesOVerride(NativeHandle<JPH_BodyCreationSettings> settings, MassProperties value)
+        {
+            UnsafeBindings.JPH_BodyCreationSettings_SetMassPropertiesOverride(settings, &value);
         }
     }
 }
