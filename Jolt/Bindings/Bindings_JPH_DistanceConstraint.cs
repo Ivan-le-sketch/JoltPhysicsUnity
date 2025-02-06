@@ -7,7 +7,7 @@
             return CreateHandle(UnsafeBindings.JPH_DistanceConstraint_Create(&settings, body1, body2));
         }
 
-        public static DistanceConstraintSettings JPH_DistanceConstraintSettings_GetSettings(NativeHandle<JPH_DistanceConstraint> constraint)
+        public static DistanceConstraintSettings JPH_DistanceConstraint_GetSettings(NativeHandle<JPH_DistanceConstraint> constraint)
         {
             var settings = new DistanceConstraintSettings();
             UnsafeBindings.JPH_DistanceConstraint_GetSettings(constraint, &settings);

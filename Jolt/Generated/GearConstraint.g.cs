@@ -4,41 +4,33 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    public readonly partial struct DistanceConstraint : IEquatable<DistanceConstraint>
+    public readonly partial struct GearConstraint : IEquatable<GearConstraint>
     {
-        internal readonly NativeHandle<JPH_DistanceConstraint> Handle;
+        internal readonly NativeHandle<JPH_GearConstraint> Handle;
         
-        internal DistanceConstraint(NativeHandle<JPH_DistanceConstraint> handle) => Handle = handle;
+        internal GearConstraint(NativeHandle<JPH_GearConstraint> handle) => Handle = handle;
         
         #region IEquatable
         
-        public bool Equals(DistanceConstraint other) => Handle.Equals(other.Handle);
+        public bool Equals(GearConstraint other) => Handle.Equals(other.Handle);
         
-        public override bool Equals(object obj) => obj is DistanceConstraint other && Equals(other);
+        public override bool Equals(object obj) => obj is GearConstraint other && Equals(other);
         
         public override int GetHashCode() => Handle.GetHashCode();
         
-        public static bool operator ==(DistanceConstraint lhs, DistanceConstraint rhs) => lhs.Equals(rhs);
+        public static bool operator ==(GearConstraint lhs, GearConstraint rhs) => lhs.Equals(rhs);
         
-        public static bool operator !=(DistanceConstraint lhs, DistanceConstraint rhs) => !lhs.Equals(rhs);
+        public static bool operator !=(GearConstraint lhs, GearConstraint rhs) => !lhs.Equals(rhs);
         
         #endregion
         
-        #region JPH_DistanceConstraint
+        #region JPH_GearConstraint
         
-        public DistanceConstraintSettings GetSettings() => Bindings.JPH_DistanceConstraint_GetSettings(Handle);
+        public GearConstraintSettings GetSettings() => Bindings.JPH_GearConstraint_GetSettings(Handle);
         
-        public void SetDistance(float minDistance, float maxDistance) => Bindings.JPH_DistanceConstraint_SetDistance(Handle, minDistance, maxDistance);
+        public void SetConstraints(Constraint gear1, Constraint gear2) => Bindings.JPH_GearConstraint_SetConstraints(Handle, gear1.Handle, gear2.Handle);
         
-        public float GetMinDistance() => Bindings.JPH_DistanceConstraint_GetMinDistance(Handle);
-        
-        public float GetMaxDistance() => Bindings.JPH_DistanceConstraint_GetMaxDistance(Handle);
-        
-        public SpringSettings GetLimitsSpringSettings() => Bindings.JPH_DistanceConstraint_GetLimitsSpringSettings(Handle);
-        
-        public void SetLimitsSpringSettings(SpringSettings settings) => Bindings.JPH_DistanceConstraint_SetLimitsSpringSettings(Handle, settings);
-        
-        public float GetTotalLambdaPosition() => Bindings.JPH_DistanceConstraint_GetTotalLambdaPosition(Handle);
+        public float GetTotalLambda() => Bindings.JPH_GearConstraint_GetTotalLambda(Handle);
         
         #endregion
         
