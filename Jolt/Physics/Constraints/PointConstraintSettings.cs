@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Jolt
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct PointConstraintSettings
     {
