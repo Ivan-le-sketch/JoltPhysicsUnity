@@ -1096,6 +1096,45 @@ namespace Jolt
         public static extern float JPH_Quat_GetRotationAngle([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("const JPH_Vec3 *")] float3* axis);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Add([NativeTypeName("const JPH_Quat *")] quaternion* q1, [NativeTypeName("const JPH_Quat *")] quaternion* q2, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Subtract([NativeTypeName("const JPH_Quat *")] quaternion* q1, [NativeTypeName("const JPH_Quat *")] quaternion* q2, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Multiply([NativeTypeName("const JPH_Quat *")] quaternion* q1, [NativeTypeName("const JPH_Quat *")] quaternion* q2, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_MultiplyScalar([NativeTypeName("const JPH_Quat *")] quaternion* q, float scalar, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Divide([NativeTypeName("const JPH_Quat *")] quaternion* q1, [NativeTypeName("const JPH_Quat *")] quaternion* q2, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Dot([NativeTypeName("const JPH_Quat *")] quaternion* q1, [NativeTypeName("const JPH_Quat *")] quaternion* q2, float* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Conjugated([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_GetTwist([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("const JPH_Vec3 *")] float3* axis, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_GetSwingTwist([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("JPH_Quat *")] quaternion* outSwing, [NativeTypeName("JPH_Quat *")] quaternion* outTwist);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_LERP([NativeTypeName("const JPH_Quat *")] quaternion* from, [NativeTypeName("const JPH_Quat *")] quaternion* to, float fraction, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_SLERP([NativeTypeName("const JPH_Quat *")] quaternion* from, [NativeTypeName("const JPH_Quat *")] quaternion* to, float fraction, [NativeTypeName("JPH_Quat *")] quaternion* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_Rotate([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("const JPH_Vec3 *")] float3* vec, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Quat_InverseRotate([NativeTypeName("const JPH_Quat *")] quaternion* quat, [NativeTypeName("const JPH_Vec3 *")] float3* vec, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
         public static extern NativeBool JPH_Vec3_IsClose([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, float maxDistSq);
 
@@ -1130,12 +1169,6 @@ namespace Jolt
         public static extern float JPH_Vec3_LengthSquared([NativeTypeName("const JPH_Vec3 *")] float3* v);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_Vec3_Multiply([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, [NativeTypeName("JPH_Vec3 *")] float3* result);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_Vec3_MultiplyScalar([NativeTypeName("const JPH_Vec3 *")] float3* v, float scalar, [NativeTypeName("JPH_Vec3 *")] float3* result);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_Vec3_DotProduct([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, float* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -1146,6 +1179,30 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_Vec3_Subtract([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Vec3_Multiply([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Vec3_MultiplyScalar([NativeTypeName("const JPH_Vec3 *")] float3* v, float scalar, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Vec3_Divide([NativeTypeName("const JPH_Vec3 *")] float3* v1, [NativeTypeName("const JPH_Vec3 *")] float3* v2, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Vec3_DivideScalar([NativeTypeName("const JPH_Vec3 *")] float3* v, float scalar, [NativeTypeName("JPH_Vec3 *")] float3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Matrix4x4_Add([NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m1, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Matrix4x4_Subtract([NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m1, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Matrix4x4_Multiply([NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m1, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m2, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Matrix4x4_MultiplyScalar([NativeTypeName("const JPH_Matrix4x4 *")] float4x4* m, float scalar, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_Matrix4x4_Zero([NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
@@ -3531,28 +3588,22 @@ namespace Jolt
         public static extern void JPH_CollisionEstimationResult_Destroy([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetLinearVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetLinearVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* linearVelocity);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetLinearVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetLinearVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* linearVelocity);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetAngularVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetAngularVelocity1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* angularVelocity);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetAngularVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetAngularVelocity2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* angularVelocity);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetTangent1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetTangent1([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* tangent);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        [return: NativeTypeName("JPH_Vec3")]
-        public static extern float3 JPH_CollisionEstimationResult_GetTangent2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);
+        public static extern void JPH_CollisionEstimationResult_GetTangent2([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult, [NativeTypeName("JPH_Vec3 *")] float3* tangent);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern uint JPH_CollisionEstimationResult_GetImpulsesCount([NativeTypeName("const JPH_CollisionEstimationResult *")] JPH_CollisionEstimationResult* collisionEstimationResult);

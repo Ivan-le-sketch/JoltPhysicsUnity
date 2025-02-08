@@ -819,7 +819,7 @@ void JPH_PhysicsSystem_SetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	joltSettings.mPenetrationSlop = settings->penetrationSlop;
 	joltSettings.mLinearCastThreshold = settings->linearCastThreshold;
 	joltSettings.mLinearCastMaxPenetration = settings->linearCastMaxPenetration;
-	joltSettings.mManifoldToleranceSq = settings->manifoldToleranceSq;
+	joltSettings.mManifoldTolerance = settings->manifoldTolerance;
 	joltSettings.mMaxPenetrationDistance = settings->maxPenetrationDistance;
 	joltSettings.mBodyPairCacheMaxDeltaPositionSq = settings->bodyPairCacheMaxDeltaPositionSq;
 	joltSettings.mBodyPairCacheCosMaxDeltaRotationDiv2 = settings->bodyPairCacheCosMaxDeltaRotationDiv2;
@@ -851,7 +851,7 @@ void JPH_PhysicsSystem_GetPhysicsSettings(JPH_PhysicsSystem* system, JPH_Physics
 	result->penetrationSlop = joltSettings.mPenetrationSlop;
 	result->linearCastThreshold = joltSettings.mLinearCastThreshold;
 	result->linearCastMaxPenetration = joltSettings.mLinearCastMaxPenetration;
-	result->manifoldToleranceSq = joltSettings.mManifoldToleranceSq;
+	result->manifoldTolerance = joltSettings.mManifoldTolerance;
 	result->maxPenetrationDistance = joltSettings.mMaxPenetrationDistance;
 	result->bodyPairCacheMaxDeltaPositionSq = joltSettings.mBodyPairCacheMaxDeltaPositionSq;
 	result->bodyPairCacheCosMaxDeltaRotationDiv2 = joltSettings.mBodyPairCacheCosMaxDeltaRotationDiv2;
@@ -1223,6 +1223,107 @@ float JPH_Quat_GetRotationAngle(const JPH_Quat* quat, const JPH_Vec3* axis)
 	return joltQuat.GetRotationAngle(ToJolt(axis));
 }
 
+void JPH_Quat_Multiply(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result)
+{
+	JPH_ASSERT(q1 && q2 && result);
+	auto joltQ1 = ToJolt(q1);
+	auto joltQ2 = ToJolt(q2);
+	FromJolt(joltQ1 * joltQ2, result);
+}
+
+void JPH_Quat_MultiplyScalar(const JPH_Quat* q, float scalar, JPH_Quat* result)
+{
+	JPH_ASSERT(q && result);
+	auto joltQ = ToJolt(q);
+	FromJolt(joltQ * scalar, result);
+}
+
+void JPH_Quat_Add(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result)
+{
+	JPH_ASSERT(q1 && q2 && result);
+	auto joltQ1 = ToJolt(q1);
+	auto joltQ2 = ToJolt(q2);
+	FromJolt(joltQ1 + joltQ2, result);
+}
+
+void JPH_Quat_Subtract(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result)
+{
+	JPH_ASSERT(q1 && q2 && result);
+	auto joltQ1 = ToJolt(q1);
+	auto joltQ2 = ToJolt(q2);
+	FromJolt(joltQ1 - joltQ2, result);
+}
+
+void JPH_Quat_DivideScalar(const JPH_Quat* q, float scalar, JPH_Quat* result)
+{
+	JPH_ASSERT(q && result);
+	JPH_ASSERT(scalar != 0.0f);
+	auto joltQ = ToJolt(q);
+	FromJolt(joltQ / scalar, result);
+}
+
+void JPH_Quat_Dot(const JPH_Quat* q1, const JPH_Quat* q2, float* result)
+{
+	JPH_ASSERT(q1 && q2 && result);
+	auto joltQ1 = ToJolt(q1);
+	auto joltQ2 = ToJolt(q2);
+	*result = joltQ1.Dot(joltQ2);
+}
+
+void JPH_Quat_Conjugated(const JPH_Quat* quat, JPH_Quat* result)
+{
+	JPH_ASSERT(quat && result);
+	auto joltQuat = ToJolt(quat);
+	FromJolt(joltQuat.Conjugated(), result);
+}
+
+void JPH_Quat_GetTwist(const JPH_Quat* quat, const JPH_Vec3* axis, JPH_Quat* result)
+{
+	JPH_ASSERT(quat && axis && result);
+	auto joltQuat = ToJolt(quat);
+	FromJolt(joltQuat.GetTwist(ToJolt(axis)), result);
+}
+
+void JPH_Quat_GetSwingTwist(const JPH_Quat* quat, JPH_Quat* outSwing, JPH_Quat* outTwist)
+{
+	JPH_ASSERT(quat && outSwing && outTwist);
+	auto joltQuat = ToJolt(quat);
+	JPH::Quat swing, twist;
+	joltQuat.GetSwingTwist(swing, twist);
+	FromJolt(swing, outSwing);
+	FromJolt(twist, outTwist);
+}
+
+void JPH_Quat_LERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
+{
+	JPH_ASSERT(from && to && result);
+	auto joltFrom = ToJolt(from);
+	auto joltTo = ToJolt(to);
+	FromJolt(joltFrom.LERP(joltTo, fraction), result);
+}
+
+void JPH_Quat_SLERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result)
+{
+	JPH_ASSERT(from && to && result);
+	auto joltFrom = ToJolt(from);
+	auto joltTo = ToJolt(to);
+	FromJolt(joltFrom.SLERP(joltTo, fraction), result);
+}
+
+void JPH_Quat_Rotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result)
+{
+	JPH_ASSERT(quat && vec && result);
+	auto joltQuat = ToJolt(quat);
+	FromJolt(joltQuat * ToJolt(vec), result);
+}
+
+void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result)
+{
+	JPH_ASSERT(quat && vec && result);
+	auto joltQuat = ToJolt(quat);
+	FromJolt(joltQuat.InverseRotate(ToJolt(vec)), result);
+}
+
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq)
 {
 	JPH_ASSERT(v1 != nullptr);
@@ -1325,6 +1426,22 @@ void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
 	FromJolt(joltVec * scalar, result);
 }
 
+void JPH_Vec3_Divide(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
+{
+	JPH_ASSERT(v1 && v2 && result);
+	JPH::Vec3 joltVec1 = ToJolt(v1);
+	JPH::Vec3 joltVec2 = ToJolt(v2);
+	FromJolt(joltVec1 / joltVec2, result);
+}
+
+void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result)
+{
+	JPH_ASSERT(v && result);
+	JPH_ASSERT(scalar != 0.0f);
+	JPH::Vec3 joltVec = ToJolt(v);
+	FromJolt(joltVec / scalar, result);
+}
+
 void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result)
 {
 	JPH_ASSERT(v1 && v2 && result);
@@ -1354,6 +1471,37 @@ void JPH_Vec3_Subtract(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result)
 	JPH::Vec3 joltVec1 = ToJolt(v1);
 	JPH::Vec3 joltVec2 = ToJolt(v2);
 	FromJolt(joltVec1 - joltVec2, result);
+}
+
+void JPH_Matrix4x4_Add(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m1 && m2 && result);
+	auto joltM1 = ToJolt(m1);
+	auto joltM2 = ToJolt(m2);
+	FromJolt(joltM1 + joltM2, result);
+}
+
+void JPH_Matrix4x4_Subtract(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m1 && m2 && result);
+	auto joltM1 = ToJolt(m1);
+	auto joltM2 = ToJolt(m2);
+	FromJolt(joltM1 - joltM2, result);
+}
+
+void JPH_Matrix4x4_Multiply(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m1 && m2 && result);
+	auto joltM1 = ToJolt(m1);
+	auto joltM2 = ToJolt(m2);
+	FromJolt(joltM1 * joltM2, result);
+}
+
+void JPH_Matrix4x4_MultiplyScalar(const JPH_Matrix4x4* m, float scalar, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM * scalar, result);
 }
 
 void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result) {
@@ -2533,7 +2681,7 @@ JPH_RotatedTranslatedShapeSettings* JPH_RotatedTranslatedShapeSettings_Create(co
 	auto settings = new JPH::RotatedTranslatedShapeSettings(
 		ToJolt(position),
 		rotation != nullptr ? ToJolt(rotation) : JPH::Quat::sIdentity(),
-		shapeSettings != nullptr ? AsShapeSettings(shapeSettings) : new EmptyShapeSettings()
+		AsShapeSettings(shapeSettings)
 	);
 	settings->AddRef();
 
@@ -9522,40 +9670,40 @@ void JPH_CollisionEstimationResult_Destroy(JPH_CollisionEstimationResult* collis
 		delete reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetLinearVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mLinearVelocity1);
+	FromJolt(jolt_result->mLinearVelocity1, linearVelocity);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetLinearVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mLinearVelocity2);
+	FromJolt(jolt_result->mLinearVelocity2, linearVelocity);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetAngularVelocity1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mAngularVelocity1);
+	FromJolt(jolt_result->mAngularVelocity1, angularVelocity);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetAngularVelocity2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mAngularVelocity2);
+	FromJolt(jolt_result->mAngularVelocity2, angularVelocity);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetTangent1(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetTangent1(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mTangent1);
+	FromJolt(jolt_result->mTangent1, tangent);
 }
 
-JPH_Vec3 JPH_CollisionEstimationResult_GetTangent2(JPH_CollisionEstimationResult* collisionEstimationResult)
+void JPH_CollisionEstimationResult_GetTangent2(JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent)
 {
 	auto jolt_result = reinterpret_cast<JPH::CollisionEstimationResult*>(collisionEstimationResult);
-	return FromJolt(jolt_result->mTangent2);
+	FromJolt(jolt_result->mTangent2, tangent);
 }
 
 uint32_t JPH_CollisionEstimationResult_GetImpulsesCount(JPH_CollisionEstimationResult* collisionEstimationResult)

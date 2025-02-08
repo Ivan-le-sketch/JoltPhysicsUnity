@@ -1016,7 +1016,7 @@ typedef struct JPH_PhysicsSettings {
 	float penetrationSlop;
 	float linearCastThreshold;
 	float linearCastMaxPenetration;
-	float manifoldToleranceSq;
+	float manifoldTolerance;
 	float maxPenetrationDistance;
 	float bodyPairCacheMaxDeltaPositionSq;
 	float bodyPairCacheCosMaxDeltaRotationDiv2;
@@ -1097,6 +1097,21 @@ JPH_CAPI void JPH_Quat_Inversed(const JPH_Quat* quat, JPH_Quat* result);
 JPH_CAPI void JPH_Quat_GetPerpendicular(const JPH_Quat* quat, JPH_Quat* result);
 JPH_CAPI float JPH_Quat_GetRotationAngle(const JPH_Quat* quat, const JPH_Vec3* axis);
 
+JPH_CAPI void JPH_Quat_Add(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Subtract(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Multiply(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_MultiplyScalar(const JPH_Quat* q, float scalar, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Divide(const JPH_Quat* q1, const JPH_Quat* q2, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Dot(const JPH_Quat* q1, const JPH_Quat* q2, float* result);
+
+JPH_CAPI void JPH_Quat_Conjugated(const JPH_Quat* quat, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_GetTwist(const JPH_Quat* quat, const JPH_Vec3* axis, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_GetSwingTwist(const JPH_Quat* quat, JPH_Quat* outSwing, JPH_Quat* outTwist);
+JPH_CAPI void JPH_Quat_LERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_SLERP(const JPH_Quat* from, const JPH_Quat* to, float fraction, JPH_Quat* result);
+JPH_CAPI void JPH_Quat_Rotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
+JPH_CAPI void JPH_Quat_InverseRotate(const JPH_Quat* quat, const JPH_Vec3* vec, JPH_Vec3* result);
+
 JPH_CAPI bool JPH_Vec3_IsClose(const JPH_Vec3* v1, const JPH_Vec3* v2, float maxDistSq);
 JPH_CAPI bool JPH_Vec3_IsNearZero(const JPH_Vec3* v, float maxDistSq);
 JPH_CAPI bool JPH_Vec3_IsNormalized(const JPH_Vec3* v, float tolerance);
@@ -1110,13 +1125,20 @@ JPH_CAPI void JPH_Vec3_Abs(const JPH_Vec3* v, JPH_Vec3* result);
 JPH_CAPI float JPH_Vec3_Length(const JPH_Vec3* v);
 JPH_CAPI float JPH_Vec3_LengthSquared(const JPH_Vec3* v);
 
-JPH_CAPI void JPH_Vec3_Multiply(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
-JPH_CAPI void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_DotProduct(const JPH_Vec3* v1, const JPH_Vec3* v2, float* result);
 JPH_CAPI void JPH_Vec3_Normalize(const JPH_Vec3* v, JPH_Vec3* result);
 
 JPH_CAPI void JPH_Vec3_Add(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
 JPH_CAPI void JPH_Vec3_Subtract(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Multiply(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_MultiplyScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_Divide(const JPH_Vec3* v1, const JPH_Vec3* v2, JPH_Vec3* result);
+JPH_CAPI void JPH_Vec3_DivideScalar(const JPH_Vec3* v, float scalar, JPH_Vec3* result);
+
+JPH_CAPI void JPH_Matrix4x4_Add(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_Matrix4x4_Subtract(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_Matrix4x4_Multiply(const JPH_Matrix4x4* m1, const JPH_Matrix4x4* m2, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_Matrix4x4_MultiplyScalar(const JPH_Matrix4x4* m, float scalar, JPH_Matrix4x4* result);
 
 JPH_CAPI void JPH_Matrix4x4_Zero(JPH_Matrix4x4* result);
 JPH_CAPI void JPH_Matrix4x4_Identity(JPH_Matrix4x4* result);
@@ -2501,12 +2523,12 @@ JPH_CAPI void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
 /* CollisionEstimationResult */
 JPH_CAPI void JPH_CollisionEstimationResult_Destroy(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetLinearVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetAngularVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetTangent1(const JPH_CollisionEstimationResult* collisionEstimationResult);
-JPH_CAPI JPH_Vec3 JPH_CollisionEstimationResult_GetTangent2(const JPH_CollisionEstimationResult* collisionEstimationResult);
+JPH_CAPI void JPH_CollisionEstimationResult_GetLinearVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetLinearVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* linearVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetAngularVelocity1(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetAngularVelocity2(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* angularVelocity);
+JPH_CAPI void JPH_CollisionEstimationResult_GetTangent1(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent);
+JPH_CAPI void JPH_CollisionEstimationResult_GetTangent2(const JPH_CollisionEstimationResult* collisionEstimationResult, JPH_Vec3* tangent);
 JPH_CAPI uint32_t JPH_CollisionEstimationResult_GetImpulsesCount(const JPH_CollisionEstimationResult* collisionEstimationResult);
 JPH_CAPI void JPH_CollisionEstimationResult_GetImpulse(const JPH_CollisionEstimationResult* collisionEstimationResult, uint32_t index, JPH_CollisionEstimationResultImpulse* impulse);
 
