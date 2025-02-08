@@ -13,7 +13,7 @@ namespace Jolt
         public float PenetrationSlop;
         public float LinearCastThreshold;
         public float LinearCastMaxPenetration;
-        public float ManifoldToleranceSq;
+        public float ManifoldTolerance;
         public float MaxPenetrationDistance;
         public float BodyPairCacheMaxDeltaPositionSq;
         public float BodyPairCacheCosMaxDeltaRotationDiv2;
