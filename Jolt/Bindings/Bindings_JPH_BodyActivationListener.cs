@@ -2,7 +2,7 @@
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_BodyActivationListener> JPH_BodyActivationListener_Create(JPH_BodyActivationListener_Procs procs)
+        public static NativeHandle<JPH_BodyActivationListener> JPH_BodyActivationListener_Create(JPH_BodyActivationListener_Procs* procs)
         {
             return CreateHandle(UnsafeBindings.JPH_BodyActivationListener_Create(procs, null));
         }

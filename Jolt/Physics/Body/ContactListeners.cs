@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Jolt
 {
@@ -33,6 +34,9 @@ namespace Jolt
         private OnContactPersisted onContactPersistedDelegate;
         private OnContactRemoved onContactRemovedDelegate;
 
+        private IntPtr procsUnmanagedPointer;
+        internal JPH_ContactListener_Procs* Procs => (JPH_ContactListener_Procs*)procsUnmanagedPointer;
+
         public ContactListener()
         {
             CreateNativeListener();
@@ -58,13 +62,16 @@ namespace Jolt
                 OnContactPersisted = Marshal.GetFunctionPointerForDelegate(onContactPersistedDelegate),
                 OnContactRemoved = Marshal.GetFunctionPointerForDelegate(onContactRemovedDelegate),
             };
+            procsUnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(JPH_ContactListener_Procs)));
+            Marshal.StructureToPtr(procs, procsUnmanagedPointer, false);
 
-            Handle = Bindings.JPH_ContactListener_Create(procs);
+            Handle = Bindings.JPH_ContactListener_Create(Procs);
         }
 
         public void Destroy()
         {
             Bindings.JPH_ContactListener_Destroy(Handle);
+            Marshal.FreeHGlobal(procsUnmanagedPointer);
         }
 
         public void SetImplementation(IContactListenerImplementation implementation)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -50,24 +49,29 @@ namespace Jolt
         private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFunctionPointer;
         private static readonly FunctionPointer<ShouldCollideLockedSignature> shouldCollideLockedFunctionPointer;
 
+        private JPH_BodyFilter_Procs procs;
+
         static BodyFilter()
         {
             shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
             shouldCollideLockedFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideLockedSignature>(ShouldCollideLocked);
         }
 
-        public BodyFilter(IEnumerable<BodyID> bodyIDs, FilterMode filterMode)
+        public BodyFilter(NativeList<BodyID> bodyIDs, FilterMode filterMode)
         {
             Handle = default;
             UnmanagedPointer = default;
 
-            bodyIDSelection = new NativeHashSet<BodyID>(8, Allocator.Persistent);
-            foreach (BodyID bodyID in bodyIDs)
+            bodyIDSelection = new NativeHashSet<BodyID>(bodyIDs.Length, Allocator.Persistent);
+            for (int i = 0; i < bodyIDs.Length; i++)
             {
+                BodyID bodyID = bodyIDs[i];
                 bodyIDSelection.Add(bodyID);
             }
 
             mode = filterMode;
+
+            procs = default;
         }
 
         /// <summary>
@@ -76,23 +80,20 @@ namespace Jolt
         /// <param name="bodyIDs"></param>
         /// <param name="filterMode"></param>
         /// <returns></returns>
-        public static BodyFilter Create(IEnumerable<BodyID> bodyIDs, FilterMode filterMode)
+        public static BodyFilter Create(NativeList<BodyID> bodyIDs, FilterMode filterMode)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BodyFilter)));
             BodyFilter filter = new BodyFilter(bodyIDs, filterMode);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BodyFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (BodyFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_BodyFilter_Procs
+            filter.procs = new JPH_BodyFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
                 ShouldCollideLocked = shouldCollideLockedFunctionPointer.Value,
             };
 
-            filter.Handle = Bindings.JPH_BodyFilter_Create(procs, ptr);
+            var ptr = (BodyFilter*)filter.UnmanagedPointer.ToPointer();
+            filter.Handle = Bindings.JPH_BodyFilter_Create(filter.procs, ptr);
 
             return filter;
         }

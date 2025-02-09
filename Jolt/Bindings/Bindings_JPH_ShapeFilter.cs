@@ -4,7 +4,7 @@
     {
         public static NativeHandle<JPH_ShapeFilter> JPH_ShapeFilter_Create(JPH_ShapeFilter_Procs procs, void* userData)
         {
-            return CreateHandle(UnsafeBindings.JPH_ShapeFilter_Create(procs, userData));
+            return CreateHandle(UnsafeBindings.JPH_ShapeFilter_Create(&procs, userData));
         }
 
         public static void JPH_ShapeFilter_Destroy(NativeHandle<JPH_ShapeFilter> filter)

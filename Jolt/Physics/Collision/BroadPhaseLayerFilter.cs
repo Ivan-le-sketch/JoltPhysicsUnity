@@ -47,6 +47,8 @@ namespace Jolt
         private delegate bool ShouldCollideSignature(void* userData, ref BroadPhaseLayer layer);
         private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFunctionPointer;
 
+        private JPH_BroadPhaseLayerFilter_Procs procs;
+
         static BroadPhaseLayerFilter()
         {
             shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
@@ -56,6 +58,7 @@ namespace Jolt
         {
             Handle = default;
             UnmanagedPointer = default;
+            procs = default;
 
             this.collisionMask = collisionMask;
         }
@@ -64,6 +67,7 @@ namespace Jolt
         {
             Handle = default;
             UnmanagedPointer = default;
+            procs = default;
 
             if (constructorMode == MaskInitializationMode.IgnoreLayers)
             {
@@ -115,20 +119,17 @@ namespace Jolt
         /// <param name="collisionMask">The mask used to determine layer collisions.</param>
         public static BroadPhaseLayerFilter Create(ulong collisionMask)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
             BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(collisionMask);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_BroadPhaseLayerFilter_Procs
+            filter.procs = new JPH_BroadPhaseLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
             };
 
-            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
+            var ptr = (BroadPhaseLayerFilter*)filter.UnmanagedPointer.ToPointer();
+            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(filter.procs, ptr);
 
             return filter;
         }

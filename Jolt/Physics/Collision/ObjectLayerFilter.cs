@@ -39,6 +39,8 @@ namespace Jolt
 
         private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFuncPointer;
 
+        private JPH_ObjectLayerFilter_Procs procs;
+
         static ObjectLayerFilter()
         {
             shouldCollideFuncPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
@@ -48,6 +50,7 @@ namespace Jolt
         {
             Handle = default;
             UnmanagedPointer = default;
+            procs = default;
 
             this.collisionMask = collisionMask;
         }
@@ -56,6 +59,7 @@ namespace Jolt
         {
             Handle = default;
             UnmanagedPointer = default;
+            procs = default;
 
             if (constructorMode == MaskInitializationMode.IgnoreLayers)
             {
@@ -107,20 +111,17 @@ namespace Jolt
         /// <param name="collisionMask">The mask used to determine layer collisions.</param>
         public static ObjectLayerFilter Create(ulong collisionMask)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
             ObjectLayerFilter filter = new ObjectLayerFilter(collisionMask);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (ObjectLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_ObjectLayerFilter_Procs
+            filter.procs = new JPH_ObjectLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFuncPointer.Value
             };
 
-            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, ptr);
+            var ptr = (ObjectLayerFilter*)filter.UnmanagedPointer.ToPointer();
+            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(filter.procs, ptr);
 
             return filter;
         }

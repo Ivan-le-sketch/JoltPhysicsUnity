@@ -50,6 +50,8 @@ namespace Jolt
         private static FunctionPointer<ShouldCollideSignature> shouldCollideFunctionPointer;
         private static FunctionPointer<ShouldCollide2Signature> shouldCollide2FunctionPointer;
 
+        private JPH_ShapeFilter_Procs procs;
+
         static ShapeFilter()
         {
             shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
@@ -60,6 +62,7 @@ namespace Jolt
         {
             Handle = default;
             UnmanagedPointer = default;
+            procs = default;
 
             subShapeIDSelection = new NativeHashSet<SubShapeID>(8, Allocator.Persistent);
 
@@ -79,21 +82,18 @@ namespace Jolt
         /// <returns></returns>
         public static ShapeFilter Create(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ShapeFilter)));
             ShapeFilter filter = new ShapeFilter(subShapes, filterMode);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ShapeFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (ShapeFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_ShapeFilter_Procs
+            filter.procs = new JPH_ShapeFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
                 ShouldCollide2 = shouldCollide2FunctionPointer.Value,
             };
 
-            filter.Handle = Bindings.JPH_ShapeFilter_Create(procs, ptr);
+            var ptr = (ShapeFilter*)filter.UnmanagedPointer.ToPointer();
+            filter.Handle = Bindings.JPH_ShapeFilter_Create(filter.procs, ptr);
 
             return filter;
         }

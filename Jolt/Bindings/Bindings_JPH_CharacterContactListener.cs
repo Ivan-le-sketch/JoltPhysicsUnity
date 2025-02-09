@@ -2,7 +2,7 @@
 {
     internal static unsafe partial class Bindings
     {
-        public static NativeHandle<JPH_CharacterContactListener> JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs procs)
+        public static NativeHandle<JPH_CharacterContactListener> JPH_CharacterContactListener_Create(JPH_CharacterContactListener_Procs* procs)
         {
             return CreateHandle(UnsafeBindings.JPH_CharacterContactListener_Create(procs, null));
         }

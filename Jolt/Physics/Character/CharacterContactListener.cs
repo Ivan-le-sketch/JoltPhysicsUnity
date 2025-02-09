@@ -38,6 +38,9 @@ namespace Jolt
         private OnContactAdded onContactAddedDelegate;
         private OnContactSolve onContactSolveDelegate;
 
+        private IntPtr procsUnmanagedPointer;
+        internal JPH_CharacterContactListener_Procs* Procs => (JPH_CharacterContactListener_Procs*)procsUnmanagedPointer;
+
         public void Create(ICharacterContactListenerBehaviour behaviour)
         {
             this.behaviour = behaviour;
@@ -60,13 +63,16 @@ namespace Jolt
                 OnContactSolve = Marshal.GetFunctionPointerForDelegate(onContactSolveDelegate),
                 OnCharacterContactSolve = Marshal.GetFunctionPointerForDelegate(onCharacterContactSolveDelegate),
             };
+            procsUnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(JPH_CharacterContactListener_Procs)));
+            Marshal.StructureToPtr(procs, procsUnmanagedPointer, false);
 
-            Handle = Bindings.JPH_CharacterContactListener_Create(procs);
+            Handle = Bindings.JPH_CharacterContactListener_Create(Procs);
         }
 
         public void Dispose()
         {
             Bindings.JPH_CharacterContactListener_Destroy(Handle);
+            Marshal.FreeHGlobal(procsUnmanagedPointer);
         }
 
         #region Listener callbacks
