@@ -14,9 +14,9 @@ namespace Jolt
         public const uint ObjectLayerBits = 16; // TODO can be 32 with compiler flag
 
         /// <summary>
-        /// The invalid ObjectLayer (0).
+        /// The invalid ObjectLayer (~0), all bits set.
         /// </summary>
-        public static readonly ObjectLayer Invalid = 0;
+        public static readonly ObjectLayer Invalid = new ObjectLayer(unchecked((ushort)~0));
 
         /// <summary>
         /// The layer value.
