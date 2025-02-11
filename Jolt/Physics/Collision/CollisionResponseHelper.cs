@@ -10,12 +10,12 @@
             uint numIterations
             )
         {
-            return new CollisionEstimationResult(Bindings.JPH_EstimateCollisionResponse(
-                body1.Handle, body2.Handle, 
-                manifold.Handle, 
-                combinedFriction, combinedRestitution, 
-                minVelocityForRestitution, 
-                numIterations));
+            return Bindings.JPH_EstimateCollisionResponse(
+                body1.Handle, body2.Handle,
+                manifold.Handle,
+                combinedFriction, combinedRestitution,
+                minVelocityForRestitution,
+                numIterations);
         }
     }
 }
