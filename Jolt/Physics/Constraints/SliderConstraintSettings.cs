@@ -11,7 +11,7 @@ namespace Jolt
         public ConstraintSettings @base;
 
         public ConstraintSpace space;
-        internal NativeBool autoDetectPoint;
+        public NativeBool autoDetectPoint;
         public rvec3 point1;
         public float3 sliderAxis1;
         public float3 normalAxis1;
@@ -23,9 +23,6 @@ namespace Jolt
         public SpringSettings limitsSpringSettings;
         public float maxFrictionForce;
         public MotorSettings motorSettings;
-
-        // This property allows not exposing the internal NativeBool field. Making the NativeBool type public under consideration.
-        public bool AutoDetectPoint { get => autoDetectPoint; set => autoDetectPoint = value; }
 
         public static SliderConstraintSettings Default()
         {

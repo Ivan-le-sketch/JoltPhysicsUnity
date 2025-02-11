@@ -8,24 +8,9 @@ namespace Jolt
         public CollideSettingsBase @base;
 
         public BackFaceMode backFaceModeTriangles;
-
         public BackFaceMode backFaceModeConvex;
-
-        internal NativeBool useShrunkenShapeAndConvexRadius;
-
-        internal NativeBool returnDeepestPoint;
-
-        public bool UseShrunkenShapeAndConvexRadius
-        {
-            get => useShrunkenShapeAndConvexRadius;
-            set => useShrunkenShapeAndConvexRadius = value;
-        }
-
-        public bool ReturnDeepestPoint
-        {
-            get => returnDeepestPoint;
-            set => returnDeepestPoint = value;
-        }
+        public NativeBool useShrunkenShapeAndConvexRadius;
+        public NativeBool returnDeepestPoint;
 
         public static ShapeCastSettings Default()
         {

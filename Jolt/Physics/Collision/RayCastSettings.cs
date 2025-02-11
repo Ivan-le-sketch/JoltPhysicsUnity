@@ -6,17 +6,8 @@ namespace Jolt
     public struct RayCastSettings
     {
         public BackFaceMode backFaceModeTriangles;
-
         public BackFaceMode backFaceModeConvex;
-
-        internal NativeBool treatConvexAsSolid;
-
-        public bool TreatConvexAsSolid
-        {
-            get => treatConvexAsSolid;
-
-            set => treatConvexAsSolid = value;
-        }
+        public NativeBool treatConvexAsSolid;
 
         public static RayCastSettings Default()
         {

@@ -1,7 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
+using UnityEngine;
 
 namespace Jolt
 {
+    [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct PhysicsSettings
     {
@@ -24,23 +27,45 @@ namespace Jolt
         public float MinVelocityForRestitution;
         public float TimeBeforeSleep;
         public float PointVelocitySleepThreshold;
+        public NativeBool DeterministicSimulation;
+        public NativeBool ConstraintWarmStart;
+        public NativeBool UseBodyPairContactCache;
+        public NativeBool UseManifoldReduction;
+        public NativeBool UseLargeIslandSplitter;
+        public NativeBool AllowSleeping;
+        public NativeBool CheckActiveEdges;
 
-        // Using bool properties while keeping NativeBool as private since currently NativeBool is internal
-
-        private NativeBool deterministicSimulation;
-        private NativeBool constraintWarmStart;
-        private NativeBool useBodyPairContactCache;
-        private NativeBool useManifoldReduction;
-        private NativeBool useLargeIslandSplitter;
-        private NativeBool allowSleeping;
-        private NativeBool checkActiveEdges;
-
-        public bool DeterministicSimulation { get => deterministicSimulation; set => deterministicSimulation = value; }
-        public bool ConstraintWarmStart { get => constraintWarmStart; set => constraintWarmStart = value; }
-        public bool UseBodyPairContactCache { get => useBodyPairContactCache; set => useBodyPairContactCache = value; }
-        public bool UseManifoldReduction { get => useManifoldReduction; set => useManifoldReduction = value; }
-        public bool UseLargeIslandSplitter { get => useLargeIslandSplitter; set => useLargeIslandSplitter = value; }
-        public bool AllowSleeping { get => allowSleeping; set => allowSleeping = value; }
-        public bool CheckActiveEdges { get => checkActiveEdges; set => checkActiveEdges = value; }
+        public static PhysicsSettings Default()
+        {
+            return new PhysicsSettings
+            {
+                MaxInFlightBodyPairs = 16384,
+                StepListenersBatchSize = 8,
+                StepListenerBatchesPerJob = 1,
+                Baumgarte = 0.2f,
+                SpeculativeContactDistance = 0.02f,
+                PenetrationSlop = 0.02f,
+                LinearCastThreshold = 0.75f,
+                LinearCastMaxPenetration = 0.25f,
+                ManifoldTolerance = 1.0e-3f,
+                MaxPenetrationDistance = 0.2f,
+                BodyPairCacheMaxDeltaPositionSq = Mathf.Pow(0.001f, 2),
+                BodyPairCacheCosMaxDeltaRotationDiv2 = 0.99984769515639123915701155881391f,
+                ContactNormalCosMaxDeltaRotation = 0.99619469809174553229501040247389f,
+                ContactPointPreserveLambdaMaxDistSq = Mathf.Pow(0.01f, 2),
+                NumVelocitySteps = 10,
+                NumPositionSteps = 2,
+                MinVelocityForRestitution = 1.0f,
+                TimeBeforeSleep = 0.5f,
+                PointVelocitySleepThreshold = 0.03f,
+                DeterministicSimulation = true,
+                ConstraintWarmStart = true,
+                UseBodyPairContactCache = true,
+                UseManifoldReduction = true,
+                UseLargeIslandSplitter = true,
+                AllowSleeping = true,
+                CheckActiveEdges = true,
+            };
+        }
     }
 }
