@@ -2,7 +2,7 @@
 
 namespace Jolt
 {
-    public struct BodyID : IEquatable<BodyID>
+    public struct BodyID : IEquatable<BodyID>, IComparable<BodyID>
     {
         public uint Value;
 
@@ -31,6 +31,17 @@ namespace Jolt
         public static bool operator !=(BodyID lhs, BodyID rhs)
         {
             return !lhs.Equals(rhs);
+        }
+
+        #endregion
+
+        #region IComparable
+
+        public int CompareTo(BodyID other)
+        {
+            if (Value < other.Value) return -1;
+            if (Value > other.Value) return 1;
+            return 0;
         }
 
         #endregion
