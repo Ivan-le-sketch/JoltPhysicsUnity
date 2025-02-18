@@ -114,14 +114,14 @@ namespace Jolt
             ObjectLayerFilter filter = new ObjectLayerFilter(collisionMask);
             filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
             Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (ObjectLayerFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.procs = new JPH_ObjectLayerFilter_Procs
+            ptr->procs = new JPH_ObjectLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFuncPointer.Value
             };
 
-            var ptr = (ObjectLayerFilter*)filter.UnmanagedPointer.ToPointer();
-            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(filter.procs, ptr);
+            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }
@@ -133,20 +133,17 @@ namespace Jolt
         /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
         public static ObjectLayerFilter Create(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
         {
-            var unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
             ObjectLayerFilter filter = new ObjectLayerFilter(layers, constructorMode);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ObjectLayerFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (ObjectLayerFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (ObjectLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_ObjectLayerFilter_Procs
+            ptr->procs = new JPH_ObjectLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFuncPointer.Value
             };
 
-            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(procs, ptr);
+            filter.Handle = Bindings.JPH_ObjectLayerFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }

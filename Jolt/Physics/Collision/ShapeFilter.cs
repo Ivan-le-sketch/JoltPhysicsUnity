@@ -85,15 +85,15 @@ namespace Jolt
             ShapeFilter filter = new ShapeFilter(subShapes, filterMode);
             filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ShapeFilter)));
             Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (ShapeFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.procs = new JPH_ShapeFilter_Procs
+            ptr->procs = new JPH_ShapeFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
                 ShouldCollide2 = shouldCollide2FunctionPointer.Value,
             };
 
-            var ptr = (ShapeFilter*)filter.UnmanagedPointer.ToPointer();
-            filter.Handle = Bindings.JPH_ShapeFilter_Create(filter.procs, ptr);
+            filter.Handle = Bindings.JPH_ShapeFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }

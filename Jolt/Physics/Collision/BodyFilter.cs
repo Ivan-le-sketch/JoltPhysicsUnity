@@ -85,15 +85,15 @@ namespace Jolt
             BodyFilter filter = new BodyFilter(bodyIDs, filterMode);
             filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BodyFilter)));
             Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (BodyFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.procs = new JPH_BodyFilter_Procs
+            ptr->procs = new JPH_BodyFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
                 ShouldCollideLocked = shouldCollideLockedFunctionPointer.Value,
             };
 
-            var ptr = (BodyFilter*)filter.UnmanagedPointer.ToPointer();
-            filter.Handle = Bindings.JPH_BodyFilter_Create(filter.procs, ptr);
+            filter.Handle = Bindings.JPH_BodyFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }

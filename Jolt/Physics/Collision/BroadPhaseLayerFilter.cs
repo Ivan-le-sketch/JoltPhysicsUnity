@@ -122,14 +122,14 @@ namespace Jolt
             BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(collisionMask);
             filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
             Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (BroadPhaseLayerFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.procs = new JPH_BroadPhaseLayerFilter_Procs
+            ptr->procs = new JPH_BroadPhaseLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
             };
 
-            var ptr = (BroadPhaseLayerFilter*)filter.UnmanagedPointer.ToPointer();
-            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(filter.procs, ptr);
+            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }
@@ -141,20 +141,17 @@ namespace Jolt
         /// <param name="constructorMode">The mode that determines how layers are treated (either collide or ignore).</param>
         public static BroadPhaseLayerFilter Create(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
         {
-            IntPtr unmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
             BroadPhaseLayerFilter filter = new BroadPhaseLayerFilter(layers, constructorMode);
-            Marshal.StructureToPtr(filter, unmanagedPointer, false);
+            filter.UnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(BroadPhaseLayerFilter)));
+            Marshal.StructureToPtr(filter, filter.UnmanagedPointer, false);
+            var ptr = (BroadPhaseLayerFilter*)filter.UnmanagedPointer.ToPointer();
 
-            filter.UnmanagedPointer = unmanagedPointer;
-
-            var ptr = (BroadPhaseLayerFilter*)unmanagedPointer.ToPointer();
-
-            var procs = new JPH_BroadPhaseLayerFilter_Procs
+            ptr->procs = new JPH_BroadPhaseLayerFilter_Procs
             {
                 ShouldCollide = shouldCollideFunctionPointer.Value,
             };
 
-            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(procs, ptr);
+            filter.Handle = Bindings.JPH_BroadPhaseLayerFilter_Create(&ptr->procs, ptr);
 
             return filter;
         }
