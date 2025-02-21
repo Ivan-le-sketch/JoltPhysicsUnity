@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -7,6 +8,7 @@ namespace Jolt
     /// A 3 vector with optional double precision.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [Serializable]
     public struct rvec3
     {
 #if !JOLT_DOUBLE_PRECISION
