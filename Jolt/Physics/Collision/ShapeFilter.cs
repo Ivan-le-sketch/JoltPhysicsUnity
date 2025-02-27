@@ -58,7 +58,7 @@ namespace Jolt
             shouldCollide2FunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollide2Signature>(ShouldCollide2);
         }
 
-        public ShapeFilter(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
+        private ShapeFilter(IEnumerable<SubShapeID> subShapes, FilterMode filterMode)
         {
             Handle = default;
             UnmanagedPointer = default;

@@ -54,7 +54,7 @@ namespace Jolt
             shouldCollideFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
         }
 
-        internal BroadPhaseLayerFilter(ulong collisionMask)
+        private BroadPhaseLayerFilter(ulong collisionMask)
         {
             Handle = default;
             UnmanagedPointer = default;
@@ -63,7 +63,7 @@ namespace Jolt
             this.collisionMask = collisionMask;
         }
 
-        internal BroadPhaseLayerFilter(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
+        private BroadPhaseLayerFilter(NativeList<BroadPhaseLayer> layers, MaskInitializationMode constructorMode)
         {
             Handle = default;
             UnmanagedPointer = default;

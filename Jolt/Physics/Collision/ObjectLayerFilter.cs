@@ -46,7 +46,7 @@ namespace Jolt
             shouldCollideFuncPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideSignature>(ShouldCollide);
         }
 
-        internal ObjectLayerFilter(ulong collisionMask)
+        private ObjectLayerFilter(ulong collisionMask)
         {
             Handle = default;
             UnmanagedPointer = default;
@@ -55,7 +55,7 @@ namespace Jolt
             this.collisionMask = collisionMask;
         }
 
-        internal ObjectLayerFilter(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
+        private ObjectLayerFilter(NativeList<ObjectLayer> layers, MaskInitializationMode constructorMode)
         {
             Handle = default;
             UnmanagedPointer = default;

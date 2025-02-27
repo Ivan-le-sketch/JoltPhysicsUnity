@@ -57,7 +57,7 @@ namespace Jolt
             shouldCollideLockedFunctionPointer = BurstCompiler.CompileFunctionPointer<ShouldCollideLockedSignature>(ShouldCollideLocked);
         }
 
-        public BodyFilter(NativeList<BodyID> bodyIDs, FilterMode filterMode)
+        private BodyFilter(NativeList<BodyID> bodyIDs, FilterMode filterMode)
         {
             Handle = default;
             UnmanagedPointer = default;
@@ -241,6 +241,7 @@ namespace Jolt
 
         public void Dispose()
         {
+            bodyIDSelection.Dispose();
             Bindings.JPH_BodyFilter_Destroy(Handle);
             Marshal.FreeHGlobal(UnmanagedPointer);
         }
