@@ -6,31 +6,24 @@
     [GenerateHandle("JPH_Shape"), GenerateBindings("JPH_Shape")]
     public readonly partial struct Shape
     {
+        [OverrideBinding("JPH_Shape_Destroy")]
+        public void Destroy()
+        {
+            if (Handle.HasUser()) return; // Prevent destroying a shape that still has user
+
+            Bindings.JPH_Shape_Destroy(Handle);
+        }
+
         public void AddUser()
         {
-            var userCount = GetUserData();
-            userCount++;
-            SetUserData(userCount);
+            // Users should be managed carefully since they prevent the ressource destruction
+            Handle.AddUser();
         }
 
         public void RemoveUser()
         {
-            var userCount = GetUserData();
-            if (userCount > 0) userCount--;
-            if (userCount == 0)
-            {
-                Destroy();
-            }
-            else
-            {
-                SetUserData(userCount);
-            }
-        }
-
-        [OverrideBinding("JPH_Shape_Destroy")]
-        public void Destroy()
-        {
-            Bindings.JPH_Shape_Destroy(Handle);
+            // Users should be managed carefully since they prevent the ressource destruction
+            Handle.RemoveUser();
         }
 
         public static implicit operator Shape(BoxShape shape)
