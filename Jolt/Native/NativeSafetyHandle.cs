@@ -16,37 +16,26 @@ namespace Jolt
     /// A safety handle for detecting use-after-free access of native objects.
     /// </summary>
     public struct NativeSafetyHandle
-    {
-        // Initially I tried to reuse AtomicSafetyHandle to offload complexity out of the lib, but
-        // AtomicSafetyHandle is tightly coupled to the ENABLE_UNITY_COLLECTIONS_CHECKS scripting
-        // define, and ideally the Jolt safety checks can be enabled independently.
+	{
+        private readonly static SharedStatic<NativeParallelHashMap<IntPtr, int>> safetyHandles;
+        private struct SafetyHandlesKey { }
 
-        // TODO investigate more sophisticated use-after-free safety checks
+        private static readonly SharedStatic<int> spinLock;
+        private struct SpinLockKey { }
 
-        public uint Index;
-
-        private static readonly SharedStatic<int> nextHandleInternal;
-        private struct NextHandleInternalKey { }
-
-        private static readonly SharedStatic<NativeHashSet<uint>> disposed;
-        private struct DisposedKey { }
-
-        private static readonly SharedStatic<int> disposedSpinLock;
-        private struct DisposedSpinLockKey { }
+        public IntPtr NativeData;
 
         static NativeSafetyHandle()
         {
-            nextHandleInternal = SharedStatic<int>.GetOrCreate<NativeSafetyHandle, NextHandleInternalKey>();
-            disposed = SharedStatic<NativeHashSet<uint>>.GetOrCreate<NativeSafetyHandle, DisposedKey>();
-            disposedSpinLock = SharedStatic<int>.GetOrCreate<NativeSafetyHandle, DisposedSpinLockKey>();
+            safetyHandles = SharedStatic<NativeParallelHashMap<IntPtr, int>>.GetOrCreate<NativeSafetyHandle, SafetyHandlesKey>();
+            spinLock = SharedStatic<int>.GetOrCreate<NativeSafetyHandle, SpinLockKey>();
         }
 
         [RuntimeInitializeOnLoadMethod]
         internal static void Initialize()
         {
-            nextHandleInternal.Data = 0;
-            disposed.Data = new NativeHashSet<uint>(1024, Allocator.Persistent);
-            disposedSpinLock.Data = 0;
+            safetyHandles.Data = new NativeParallelHashMap<IntPtr, int>(10000, Allocator.Persistent);
+            spinLock.Data = 0;
         }
 
         /// <summary>
@@ -56,61 +45,90 @@ namespace Jolt
         {
             // TODO check for unreleased safety handles?
 
-            if (disposed.Data.IsCreated) disposed.Data.Dispose();
+            if (safetyHandles.Data.IsCreated) safetyHandles.Data.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static NativeSafetyHandle Create()
+        internal static NativeSafetyHandle Create(in IntPtr pointerToNative)
         {
-            int newIndex = Interlocked.Increment(ref nextHandleInternal.Data);
-            uint safeIndex = unchecked((uint)newIndex - 1);
+            LockSpinLock();
+            safetyHandles.Data.TryAdd(pointerToNative, 0);
+            UnlockSpinLock();
 
-            return new NativeSafetyHandle { Index = safeIndex };
+            return new NativeSafetyHandle { NativeData = pointerToNative };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Release(in NativeSafetyHandle handle)
+        internal bool Release()
         {
-            LockDisposedSpinLock();
-
-            if (disposed.Data.Contains(handle.Index))
+            Debug.Log("Attempting to release safety handle");
+            LockSpinLock();
+            if (safetyHandles.Data.ContainsKey(NativeData) && safetyHandles.Data[NativeData] > 0)
             {
-                Debug.LogWarning("A NativeSafetyHandle is being released for a handle index that was already released.");
-                return;
+                UnlockSpinLock();
+                Debug.LogWarning($"Attempting to release a safety handle with {safetyHandles.Data[NativeData]} users. Attempt denied.");
+                return false;
             }
-            disposed.Data.Add(handle.Index);
 
-            UnlockDisposedSpinLock();
+            if (!safetyHandles.Data.Remove(NativeData))
+            {
+                UnlockSpinLock();
+                Debug.LogWarning("Native safety handle : attempting to release a non existing safety handle.");
+                return false;
+            }
+            
+            UnlockSpinLock();
+
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AssertExists(in NativeSafetyHandle handle)
+        internal void AddUser()
         {
-            LockDisposedSpinLock();
+            LockSpinLock();
+            if (!safetyHandles.Data.ContainsKey(NativeData))
+            {
+                safetyHandles.Data[NativeData]++;
+            }
+            UnlockSpinLock();
+        }
 
-            if (disposed.Data.Contains(handle.Index))
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void RemoveUser()
+        {
+            LockSpinLock();
+            if (!safetyHandles.Data.ContainsKey(NativeData))
+            {
+                safetyHandles.Data[NativeData]--;
+            }
+            UnlockSpinLock();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal void AssertExists()
+        {
+            LockSpinLock();
+            if (!safetyHandles.Data.ContainsKey(NativeData))
             {
                 throw new ObjectDisposedException("The native resource has been disposed.");
             }
-
-            UnlockDisposedSpinLock();
+            UnlockSpinLock();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void LockDisposedSpinLock()
+        private static void LockSpinLock()
         {
-            while (Interlocked.CompareExchange(ref disposedSpinLock.Data, 1, 0) != 0)
+            while (Interlocked.CompareExchange(ref spinLock.Data, 1, 0) != 0)
             {
 
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void UnlockDisposedSpinLock()
+        private static void UnlockSpinLock()
         {
-            Volatile.Write(ref disposedSpinLock.Data, 0);
+            Volatile.Write(ref spinLock.Data, 0);
         }
     }
-
 #endif
 }

@@ -14,7 +14,7 @@ namespace Jolt
         public NativeHandle(T* ptr)
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
-            safety = NativeSafetyHandle.Create();
+            safety = NativeSafetyHandle.Create((IntPtr)ptr);
             #endif
 
             this.ptr = ptr;
@@ -46,7 +46,7 @@ namespace Jolt
         public readonly T* IntoPointer()
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
-            NativeSafetyHandle.AssertExists(in safety);
+            safety.AssertExists();
             #endif
 
             return ptr;
@@ -58,12 +58,22 @@ namespace Jolt
             return handle.IntoPointer();
         }
 
+        public void AddUser()
+        {
+            safety.AddUser();
+        }
+
+        public void RemoveUser()
+        {
+            safety.RemoveUser();
+        }
+
         #region IDisposable
 
         public void Dispose()
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
-            NativeSafetyHandle.Release(safety);
+            safety.Release();
             #endif
 
             ptr = null;
