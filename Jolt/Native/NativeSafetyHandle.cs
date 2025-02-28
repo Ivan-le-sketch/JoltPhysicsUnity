@@ -86,7 +86,7 @@ namespace Jolt
         internal void AddUser()
         {
             LockSpinLock();
-            if (!safetyHandles.Data.ContainsKey(NativeData))
+            if (safetyHandles.Data.ContainsKey(NativeData))
             {
                 safetyHandles.Data[NativeData]++;
             }
@@ -97,11 +97,23 @@ namespace Jolt
         internal void RemoveUser()
         {
             LockSpinLock();
-            if (!safetyHandles.Data.ContainsKey(NativeData))
+            if (safetyHandles.Data.ContainsKey(NativeData))
             {
                 safetyHandles.Data[NativeData]--;
             }
             UnlockSpinLock();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool HasUser()
+        {
+            LockSpinLock();
+            if (safetyHandles.Data.ContainsKey(NativeData))
+            {
+                return safetyHandles.Data[NativeData] > 0;
+            }
+            UnlockSpinLock();
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

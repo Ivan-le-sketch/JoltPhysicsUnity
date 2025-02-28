@@ -68,6 +68,11 @@ namespace Jolt
             safety.RemoveUser();
         }
 
+        public bool HasUser()
+        {
+            return safety.HasUser();
+        }
+
         #region IDisposable
 
         public void Dispose()

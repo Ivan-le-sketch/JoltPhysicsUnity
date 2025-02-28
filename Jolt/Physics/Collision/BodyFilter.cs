@@ -124,18 +124,12 @@ namespace Jolt
         [BurstCompile]
         internal static bool ShouldCollideLocked(void* context, JPH_Body* body)
         {
-            var bodyHandle = new Body(new NativeHandle<JPH_Body>(body));
-
-            bool result = true;
+            var bodyWrapper = new Body(new NativeHandle<JPH_Body>(body));
 
             var implPtr = (BodyFilter*)context;
             var impl = *implPtr;
 
-            result = impl.ShouldCollideLocked(bodyHandle);
-
-            bodyHandle.Handle.Dispose();
-
-            return result;
+            return impl.ShouldCollideLocked(bodyWrapper);
         }
 
         /// <summary>
