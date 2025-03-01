@@ -4,5 +4,10 @@
     public readonly partial struct TaperedCapsuleShape
     {
         // TODO no JPH_TaperedCapsuleShape_Create binding?
+
+        public static implicit operator TaperedCapsuleShape(Shape shape)
+        {
+            return new TaperedCapsuleShape(shape.Handle.Reinterpret<JPH_TaperedCapsuleShape>());
+        }
     }
 }

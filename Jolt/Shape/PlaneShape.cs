@@ -10,5 +10,10 @@ namespace Jolt
         {
             return new PlaneShape(JPH_PlaneShape_Create(plane, halfExtent));
         }
+
+        public static implicit operator PlaneShape(Shape shape)
+        {
+            return new PlaneShape(shape.Handle.Reinterpret<JPH_PlaneShape>());
+        }
     }
 }

@@ -10,5 +10,10 @@ namespace Jolt
         {
             return new CapsuleShape(JPH_CapsuleShape_Create(halfHeightOfCylinder, radius));
         }
+
+        public static implicit operator CapsuleShape(Shape shape)
+        {
+            return new CapsuleShape(shape.Handle.Reinterpret<JPH_CapsuleShape>());
+        }
     }
 }

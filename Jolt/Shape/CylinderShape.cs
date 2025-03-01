@@ -10,5 +10,10 @@ namespace Jolt
         {
             return new CylinderShape(JPH_CylinderShape_Create(halfHeightOfCylinder, radius));
         }
+
+        public static implicit operator CylinderShape(Shape shape)
+        {
+            return new CylinderShape(shape.Handle.Reinterpret<JPH_CylinderShape>());
+        }
     }
 }

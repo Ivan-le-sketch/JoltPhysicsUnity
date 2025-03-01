@@ -11,5 +11,10 @@ namespace Jolt
         {
             return new BoxShape(JPH_BoxShape_Create(halfExtent, convexRadius));
         }
+
+        public static implicit operator BoxShape(Shape shape)
+        {
+            return new BoxShape(shape.Handle.Reinterpret<JPH_BoxShape>());
+        }
     }
 }

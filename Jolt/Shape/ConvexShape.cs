@@ -35,5 +35,10 @@
         {
             return new ConvexShape(shape.Handle.Reinterpret<JPH_ConvexShape>());
         }
+
+        public static implicit operator ConvexShape(Shape shape)
+        {
+            return new ConvexShape(shape.Handle.Reinterpret<JPH_ConvexShape>());
+        }
     }
 }

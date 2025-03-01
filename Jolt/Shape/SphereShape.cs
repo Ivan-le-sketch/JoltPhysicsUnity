@@ -10,5 +10,10 @@ namespace Jolt
         {
             return new SphereShape(JPH_SphereShape_Create(radius));
         }
+
+        public static implicit operator SphereShape(Shape shape)
+        {
+            return new SphereShape(shape.Handle.Reinterpret<JPH_SphereShape>());
+        }
     }
 }
