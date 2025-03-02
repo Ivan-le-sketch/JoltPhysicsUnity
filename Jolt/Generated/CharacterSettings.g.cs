@@ -10,6 +10,10 @@ namespace Jolt
         
         internal CharacterSettings(NativeHandle<JPH_CharacterSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(CharacterSettings other) => Handle.Equals(other.Handle);

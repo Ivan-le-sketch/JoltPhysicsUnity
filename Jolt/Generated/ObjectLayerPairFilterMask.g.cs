@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ObjectLayerPairFilterMask(NativeHandle<JPH_ObjectLayerPairFilter> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ObjectLayerPairFilterMask other) => Handle.Equals(other.Handle);

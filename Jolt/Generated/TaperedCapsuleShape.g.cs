@@ -10,6 +10,10 @@ namespace Jolt
         
         internal TaperedCapsuleShape(NativeHandle<JPH_TaperedCapsuleShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(TaperedCapsuleShape other) => Handle.Equals(other.Handle);

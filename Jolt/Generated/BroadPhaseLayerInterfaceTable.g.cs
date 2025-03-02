@@ -10,6 +10,10 @@ namespace Jolt
         
         internal BroadPhaseLayerInterfaceTable(NativeHandle<JPH_BroadPhaseLayerInterface> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(BroadPhaseLayerInterfaceTable other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal SliderConstraint(NativeHandle<JPH_SliderConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(SliderConstraint other) => Handle.Equals(other.Handle);

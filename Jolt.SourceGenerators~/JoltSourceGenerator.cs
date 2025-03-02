@@ -174,6 +174,10 @@ internal class JoltSourceGenerator : ISourceGenerator
         WritePaddedLine(writer, $"internal readonly NativeHandle<{target.NativeTypeName}> Handle;");
         
         WritePaddedLine(writer, $"internal {target.TypeName}(NativeHandle<{target.NativeTypeName}> handle) => Handle = handle;");
+
+        WritePaddedLine(writer, $"public void AddUser() => Handle.AddUser();");
+
+        WritePaddedLine(writer, $"public void RemoveUser() => Handle.RemoveUser();");
     }
 
     private static void GenerateEquatableInterface(IndentedTextWriter writer, JoltNativeTypeWrapper target)

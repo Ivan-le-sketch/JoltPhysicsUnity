@@ -10,6 +10,10 @@ namespace Jolt
         
         internal CapsuleShapeSettings(NativeHandle<JPH_CapsuleShapeSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(CapsuleShapeSettings other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ContactSettings(NativeHandle<JPH_ContactSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ContactSettings other) => Handle.Equals(other.Handle);

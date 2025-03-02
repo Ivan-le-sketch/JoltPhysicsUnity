@@ -10,6 +10,10 @@ namespace Jolt
         
         internal HingeConstraint(NativeHandle<JPH_HingeConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(HingeConstraint other) => Handle.Equals(other.Handle);

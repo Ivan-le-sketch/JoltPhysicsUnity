@@ -10,6 +10,10 @@ namespace Jolt
         
         internal BodyCreationSettings(NativeHandle<JPH_BodyCreationSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(BodyCreationSettings other) => Handle.Equals(other.Handle);

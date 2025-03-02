@@ -10,6 +10,10 @@ namespace Jolt
         
         internal MutableCompoundShape(NativeHandle<JPH_MutableCompoundShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(MutableCompoundShape other) => Handle.Equals(other.Handle);
@@ -25,8 +29,6 @@ namespace Jolt
         #endregion
         
         #region JPH_MutableCompoundShape
-        
-        public MutableCompoundShape Create() => new MutableCompoundShape(Bindings.JPH_MutableCompoundShape_Create(Handle.Reinterpret<JPH_MutableCompoundShapeSettings>()));
         
         public uint AddShape(float3 position, quaternion rotation, Shape child, uint userData, uint index) => Bindings.JPH_MutableCompoundShape_AddShape(Handle, position, rotation, child.Handle, userData, index);
         

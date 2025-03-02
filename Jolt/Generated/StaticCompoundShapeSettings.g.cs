@@ -10,6 +10,10 @@ namespace Jolt
         
         internal StaticCompoundShapeSettings(NativeHandle<JPH_StaticCompoundShapeSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(StaticCompoundShapeSettings other) => Handle.Equals(other.Handle);

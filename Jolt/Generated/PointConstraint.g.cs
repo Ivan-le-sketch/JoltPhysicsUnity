@@ -10,6 +10,10 @@ namespace Jolt
         
         internal PointConstraint(NativeHandle<JPH_PointConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(PointConstraint other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal FixedConstraint(NativeHandle<JPH_FixedConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(FixedConstraint other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal SphereShape(NativeHandle<JPH_SphereShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(SphereShape other) => Handle.Equals(other.Handle);

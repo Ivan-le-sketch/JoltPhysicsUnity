@@ -10,6 +10,10 @@ namespace Jolt
         
         internal SixDOFConstraint(NativeHandle<JPH_SixDOFConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(SixDOFConstraint other) => Handle.Equals(other.Handle);

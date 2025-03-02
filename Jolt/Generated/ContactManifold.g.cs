@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ContactManifold(NativeHandle<JPH_ContactManifold> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ContactManifold other) => Handle.Equals(other.Handle);

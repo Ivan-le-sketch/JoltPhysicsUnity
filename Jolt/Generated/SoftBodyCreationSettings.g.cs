@@ -10,6 +10,10 @@ namespace Jolt
         
         internal SoftBodyCreationSettings(NativeHandle<JPH_SoftBodyCreationSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(SoftBodyCreationSettings other) => Handle.Equals(other.Handle);

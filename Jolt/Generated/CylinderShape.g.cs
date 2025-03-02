@@ -10,6 +10,10 @@ namespace Jolt
         
         internal CylinderShape(NativeHandle<JPH_CylinderShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(CylinderShape other) => Handle.Equals(other.Handle);

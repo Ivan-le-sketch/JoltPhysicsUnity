@@ -10,6 +10,10 @@ namespace Jolt
         
         internal SwingTwistConstraint(NativeHandle<JPH_SwingTwistConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(SwingTwistConstraint other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal EmptyShapeSettings(NativeHandle<JPH_EmptyShapeSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(EmptyShapeSettings other) => Handle.Equals(other.Handle);

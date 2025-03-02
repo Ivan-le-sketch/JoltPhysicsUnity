@@ -14,18 +14,6 @@
             Bindings.JPH_Shape_Destroy(Handle);
         }
 
-        public void AddUser()
-        {
-            // Users should be managed carefully since they prevent the ressource destruction
-            Handle.AddUser();
-        }
-
-        public void RemoveUser()
-        {
-            // Users should be managed carefully since they prevent the ressource destruction
-            Handle.RemoveUser();
-        }
-
         public static implicit operator Shape(BoxShape shape)
         {
             return new Shape(shape.Handle.Reinterpret<JPH_Shape>());

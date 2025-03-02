@@ -10,6 +10,10 @@ namespace Jolt
         
         internal CharacterVirtual(NativeHandle<JPH_CharacterVirtual> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(CharacterVirtual other) => Handle.Equals(other.Handle);

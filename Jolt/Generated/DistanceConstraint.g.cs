@@ -10,6 +10,10 @@ namespace Jolt
         
         internal DistanceConstraint(NativeHandle<JPH_DistanceConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(DistanceConstraint other) => Handle.Equals(other.Handle);

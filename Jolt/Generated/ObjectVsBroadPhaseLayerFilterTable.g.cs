@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ObjectVsBroadPhaseLayerFilterTable(NativeHandle<JPH_ObjectVsBroadPhaseLayerFilter> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ObjectVsBroadPhaseLayerFilterTable other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal JobSystem(NativeHandle<JPH_JobSystem> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(JobSystem other) => Handle.Equals(other.Handle);

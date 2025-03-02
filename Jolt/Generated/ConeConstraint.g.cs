@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ConeConstraint(NativeHandle<JPH_ConeConstraint> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ConeConstraint other) => Handle.Equals(other.Handle);

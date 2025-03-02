@@ -10,6 +10,10 @@ namespace Jolt
         
         internal PhysicsMaterial(NativeHandle<JPH_PhysicsMaterial> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(PhysicsMaterial other) => Handle.Equals(other.Handle);

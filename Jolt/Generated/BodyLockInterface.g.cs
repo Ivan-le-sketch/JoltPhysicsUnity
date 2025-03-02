@@ -10,6 +10,10 @@ namespace Jolt
         
         internal BodyLockInterface(NativeHandle<JPH_BodyLockInterface> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(BodyLockInterface other) => Handle.Equals(other.Handle);

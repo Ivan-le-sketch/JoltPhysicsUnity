@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ShapeSettings(NativeHandle<JPH_ShapeSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ShapeSettings other) => Handle.Equals(other.Handle);

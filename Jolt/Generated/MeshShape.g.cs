@@ -10,6 +10,10 @@ namespace Jolt
         
         internal MeshShape(NativeHandle<JPH_MeshShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(MeshShape other) => Handle.Equals(other.Handle);

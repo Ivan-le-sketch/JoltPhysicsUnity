@@ -10,6 +10,10 @@ namespace Jolt
         
         internal BoxShape(NativeHandle<JPH_BoxShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(BoxShape other) => Handle.Equals(other.Handle);

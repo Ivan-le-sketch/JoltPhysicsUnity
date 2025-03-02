@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ConvexShape(NativeHandle<JPH_ConvexShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ConvexShape other) => Handle.Equals(other.Handle);

@@ -10,6 +10,10 @@ namespace Jolt
         
         internal TriangleShapeSettings(NativeHandle<JPH_TriangleShapeSettings> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(TriangleShapeSettings other) => Handle.Equals(other.Handle);

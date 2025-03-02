@@ -10,6 +10,10 @@ namespace Jolt
         
         internal ObjectLayerPairFilterTable(NativeHandle<JPH_ObjectLayerPairFilter> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(ObjectLayerPairFilterTable other) => Handle.Equals(other.Handle);

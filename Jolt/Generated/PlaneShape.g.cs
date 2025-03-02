@@ -10,6 +10,10 @@ namespace Jolt
         
         internal PlaneShape(NativeHandle<JPH_PlaneShape> handle) => Handle = handle;
         
+        public void AddUser() => Handle.AddUser();
+        
+        public void RemoveUser() => Handle.RemoveUser();
+        
         #region IEquatable
         
         public bool Equals(PlaneShape other) => Handle.Equals(other.Handle);
