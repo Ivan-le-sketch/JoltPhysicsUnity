@@ -44,15 +44,27 @@ namespace Jolt
         
         public AABox GetLocalBounds() => Bindings.JPH_Shape_GetLocalBounds(Handle);
         
+        public uint GetSubShapeIDBitsRecursive() => Bindings.JPH_Shape_GetSubShapeIDBitsRecursive(Handle);
+        
         public AABox GetWorldSpaceBounds(rmatrix4x4 centerOfMassTransform, float3 scale) => Bindings.JPH_Shape_GetWorldSpaceBounds(Handle, centerOfMassTransform, scale);
         
         public float GetInnerRadius() => Bindings.JPH_Shape_GetInnerRadius(Handle);
         
         public MassProperties GetMassProperties() => Bindings.JPH_Shape_GetMassProperties(Handle);
         
+        public Shape GetLeafShape(SubShapeID subShapeID, out SubShapeID remainder) => new Shape(Bindings.JPH_Shape_GetLeafShape(Handle, subShapeID, out remainder));
+        
+        public PhysicsMaterial GetMaterial(SubShapeID subShapeID) => new PhysicsMaterial(Bindings.JPH_Shape_GetMaterial(Handle, subShapeID));
+        
         public float3 GetSurfaceNormal(SubShapeID subShapeID, float3 localPosition) => Bindings.JPH_Shape_GetSurfaceNormal(Handle, subShapeID, localPosition);
         
         public float GetVolume() => Bindings.JPH_Shape_GetVolume(Handle);
+        
+        public bool IsValidScale(float3 scale) => Bindings.JPH_Shape_IsValidScale(Handle, scale);
+        
+        public float3 MakeScaleValid(float3 scale) => Bindings.JPH_Shape_MakeScaleValid(Handle, scale);
+        
+        public Shape ScaleShape(float3 scale) => new Shape(Bindings.JPH_Shape_ScaleShape(Handle, scale));
         
         public bool CastRay(float3 origin, float3 direction, out RayCastResult result) => Bindings.JPH_Shape_CastRay(Handle, origin, direction, out result);
         

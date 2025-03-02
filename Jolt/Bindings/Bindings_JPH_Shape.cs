@@ -56,6 +56,11 @@ namespace Jolt
             return result;
         }
 
+        public static uint JPH_Shape_GetSubShapeIDBitsRecursive(NativeHandle<JPH_Shape> shape)
+        {
+            return UnsafeBindings.JPH_Shape_GetSubShapeIDBitsRecursive(shape);
+        }
+
         public static AABox JPH_Shape_GetWorldSpaceBounds(NativeHandle<JPH_Shape> shape, rmatrix4x4 centerOfMassTransform, float3 scale)
         {
             AABox result;
@@ -79,6 +84,19 @@ namespace Jolt
             return result;
         }
 
+        public static NativeHandle<JPH_Shape> JPH_Shape_GetLeafShape(NativeHandle<JPH_Shape> shape, SubShapeID subShapeID, out SubShapeID remainder)
+        {
+            fixed (SubShapeID* ptr = &remainder)
+            {
+                return CreateHandle(UnsafeBindings.JPH_Shape_GetLeafShape(shape, subShapeID, ptr));
+            }
+        }
+
+        public static NativeHandle<JPH_PhysicsMaterial> JPH_Shape_GetMaterial(NativeHandle<JPH_Shape> shape, SubShapeID subShapeID)
+        {
+            return CreateHandle(UnsafeBindings.JPH_Shape_GetMaterial(shape, subShapeID));
+        }
+
         public static float3 JPH_Shape_GetSurfaceNormal(NativeHandle<JPH_Shape> shape, SubShapeID subShapeID, float3 localPosition)
         {
             float3 result;
@@ -91,6 +109,25 @@ namespace Jolt
         public static float JPH_Shape_GetVolume(NativeHandle<JPH_Shape> shape)
         {
             return UnsafeBindings.JPH_Shape_GetVolume(shape);
+        }
+
+        public static bool JPH_Shape_IsValidScale(NativeHandle<JPH_Shape> shape, float3 scale)
+        {
+            return UnsafeBindings.JPH_Shape_IsValidScale(shape, &scale);
+        }
+
+        public static float3 JPH_Shape_MakeScaleValid(NativeHandle<JPH_Shape> shape, float3 scale)
+        {
+            float3 result;
+
+            UnsafeBindings.JPH_Shape_MakeScaleValid(shape, &scale, &result);
+
+            return result;
+        }
+
+        public static NativeHandle<JPH_Shape> JPH_Shape_ScaleShape(NativeHandle<JPH_Shape> shape, float3 scale)
+        {
+            return CreateHandle(UnsafeBindings.JPH_Shape_ScaleShape(shape, &scale));
         }
 
         public static bool JPH_Shape_CastRay(NativeHandle<JPH_Shape> shape, float3 origin, float3 direction, out RayCastResult result)
