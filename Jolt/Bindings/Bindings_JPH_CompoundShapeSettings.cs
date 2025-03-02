@@ -13,15 +13,5 @@ namespace Jolt
         {
             UnsafeBindings.JPH_CompoundShapeSettings_AddShape2(settings, &position, &rotation, shape, userData);
         }
-
-        public static NativeHandle<JPH_StaticCompoundShapeSettings> JPH_StaticCompoundShapeSettings_Create()
-        {
-            return CreateHandle(UnsafeBindings.JPH_StaticCompoundShapeSettings_Create());
-        }
-
-        public static NativeHandle<JPH_MutableCompoundShapeSettings> JPH_MutableCompoundShapeSettings_Create()
-        {
-            return CreateHandle(UnsafeBindings.JPH_MutableCompoundShapeSettings_Create());
-        }
     }
 }

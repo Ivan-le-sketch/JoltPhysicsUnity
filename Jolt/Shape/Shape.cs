@@ -71,6 +71,11 @@
             return new Shape(shape.Handle.Reinterpret<JPH_Shape>());
         }
 
+        public static implicit operator Shape(StaticCompoundShape shape)
+        {
+            return new Shape(shape.Handle.Reinterpret<JPH_Shape>());
+        }
+
         public static implicit operator Shape(TaperedCapsuleShape shape)
         {
             return new Shape(shape.Handle.Reinterpret<JPH_Shape>());

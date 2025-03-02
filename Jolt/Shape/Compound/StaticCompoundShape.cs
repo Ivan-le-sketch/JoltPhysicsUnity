@@ -2,18 +2,18 @@
 
 namespace Jolt
 {
-    [GenerateHandle("JPH_MutableCompoundShape"), GenerateBindings("JPH_MutableCompoundShape", "JPH_CompoundShape", "JPH_Shape")]
-    public readonly partial struct MutableCompoundShape
+    [GenerateHandle("JPH_StaticCompoundShape"), GenerateBindings("JPH_StaticCompoundShape", "JPH_CompoundShape", "JPH_Shape")]
+    public readonly partial struct StaticCompoundShape
     {
-        public static implicit operator MutableCompoundShape(Shape shape)
+        public static implicit operator StaticCompoundShape(Shape shape)
         {
-            return new MutableCompoundShape(shape.Handle.Reinterpret<JPH_MutableCompoundShape>());
+            return new StaticCompoundShape(shape.Handle.Reinterpret<JPH_StaticCompoundShape>());
         }
 
         [OverrideBinding("JPH_MutableCompoundShape_Create")]
-        public static MutableCompoundShape Create(MutableCompoundShapeSettings settings)
+        public static StaticCompoundShape Create(StaticCompoundShapeSettings settings)
         {
-            return new MutableCompoundShape(Bindings.JPH_MutableCompoundShape_Create(settings.Handle));
+            return new StaticCompoundShape(Bindings.JPH_StaticCompoundShape_Create(settings.Handle));
         }
 
         [OverrideBinding("JPH_CompoundShape_GetSubShape")]
