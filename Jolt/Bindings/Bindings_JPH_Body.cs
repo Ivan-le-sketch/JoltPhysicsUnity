@@ -14,6 +14,11 @@ namespace Jolt
             return UnsafeBindings.JPH_Body_GetBodyType(body);
         }
 
+        public static NativeHandle<JPH_Shape> JPH_Body_GetShape(NativeHandle<JPH_Body> body)
+        {
+            return CreateHandle(UnsafeBindings.JPH_Body_GetShape(body));
+        }
+
         public static AABox JPH_Body_GetWorldSpaceBounds(NativeHandle<JPH_Body> body)
         {
             AABox result;

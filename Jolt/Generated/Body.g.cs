@@ -34,6 +34,8 @@ namespace Jolt
         
         public BodyType GetBodyType() => Bindings.JPH_Body_GetBodyType(Handle);
         
+        public Shape GetShape() => new Shape(Bindings.JPH_Body_GetShape(Handle));
+        
         public AABox GetWorldSpaceBounds() => Bindings.JPH_Body_GetWorldSpaceBounds(Handle);
         
         public float3 GetWorldSpaceSurfaceNormal(SubShapeID subShapeID, rvec3 position) => Bindings.JPH_Body_GetWorldSpaceSurfaceNormal(Handle, subShapeID, position);
