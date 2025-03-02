@@ -1,6 +1,8 @@
 ﻿// Shims for a handful of Unity types that are needed to generate the Jolt wrappers without errors. The implementation
 // is irrelevant, we just need the types to be present so that the project can compile.
 
+using System;
+
 namespace Unity.Mathematics
 {
     public struct double3 { }
@@ -37,6 +39,8 @@ namespace UnityEngine
 {
     public static class Debug
     {
+        public static void Log(string _) { }
+
         public static void LogWarning(string _) { }
 
         public static void LogException(System.Exception _) { }
@@ -102,6 +106,27 @@ namespace Unity.Collections
         public bool Contains(T _) => true;
 
         public void Clear() { }
+    }
+
+    public struct NativeParallelHashMap<TKey, TValue> : System.IDisposable
+    {
+        public NativeParallelHashMap(int _, Allocator __) { }
+
+        public bool IsCreated => true;
+
+        public void Dispose() { }
+
+        public bool ContainsKey(TKey _) => true;
+
+        public bool TryAdd(TKey key, TValue value) => true;
+
+        public bool Remove(TKey _) => true;
+
+        public TValue this[TKey _]
+        {
+            get => default(TValue);
+            set { }
+        }
     }
 
     public enum Allocator
