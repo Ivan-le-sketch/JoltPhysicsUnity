@@ -11,6 +11,8 @@ namespace Jolt
 
         public static void JPH_ObjectLayerFilter_Destroy(NativeHandle<JPH_ObjectLayerFilter> filter) 
         {
+            if (filter.HasUser()) return;
+
             UnsafeBindings.JPH_ObjectLayerFilter_Destroy(filter);
 
             filter.Dispose();

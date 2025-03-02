@@ -9,6 +9,8 @@
 
         public static void JPH_StateRecorder_Destroy(NativeHandle<JPH_StateRecorder> recorder)
         {
+            if (recorder.HasUser()) return;
+
             UnsafeBindings.JPH_StateRecorder_Destroy(recorder);
 
             recorder.Dispose();

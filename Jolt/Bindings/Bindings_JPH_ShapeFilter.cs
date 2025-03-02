@@ -9,6 +9,8 @@
 
         public static void JPH_ShapeFilter_Destroy(NativeHandle<JPH_ShapeFilter> filter)
         {
+            if (filter.HasUser()) return;
+
             UnsafeBindings.JPH_ShapeFilter_Destroy(filter);
 
             filter.Dispose();

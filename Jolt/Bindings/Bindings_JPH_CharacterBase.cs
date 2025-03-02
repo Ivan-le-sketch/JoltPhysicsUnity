@@ -6,6 +6,8 @@ namespace Jolt
     {
         public static void JPH_CharacterBase_Destroy(NativeHandle<JPH_CharacterBase> character)
         {
+            if (character.HasUser()) return;
+
             UnsafeBindings.JPH_CharacterBase_Destroy(character);
 
             character.Dispose();

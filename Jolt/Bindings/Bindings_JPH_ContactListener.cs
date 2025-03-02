@@ -9,6 +9,8 @@
 
         public static void JPH_ContactListener_Destroy(NativeHandle<JPH_ContactListener> listener)
         {
+            if (listener.HasUser()) return;
+
             UnsafeBindings.JPH_ContactListener_Destroy(listener);
 
             listener.Dispose();

@@ -25,6 +25,8 @@ namespace Jolt
 
         public static void JPH_PhysicsSystem_Destroy(NativeHandle<JPH_PhysicsSystem> system)
         {
+            if (system.HasUser()) return;
+
             UnsafeBindings.JPH_PhysicsSystem_Destroy(system);
 
             system.Dispose();

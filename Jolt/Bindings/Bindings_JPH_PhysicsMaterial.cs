@@ -9,6 +9,8 @@
         
         public static void JPH_PhysicsMaterial_Destroy(NativeHandle<JPH_PhysicsMaterial> material)
         {
+            if (material.HasUser()) return;
+
             UnsafeBindings.JPH_PhysicsMaterial_Destroy(material);
             
             material.Dispose();

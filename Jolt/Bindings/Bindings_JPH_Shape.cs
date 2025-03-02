@@ -6,6 +6,8 @@ namespace Jolt
     {
         public static void JPH_Shape_Destroy(NativeHandle<JPH_Shape> shape)
         {
+            if (shape.HasUser()) return;
+
             UnsafeBindings.JPH_Shape_Destroy(shape);
 
             shape.Dispose();

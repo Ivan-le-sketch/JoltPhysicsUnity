@@ -11,6 +11,8 @@ namespace Jolt
 
         public static void JPH_BroadPhaseLayerFilter_Destroy(NativeHandle<JPH_BroadPhaseLayerFilter> filter) 
         {
+            if (filter.HasUser()) return;
+
             UnsafeBindings.JPH_BroadPhaseLayerFilter_Destroy(filter);
 
             filter.Dispose();

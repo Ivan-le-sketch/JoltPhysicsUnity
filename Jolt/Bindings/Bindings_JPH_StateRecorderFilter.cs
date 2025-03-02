@@ -11,6 +11,8 @@ namespace Jolt
 
         public static void JPH_StateRecorderFilter_Destroy(NativeHandle<JPH_StateRecorderFilter> filter)
         {
+            if (filter.HasUser()) return;
+
             UnsafeBindings.JPH_StateRecorderFilter_Destroy(filter);
 
             filter.Dispose();

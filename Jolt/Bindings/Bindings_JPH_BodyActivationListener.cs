@@ -9,6 +9,8 @@
 
         public static void JPH_BodyActivationListener_Destroy(NativeHandle<JPH_BodyActivationListener> listener)
         {
+            if (listener.HasUser()) return;
+
             UnsafeBindings.JPH_BodyActivationListener_Destroy(listener);
 
             listener.Dispose();

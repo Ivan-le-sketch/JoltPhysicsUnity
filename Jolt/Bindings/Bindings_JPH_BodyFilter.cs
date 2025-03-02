@@ -9,7 +9,11 @@
 
         public static void JPH_BodyFilter_Destroy(NativeHandle<JPH_BodyFilter> filter)
         {
+            if (filter.HasUser()) return;
+
             UnsafeBindings.JPH_BodyFilter_Destroy(filter);
+
+            filter.Dispose();
         }
     }
 }
