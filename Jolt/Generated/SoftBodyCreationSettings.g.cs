@@ -28,5 +28,11 @@ namespace Jolt
         
         #endregion
         
+        #region JPH_SoftBodyCreationSettings
+        
+        public void Destroy() => Bindings.JPH_SoftBodyCreationSettings_Destroy(Handle);
+        
+        #endregion
+        
     }
 }
