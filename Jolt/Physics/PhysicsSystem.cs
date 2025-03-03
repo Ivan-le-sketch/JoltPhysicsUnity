@@ -107,7 +107,7 @@ namespace Jolt
         }
 
         /// <summary>
-        /// Sets the contact listener.
+        /// Sets the system contact listener.
         /// </summary>
         /// <param name="listener"></param>
         public void SetContactListener(ContactListener listener)
@@ -115,9 +115,22 @@ namespace Jolt
             JPH_PhysicsSystem_SetContactListener(Handle, listener.Handle);
         }
 
+        /// <summary>
+        /// Sets the system body activation listener.
+        /// </summary>
+        /// <param name="listener"></param>
         public void SetBodyActivationListener(BodyActivationListener listener)
         {
             JPH_PhysicsSystem_SetBodyActivationListener(Handle, listener.Handle);
+        }
+
+        /// <summary>
+        /// Sets the system sim shape filter.
+        /// </summary>
+        /// <param name="filter"></param>
+        public void SetSimShapeFilter(SimShapeFilter filter)
+        {
+            JPH_PhysicsSystem_SetSimShapeFilter(Handle, filter.Handle);
         }
 
         /// <summary>

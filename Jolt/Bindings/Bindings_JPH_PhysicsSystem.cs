@@ -103,6 +103,11 @@ namespace Jolt
             UnsafeBindings.JPH_PhysicsSystem_SetBodyActivationListener(system, listener);
         }
 
+        public static void JPH_PhysicsSystem_SetSimShapeFilter(NativeHandle<JPH_PhysicsSystem> system, NativeHandle<JPH_SimShapeFilter> filter)
+        {
+            UnsafeBindings.JPH_PhysicsSystem_SetSimShapeFilter(system, filter);
+        }
+
         public static bool JPH_PhysicsSystem_WereBodiesInContact(NativeHandle<JPH_PhysicsSystem> system, BodyID a, BodyID b)
         {
             return UnsafeBindings.JPH_PhysicsSystem_WereBodiesInContact(system, a, b);
