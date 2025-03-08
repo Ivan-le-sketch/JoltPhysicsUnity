@@ -34,11 +34,9 @@ namespace Jolt
         
         public BodyType GetBodyType() => Bindings.JPH_Body_GetBodyType(Handle);
         
-        public Shape GetShape() => new Shape(Bindings.JPH_Body_GetShape(Handle));
+        public bool IsRigidBody() => Bindings.JPH_Body_IsRigidBody(Handle);
         
-        public AABox GetWorldSpaceBounds() => Bindings.JPH_Body_GetWorldSpaceBounds(Handle);
-        
-        public float3 GetWorldSpaceSurfaceNormal(SubShapeID subShapeID, rvec3 position) => Bindings.JPH_Body_GetWorldSpaceSurfaceNormal(Handle, subShapeID, position);
+        public bool IsSoftBody() => Bindings.JPH_Body_IsSoftBody(Handle);
         
         public bool IsActive() => Bindings.JPH_Body_IsActive(Handle);
         
@@ -48,9 +46,11 @@ namespace Jolt
         
         public bool IsDynamic() => Bindings.JPH_Body_IsDynamic(Handle);
         
-        public bool IsSensor() => Bindings.JPH_Body_IsSensor(Handle);
+        public bool CanBeKinematicOrDynamic() => Bindings.JPH_Body_CanBeKinematicOrDynamic(Handle);
         
         public void SetIsSensor(bool value) => Bindings.JPH_Body_SetIsSensor(Handle, value);
+        
+        public bool IsSensor() => Bindings.JPH_Body_IsSensor(Handle);
         
         public void SetCollideKinematicVsNonDynamic(bool value) => Bindings.JPH_Body_SetCollideKinematicVsNonDynamic(Handle, value);
         
@@ -66,11 +66,19 @@ namespace Jolt
         
         public bool GetApplyGyroscopicForce() => Bindings.JPH_Body_GetApplyGyroscopicForce(Handle);
         
-        public MotionProperties GetMotionProperties() => new MotionProperties(Bindings.JPH_Body_GetMotionProperties(Handle));
+        public void SetEnhancedInternalEdgeRemoval(bool value) => Bindings.JPH_Body_SetEnhancedInternalEdgeRemoval(Handle, value);
+        
+        public bool GetEnhancedInternalEdgeRemoval() => Bindings.JPH_Body_GetEnhancedInternalEdgeRemoval(Handle);
+        
+        public bool GetEnhancedInternalEdgeRemovalWithBody(Body otherBody) => Bindings.JPH_Body_GetEnhancedInternalEdgeRemovalWithBody(Handle, otherBody.Handle);
         
         public MotionType GetMotionType() => Bindings.JPH_Body_GetMotionType(Handle);
         
         public void SetMotionType(MotionType motion) => Bindings.JPH_Body_SetMotionType(Handle, motion);
+        
+        public BroadPhaseLayer GetBroadPhaseLayer() => Bindings.JPH_Body_GetBroadPhaseLayer(Handle);
+        
+        public ObjectLayer GetObjectLayer() => Bindings.JPH_Body_GetObjectLayer(Handle);
         
         public bool GetAllowSleeping() => Bindings.JPH_Body_GetAllowSleeping(Handle);
         
@@ -90,9 +98,17 @@ namespace Jolt
         
         public void SetLinearVelocity(float3 velocity) => Bindings.JPH_Body_SetLinearVelocity(Handle, velocity);
         
+        public void SetLinearVelocityClamped(float3 velocity) => Bindings.JPH_Body_SetLinearVelocityClamped(Handle, velocity);
+        
         public float3 GetAngularVelocity() => Bindings.JPH_Body_GetAngularVelocity(Handle);
         
         public void SetAngularVelocity(float3 velocity) => Bindings.JPH_Body_SetAngularVelocity(Handle, velocity);
+        
+        public void SetAngularVelocityClamped(float3 velocity) => Bindings.JPH_Body_SetAngularVelocityClamped(Handle, velocity);
+        
+        public float3 GetPointVelocityCOM(float3 pointRelativeToCOM) => Bindings.JPH_Body_GetPointVelocityCOM(Handle, pointRelativeToCOM);
+        
+        public float3 GetPointVelocity(rvec3 point) => Bindings.JPH_Body_GetPointVelocity(Handle, point);
         
         public void AddForce(float3 force) => Bindings.JPH_Body_AddForce(Handle, force);
         
@@ -104,21 +120,47 @@ namespace Jolt
         
         public float3 GetAccumulatedTorque() => Bindings.JPH_Body_GetAccumulatedTorque(Handle);
         
+        public void ResetForce() => Bindings.JPH_Body_ResetForce(Handle);
+        
+        public void ResetTorque() => Bindings.JPH_Body_ResetTorque(Handle);
+        
+        public void ResetMotion() => Bindings.JPH_Body_ResetMotion(Handle);
+        
+        public float4x4 GetInverseInertia() => Bindings.JPH_Body_GetInverseInertia(Handle);
+        
         public void AddImpulse(float3 impulse) => Bindings.JPH_Body_AddImpulse(Handle, impulse);
         
         public void AddImpulseAtPosition(float3 impulse, rvec3 position) => Bindings.JPH_Body_AddImpulseAtPosition(Handle, impulse, position);
         
         public void AddAngularImpulse(float3 angularImpulse) => Bindings.JPH_Body_AddAngularImpulse(Handle, angularImpulse);
         
+        public void MoveKinematic(rvec3 targetPosition, quaternion targetRotation, float deltaTime) => Bindings.JPH_Body_MoveKinematic(Handle, targetPosition, targetRotation, deltaTime);
+        
+        public void ApplyBuoyancyImpulse(rvec3 surfacePosition, float3 surfaceNormal, float buoyancy, float linearDrag, float angularDrag, float3 fluidVelocity, float3 gravity, float deltaTime) => Bindings.JPH_Body_ApplyBuoyancyImpulse(Handle, surfacePosition, surfaceNormal, buoyancy, linearDrag, angularDrag, fluidVelocity, gravity, deltaTime);
+        
+        public bool IsInBroadPhase() => Bindings.JPH_Body_IsInBroadPhase(Handle);
+        
+        public bool IsCollisionCacheInvalid() => Bindings.JPH_Body_IsCollisionCacheInvalid(Handle);
+        
+        public Shape GetShape() => new Shape(Bindings.JPH_Body_GetShape(Handle));
+        
         public rvec3 GetPosition() => Bindings.JPH_Body_GetPosition(Handle);
         
         public quaternion GetRotation() => Bindings.JPH_Body_GetRotation(Handle);
         
-        public rvec3 GetCenterOfMassPosition() => Bindings.JPH_Body_GetCenterOfMassPosition(Handle);
-        
         public rmatrix4x4 GetWorldTransform() => Bindings.JPH_Body_GetWorldTransform(Handle);
         
+        public rvec3 GetCenterOfMassPosition() => Bindings.JPH_Body_GetCenterOfMassPosition(Handle);
+        
         public rmatrix4x4 GetCenterOfMassTransform() => Bindings.JPH_Body_GetCenterOfMassTransform(Handle);
+        
+        public AABox GetWorldSpaceBounds() => Bindings.JPH_Body_GetWorldSpaceBounds(Handle);
+        
+        public float3 GetWorldSpaceSurfaceNormal(SubShapeID subShapeID, rvec3 position) => Bindings.JPH_Body_GetWorldSpaceSurfaceNormal(Handle, subShapeID, position);
+        
+        public MotionProperties GetMotionProperties() => new MotionProperties(Bindings.JPH_Body_GetMotionProperties(Handle));
+        
+        public MotionProperties GetMotionPropertiesUnchecked() => new MotionProperties(Bindings.JPH_Body_GetMotionPropertiesUnchecked(Handle));
         
         public void SetUserData(ulong userData) => Bindings.JPH_Body_SetUserData(Handle, userData);
         
