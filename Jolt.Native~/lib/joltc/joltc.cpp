@@ -1042,7 +1042,13 @@ public:
 		if (procs != nullptr
 			&& procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, static_cast<JPH_ObjectLayer>(inLayer)) == 1;
+			JPH_ObjectLayer* inLayerPtr = new JPH_ObjectLayer(static_cast<JPH_ObjectLayer>(inLayer));
+
+			bool result = procs->ShouldCollide(userData, inLayerPtr) == 1;
+
+			delete inLayerPtr;
+
+			return result;
 		}
 
 		return true;

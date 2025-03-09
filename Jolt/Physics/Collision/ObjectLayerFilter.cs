@@ -35,7 +35,8 @@ namespace Jolt
 
         private readonly ulong collisionMask;
 
-        private delegate bool ShouldCollideSignature(void* context, ref ObjectLayer layer);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool ShouldCollideSignature(void* context, ObjectLayer* layer);
 
         private static readonly FunctionPointer<ShouldCollideSignature> shouldCollideFuncPointer;
 
@@ -158,12 +159,12 @@ namespace Jolt
         /// <param name="layer"></param>
         /// <returns></returns>
         [BurstCompile]
-        internal static bool ShouldCollide(void* context, ref ObjectLayer layer)
+        internal static bool ShouldCollide(void* context, ObjectLayer* layer)
         {
             ObjectLayerFilter* implPtr = (ObjectLayerFilter*)context;
             ObjectLayerFilter impl = *implPtr;
 
-            return impl.ShouldCollide(layer);
+            return impl.ShouldCollide(*layer);
         }
 
         /// <summary>

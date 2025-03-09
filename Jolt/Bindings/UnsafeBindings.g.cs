@@ -752,7 +752,7 @@ namespace Jolt
 
     internal partial struct JPH_ObjectLayerFilter_Procs
     {
-        [NativeTypeName("bool (*)(void *, JPH_ObjectLayer) __attribute__((cdecl))")]
+        [NativeTypeName("bool (*)(void *, JPH_ObjectLayer *) __attribute__((cdecl))")]
         public IntPtr ShouldCollide;
     }
 
