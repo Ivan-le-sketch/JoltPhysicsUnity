@@ -15,10 +15,12 @@ namespace Jolt.Editor
 
         private static void OnPlayModeStateChanged(PlayModeStateChange change)
         {
+#if !JOLT_DISABLE_SAFETY_CHECkS
             if (change == PlayModeStateChange.EnteredEditMode)
             {
                 NativeSafetyHandle.Dispose();
             }
+#endif
         }
     }
 }

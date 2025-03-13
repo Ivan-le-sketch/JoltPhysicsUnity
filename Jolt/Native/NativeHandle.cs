@@ -60,26 +60,34 @@ namespace Jolt
 
         public void AddUser()
         {
+#if !JOLT_DISABLE_SAFETY_CHECkS
             safety.AddUser();
+#endif
         }
 
         public void RemoveUser()
         {
+#if !JOLT_DISABLE_SAFETY_CHECkS
             safety.RemoveUser();
+#endif
         }
 
         public bool HasUser()
         {
+#if !JOLT_DISABLE_SAFETY_CHECkS
             return safety.HasUser();
+#else
+            return false;
+#endif
         }
 
         #region IDisposable
 
         public void Dispose()
         {
-            #if !JOLT_DISABLE_SAFETY_CHECkS
+#if !JOLT_DISABLE_SAFETY_CHECkS
             safety.Release();
-            #endif
+#endif
 
             ptr = null;
         }
