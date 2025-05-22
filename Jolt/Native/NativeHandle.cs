@@ -46,6 +46,7 @@ namespace Jolt
         public readonly T* IntoPointer()
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
+            AssertExists();
             safety.AssertExists();
             #endif
 
@@ -79,6 +80,14 @@ namespace Jolt
 #else
             return false;
 #endif
+        }
+
+        private readonly void AssertExists()
+        {
+            if (ptr == null)
+            {
+                throw new Exception("Handle pointer is null.");
+            }
         }
 
         #region IDisposable
