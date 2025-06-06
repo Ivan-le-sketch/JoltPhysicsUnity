@@ -6,19 +6,23 @@ namespace Jolt
 {
     public static class Jolt
     {
-        private static bool initialized;
+
+        /// <summary>
+        /// True Jolt is current initialized.
+        /// </summary>
+        public static bool Initialized { get; private set; }
 
         /// <summary>
         /// Initialize Jolt, returning true if initialization succeeded.
         /// </summary>
         public static bool Initialize()
         {
-            if (initialized)
+            if (!Initialized)
             {
-                throw new Exception("Jolt is already initialized.");
+                Initialized = JPH_Init();
             }
 
-            return initialized = JPH_Init();
+            return Initialized;
         }
 
         /// <summary>
@@ -36,7 +40,7 @@ namespace Jolt
         {
             JPH_Shutdown();
 
-            initialized = false;
+            Initialized = false;
         }
     }
 }
