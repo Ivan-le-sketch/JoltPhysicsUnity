@@ -16,74 +16,18 @@ namespace Jolt
     /// <summary>
     /// Class that wraps a native Jolt body activation listener.
     /// </summary>
-    public unsafe class BodyActivationListener
+    public partial struct BodyActivationListener
     {
         internal NativeHandle<JPH_BodyActivationListener> Handle;
 
-        private IBodyActivationListenerImplementation implementation;
-
-        private delegate void OnBodyActivated(void* userData, BodyID bodyID, ulong bodyUserData);
-        private delegate void OnBodyDeactivated(void* userData, BodyID bodyID, ulong bodyUserData);
-
-        private OnBodyActivated onBodyActivatedDelegate;
-        private OnBodyDeactivated onBodyDeactivatedDelegate;
-
-        private IntPtr procsUnmanagedPointer;
-
-        internal JPH_BodyActivationListener_Procs* Procs => (JPH_BodyActivationListener_Procs*)procsUnmanagedPointer;
-
-        public BodyActivationListener()
+        public static BodyActivationListener Create(IBodyActivationListenerImplementation implementation)
         {
-            CreateNativeListener();
-        }
-
-        public BodyActivationListener(IBodyActivationListenerImplementation implementation)
-        {
-            CreateNativeListener();
-            SetImplementation(implementation);
-        }
-
-        private void CreateNativeListener()
-        {
-            onBodyActivatedDelegate = OnBodyActivatedCallback;
-            onBodyDeactivatedDelegate = OnBodyDeactivatedCallback;
-
-            var procs =  new JPH_BodyActivationListener_Procs
-            {
-                OnBodyActivated = Marshal.GetFunctionPointerForDelegate(onBodyActivatedDelegate),
-                OnBodyDeactivated = Marshal.GetFunctionPointerForDelegate(onBodyDeactivatedDelegate),
-            };
-            procsUnmanagedPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(JPH_BodyActivationListener_Procs)));
-            Marshal.StructureToPtr(procs, procsUnmanagedPointer, false);
-
-            Handle = Bindings.JPH_BodyActivationListener_Create(Procs);
+            return new BodyActivationListener { Handle = Bindings.JPH_BodyActivationListener_Create(implementation) };
         }
 
         public void Destroy()
         {
             Bindings.JPH_BodyActivationListener_Destroy(Handle);
-            Marshal.FreeHGlobal(procsUnmanagedPointer);
-        }
-
-        public void SetImplementation(IBodyActivationListenerImplementation implementation)
-        {
-            this.implementation = implementation;
-        }
-
-        internal void OnBodyActivatedCallback(void* userData, BodyID bodyID, ulong bodyUserData)
-        {
-            if (implementation != null)
-            {
-                implementation.OnBodyActivated(bodyID, bodyUserData);
-            }
-        }
-
-        internal void OnBodyDeactivatedCallback(void* userData, BodyID bodyID, ulong bodyUserData)
-        {
-            if (implementation != null)
-            {
-                implementation.OnBodyDeactivated(bodyID, bodyUserData);
-            }
         }
     }
 }

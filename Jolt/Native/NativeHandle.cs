@@ -11,6 +11,8 @@ namespace Jolt
 
         private T* ptr;
 
+        public nint RawValue => (nint)ptr;
+
         public NativeHandle(T* ptr)
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
