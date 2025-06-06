@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using AOT;
 
 namespace Jolt.Unity
 {
@@ -7,11 +8,9 @@ namespace Jolt.Unity
         [RuntimeInitializeOnLoadMethod]
         public static void Initialize()
         {
-            Jolt.SetAssertFailureHandler(OnAssertFailure);
-
             if (Jolt.Initialize())
             {
-                Application.quitting += static () => Jolt.Shutdown();
+                Jolt.SetAssertFailureHandler(OnAssertFailure);
             }
             else
             {
@@ -19,6 +18,7 @@ namespace Jolt.Unity
             }
         }
 
+        [MonoPInvokeCallback(typeof(JPH_AssertFailureFunc))]
         private static bool OnAssertFailure(string expr, string message, string file, uint line)
         {
             Debug.Log($"Jolt Assertion Failed:\n{expr}\n{message}\n{file}\n{line}");
