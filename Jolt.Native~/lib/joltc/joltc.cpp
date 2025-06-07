@@ -597,6 +597,77 @@ private:
 	JPH_JobSystemConfig mConfig;
 };
 
+// ------------------------
+// IL2CPP Thread Attach API
+// ------------------------
+
+#if defined(_WIN32)
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+#else
+#include <dlfcn.h>
+#endif
+
+static void* (*il2cpp_domain_get_func)() = nullptr;
+static void* (*il2cpp_thread_attach_func)(void*) = nullptr;
+static void  (*il2cpp_thread_detach_func)(void*) = nullptr;
+
+static void ResolveIL2CPPSymbols()
+{
+	static bool resolved = false;
+	if (resolved) return;
+	resolved = true;
+
+#if defined(_WIN32)
+	HMODULE lib = GetModuleHandleA("GameAssembly.dll");
+	if (!lib) return;
+	il2cpp_domain_get_func = (void* (*)())GetProcAddress(lib, "il2cpp_domain_get");
+	il2cpp_thread_attach_func = (void* (*)(void*))GetProcAddress(lib, "il2cpp_thread_attach");
+	il2cpp_thread_detach_func = (void(*)(void*))GetProcAddress(lib, "il2cpp_thread_detach");
+#else
+	void* handle = dlopen(nullptr, RTLD_LAZY);
+	il2cpp_domain_get_func = (void* (*)())dlsym(handle, "il2cpp_domain_get");
+	il2cpp_thread_attach_func = (void* (*)(void*))dlsym(handle, "il2cpp_thread_attach");
+	il2cpp_thread_detach_func = (void(*)(void*))dlsym(handle, "il2cpp_thread_detach");
+#endif
+}
+
+#include <thread>
+#include <unordered_map>
+#include <mutex>
+
+static std::mutex g_threadMapMutex;
+static std::unordered_map<std::thread::id, void*> g_il2cppThreads;
+
+static void AttachIL2CPPThread()
+{
+	ResolveIL2CPPSymbols();
+	if (!il2cpp_domain_get_func || !il2cpp_thread_attach_func)
+		return;
+
+	void* domain = il2cpp_domain_get_func();
+	void* thread = il2cpp_thread_attach_func(domain);
+
+	std::lock_guard<std::mutex> lock(g_threadMapMutex);
+	g_il2cppThreads[std::this_thread::get_id()] = thread;
+}
+
+static void DetachIL2CPPThread()
+{
+	if (!il2cpp_thread_detach_func)
+		return;
+
+	std::lock_guard<std::mutex> lock(g_threadMapMutex);
+	auto it = g_il2cppThreads.find(std::this_thread::get_id());
+	if (it != g_il2cppThreads.end())
+	{
+		il2cpp_thread_detach_func(it->second);
+		g_il2cppThreads.erase(it);
+	}
+}
+
 JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* config)
 {
 	JobSystemThreadPoolConfig createConfig{};
@@ -606,7 +677,22 @@ JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* c
 	uint32_t maxJobs = createConfig.maxJobs > 0 ? createConfig.maxJobs : JPH::cMaxPhysicsJobs;
 	uint32_t maxBarriers = createConfig.maxBarriers > 0 ? createConfig.maxBarriers : JPH::cMaxPhysicsBarriers;
 	int32_t numThreads = createConfig.numThreads > 0 ? createConfig.numThreads : -1;
-	JPH::JobSystem* jobSystem = new JPH::JobSystemThreadPool(maxJobs, maxBarriers, numThreads);
+	auto* jobSystem = new JPH::JobSystemThreadPool();
+
+	// Set IL2CPP thread attach function
+	jobSystem->SetThreadInitFunction([](int threadIndex)
+		{
+			AttachIL2CPPThread();
+		});
+
+	// Set IL2CPP thread detach function
+	jobSystem->SetThreadExitFunction([](int threadIndex)
+		{
+			DetachIL2CPPThread();
+		});
+
+	jobSystem->Init(maxJobs, maxBarriers, numThreads);
+
 	return reinterpret_cast<JPH_JobSystem*>(jobSystem);
 }
 
