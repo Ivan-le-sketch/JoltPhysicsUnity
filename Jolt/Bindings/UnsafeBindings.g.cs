@@ -2654,6 +2654,21 @@ namespace Jolt
         public static extern void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID")] BodyID bodyID);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void* JPH_BodyInterface_AddBodiesPrepare(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID *")] BodyID* bodyIDs, [NativeTypeName("int32_t")] int number);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_BodyInterface_AddBodiesFinalize(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID *")] BodyID* bodyIDs, [NativeTypeName("int32_t")] int number, void* addState, [NativeTypeName("JPH_Activation")] Activation activationMode);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_BodyInterface_AddBodiesAbort(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID *")] BodyID* bodyIDs, [NativeTypeName("int32_t")] int number, void* addState);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_BodyInterface_RemoveBodies(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID *")] BodyID* bodyIDs, [NativeTypeName("int32_t")] int number);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_BodyInterface_DestroyBodies(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID *")] BodyID* bodyIDs, [NativeTypeName("int32_t")] int number);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
         public static extern NativeBool JPH_BodyInterface_IsActive(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID")] BodyID bodyID);
 
@@ -2738,6 +2753,9 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* @interface, [NativeTypeName("JPH_BodyID")] BodyID bodyId);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_BodyInterface_ActivateBodiesInAABox(JPH_BodyInterface* @interface, [NativeTypeName("const JPH_AABox *")] AABox* box, JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter, JPH_ObjectLayerFilter* objectLayerFilter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("JPH_ObjectLayer")]

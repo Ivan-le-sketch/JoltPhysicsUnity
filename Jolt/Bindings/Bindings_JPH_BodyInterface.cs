@@ -1,4 +1,6 @@
 ﻿using System;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace Jolt
@@ -49,11 +51,7 @@ namespace Jolt
 
         public static NativeHandle<JPH_Body> JPH_BodyInterface_UnassignBodyID(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
-            // TODO is CreateHandle correct? Does that create a duplicate pointer to the body?
-
-            // return CreateHandle(UnsafeBindings.JPH_BodyInterface_UnassignBodyID(GetPointer(@interface), bodyID));
-
-            throw new NotImplementedException();
+            return CreateHandle(UnsafeBindings.JPH_BodyInterface_UnassignBodyID(@interface, bodyID));
         }
 
         public static NativeHandle<JPH_Body> JPH_BodyInterface_CreateSoftBody(NativeHandle<JPH_BodyInterface> @interface, NativeHandle<JPH_SoftBodyCreationSettings> settings)
@@ -75,7 +73,7 @@ namespace Jolt
         {
             return UnsafeBindings.JPH_BodyInterface_CreateAndAddSoftBody(@interface, settings, activation);
         }
-        
+
         public static void JPH_BodyInterface_AddBody(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, Activation activation)
         {
             UnsafeBindings.JPH_BodyInterface_AddBody(@interface, bodyID, activation);
@@ -89,6 +87,41 @@ namespace Jolt
         public static void JPH_BodyInterface_RemoveAndDestroyBody(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
             UnsafeBindings.JPH_BodyInterface_RemoveAndDestroyBody(@interface, bodyID);
+        }
+
+        public static void JPH_BodyInterface_AddBodies(NativeHandle<JPH_BodyInterface> @interface, NativeList<BodyID> bodyIDs, Activation activation)
+        {
+            BodyID* ptr = bodyIDs.GetUnsafePtr();
+            void* handle = UnsafeBindings.JPH_BodyInterface_AddBodiesPrepare(@interface, ptr, bodyIDs.Length);
+            UnsafeBindings.JPH_BodyInterface_AddBodiesFinalize(@interface, ptr, bodyIDs.Length, handle, activation);
+        }
+
+        /*public static void* JPH_BodyInterface_AddBodiesPrepare(NativeHandle<JPH_BodyInterface> @interface, NativeList<BodyID> bodyIDs)
+        {
+            fixed (BodyID* ptr = (BodyID*)bodyIDs.GetUnsafePtr())
+            {
+                return UnsafeBindings.JPH_BodyInterface_AddBodiesPrepare(@interface, ptr, bodyIDs.Length);
+            }
+        }
+
+        public static void JPH_BodyInterface_AddBodiesFinalize(NativeHandle<JPH_BodyInterface> @interface, NativeList<BodyID> bodyIDs, void* handle, Activation activation)
+        {
+            fixed (BodyID* ptr = (BodyID*)bodyIDs.GetUnsafePtr())
+            {
+                return UnsafeBindings.JPH_BodyInterface_AddBodiesFinalize(@interface, ptr, bodyIDs.Length, handle, activation);
+            }
+        }*/
+
+        public static void JPH_BodyInterface_RemoveBodies(NativeHandle<JPH_BodyInterface> @interface, NativeList<BodyID> bodyIDs)
+        {
+            BodyID* ptr = bodyIDs.GetUnsafePtr();
+            UnsafeBindings.JPH_BodyInterface_RemoveBodies(@interface, ptr, bodyIDs.Length);
+        }
+
+        public static void JPH_BodyInterface_DestroyBodies(NativeHandle<JPH_BodyInterface> @interface, NativeList<BodyID> bodyIDs)
+        {
+            BodyID* ptr = bodyIDs.GetUnsafePtr();
+            UnsafeBindings.JPH_BodyInterface_DestroyBodies(@interface, ptr, bodyIDs.Length);
         }
 
         public static bool JPH_BodyInterface_IsActive(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
@@ -193,7 +226,7 @@ namespace Jolt
         {
             position = default;
             rotation = default;
-            
+
             fixed (rvec3* positionPtr = &position)
             fixed (quaternion* rotationPtr = &rotation)
             {
@@ -231,6 +264,11 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_DeactivateBody(@interface, bodyID);
         }
 
+        public static void JPH_BodyInterface_ActivateBodiesInAABox(NativeHandle<JPH_BodyInterface> @interface, AABox box, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter)
+        {
+            UnsafeBindings.JPH_BodyInterface_ActivateBodiesInAABox(@interface, &box, broadPhaseLayerFilter, objectLayerFilter);
+        }
+
         public static void JPH_BodyInterface_SetObjectLayer(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, ObjectLayer layer)
         {
             UnsafeBindings.JPH_BodyInterface_SetObjectLayer(@interface, bodyID, layer);
@@ -247,7 +285,7 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_GetWorldTransform(@interface, bodyID, &result);
             return result;
         }
-        
+
         public static rmatrix4x4 JPH_BodyInterface_GetCenterOfMassTransform(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
             rmatrix4x4 result;
@@ -255,7 +293,7 @@ namespace Jolt
             return result;
         }
 
-        public static void JPH_BodyInterface_MoveKinematic(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, rvec3 targetPosition, quaternion targetRotation, float deltaTime) 
+        public static void JPH_BodyInterface_MoveKinematic(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, rvec3 targetPosition, quaternion targetRotation, float deltaTime)
         {
             UnsafeBindings.JPH_BodyInterface_MoveKinematic(@interface, bodyID, &targetPosition, &targetRotation, deltaTime);
         }
@@ -274,11 +312,11 @@ namespace Jolt
         {
             linearVelocity = default;
             angularVelocity = default;
-            
+
             fixed (float3* linearVelocityPtr = &linearVelocity)
             fixed (float3* angularVelocityPtr = &angularVelocity)
             {
-                UnsafeBindings.JPH_BodyInterface_GetLinearAndAngularVelocity(@interface, bodyID, linearVelocityPtr, angularVelocityPtr);   
+                UnsafeBindings.JPH_BodyInterface_GetLinearAndAngularVelocity(@interface, bodyID, linearVelocityPtr, angularVelocityPtr);
             }
         }
 
@@ -287,7 +325,7 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_AddLinearVelocity(@interface, bodyID, &linearVelocity);
         }
 
-        public static void JPH_BodyInterface_AddLinearAndAngularVelocity(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 linearVelocity, float3 angularVelocity) 
+        public static void JPH_BodyInterface_AddLinearAndAngularVelocity(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 linearVelocity, float3 angularVelocity)
         {
             UnsafeBindings.JPH_BodyInterface_AddLinearAndAngularVelocity(@interface, bodyID, &linearVelocity, &angularVelocity);
         }
@@ -316,7 +354,7 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_AddForce(@interface, bodyID, &force);
         }
 
-        public static void JPH_BodyInterface_AddForce(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 force, rvec3 point) 
+        public static void JPH_BodyInterface_AddForce(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 force, rvec3 point)
         {
             UnsafeBindings.JPH_BodyInterface_AddForce2(@interface, bodyID, &force, &point);
         }
@@ -326,32 +364,32 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_AddTorque(@interface, bodyID, &torque);
         }
 
-        public static void JPH_BodyInterface_AddForceAndTorque(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 force, float3 torque) 
+        public static void JPH_BodyInterface_AddForceAndTorque(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 force, float3 torque)
         {
             UnsafeBindings.JPH_BodyInterface_AddForceAndTorque(@interface, bodyID, &force, &torque);
         }
 
-        public static void JPH_BodyInterface_AddImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 impulse) 
+        public static void JPH_BodyInterface_AddImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 impulse)
         {
             UnsafeBindings.JPH_BodyInterface_AddImpulse(@interface, bodyID, &impulse);
         }
 
-        public static void JPH_BodyInterface_AddImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 impulse, rvec3 point) 
+        public static void JPH_BodyInterface_AddImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 impulse, rvec3 point)
         {
             UnsafeBindings.JPH_BodyInterface_AddImpulse2(@interface, bodyID, &impulse, &point);
         }
 
-        public static void JPH_BodyInterface_AddAngularImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 angularImpulse) 
+        public static void JPH_BodyInterface_AddAngularImpulse(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, float3 angularImpulse)
         {
             UnsafeBindings.JPH_BodyInterface_AddAngularImpulse(@interface, bodyID, &angularImpulse);
         }
 
-        public static void JPH_BodyInterface_SetMotionQuality(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, MotionQuality quality) 
+        public static void JPH_BodyInterface_SetMotionQuality(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, MotionQuality quality)
         {
             UnsafeBindings.JPH_BodyInterface_SetMotionQuality(@interface, bodyID, quality);
         }
 
-        public static MotionQuality JPH_BodyInterface_GetMotionQuality(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID) 
+        public static MotionQuality JPH_BodyInterface_GetMotionQuality(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
             return UnsafeBindings.JPH_BodyInterface_GetMotionQuality(@interface, bodyID);
         }
@@ -368,7 +406,7 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_SetGravityFactor(@interface, bodyID, gravityFactor);
         }
 
-        public static float JPH_BodyInterface_GetGravityFactor(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID) 
+        public static float JPH_BodyInterface_GetGravityFactor(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
             return UnsafeBindings.JPH_BodyInterface_GetGravityFactor(@interface, bodyID);
         }
@@ -378,12 +416,12 @@ namespace Jolt
             UnsafeBindings.JPH_BodyInterface_InvalidateContactCache(@interface, bodyID);
         }
 
-        public static void JPH_BodyInterface_SetUserData(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, ulong data) 
+        public static void JPH_BodyInterface_SetUserData(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID, ulong data)
         {
             UnsafeBindings.JPH_BodyInterface_SetUserData(@interface, bodyID, data);
         }
 
-        public static ulong JPH_BodyInterface_GetUserData(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID) 
+        public static ulong JPH_BodyInterface_GetUserData(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
             return UnsafeBindings.JPH_BodyInterface_GetUserData(@interface, bodyID);
         }

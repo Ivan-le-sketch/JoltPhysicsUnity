@@ -5395,6 +5395,36 @@ void JPH_BodyInterface_RemoveAndDestroyBody(JPH_BodyInterface* interface, JPH_Bo
 	AsBodyInterface(interface)->DestroyBody(joltBodyID);
 }
 
+void* JPH_BodyInterface_AddBodiesPrepare(JPH_BodyInterface* interface, JPH_BodyID* bodyIDs, int32_t number)
+{
+	JPH::BodyID* joltBodyIDs = reinterpret_cast<JPH::BodyID*>(bodyIDs);
+	return AsBodyInterface(interface)->AddBodiesPrepare(joltBodyIDs, number);
+}
+
+void JPH_BodyInterface_AddBodiesFinalize(JPH_BodyInterface* interface, JPH_BodyID* bodyIDs, int32_t number, void* addState, JPH_Activation activationMode)
+{
+	JPH::BodyID* joltBodyIDs = reinterpret_cast<JPH::BodyID*>(bodyIDs);
+	AsBodyInterface(interface)->AddBodiesFinalize(joltBodyIDs, number, addState, (JPH::EActivation)activationMode);
+}
+
+void JPH_BodyInterface_AddBodiesAbort(JPH_BodyInterface* interface, JPH_BodyID* bodyIDs, int32_t number, void* addState)
+{
+	JPH::BodyID* joltBodyIDs = reinterpret_cast<JPH::BodyID*>(bodyIDs);
+	AsBodyInterface(interface)->AddBodiesAbort(joltBodyIDs, number, addState);
+}
+
+void JPH_BodyInterface_RemoveBodies(JPH_BodyInterface* interface, JPH_BodyID* bodyIDs, int32_t number)
+{
+	JPH::BodyID* joltBodyIDs = reinterpret_cast<JPH::BodyID*>(bodyIDs);
+	AsBodyInterface(interface)->RemoveBodies(joltBodyIDs, number);
+}
+
+void JPH_BodyInterface_DestroyBodies(JPH_BodyInterface* interface, JPH_BodyID* bodyIDs, int32_t number)
+{
+	JPH::BodyID* joltBodyIDs = reinterpret_cast<JPH::BodyID*>(bodyIDs);
+	AsBodyInterface(interface)->DestroyBodies(joltBodyIDs, number);
+}
+
 bool JPH_BodyInterface_IsActive(JPH_BodyInterface* interface, JPH_BodyID bodyID)
 {
 	return AsBodyInterface(interface)->IsActive(JPH::BodyID(bodyID));
@@ -5539,6 +5569,11 @@ void JPH_BodyInterface_ActivateBody(JPH_BodyInterface* interface, JPH_BodyID bod
 void JPH_BodyInterface_DeactivateBody(JPH_BodyInterface* interface, JPH_BodyID bodyId)
 {
 	AsBodyInterface(interface)->DeactivateBody(JPH::BodyID(bodyId));
+}
+
+void JPH_BodyInterface_ActivateBodiesInAABox(JPH_BodyInterface* interface, const JPH_AABox* box, JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter, JPH_ObjectLayerFilter* objectLayerFilter)
+{
+	AsBodyInterface(interface)->ActivateBodiesInAABox(ToJolt(box), ToJolt(broadPhaseLayerFilter), ToJolt(objectLayerFilter));
 }
 
 JPH_ObjectLayer JPH_BodyInterface_GetObjectLayer(JPH_BodyInterface* interface, JPH_BodyID bodyId)

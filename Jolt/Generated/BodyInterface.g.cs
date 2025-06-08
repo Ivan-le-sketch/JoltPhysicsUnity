@@ -1,6 +1,7 @@
 ﻿using System;
 using Jolt;
 using Unity.Mathematics;
+using Unity.Collections;
 
 namespace Jolt
 {
@@ -62,6 +63,12 @@ namespace Jolt
         
         public void RemoveAndDestroyBody(BodyID bodyID) => Bindings.JPH_BodyInterface_RemoveAndDestroyBody(Handle, bodyID);
         
+        public void AddBodies(NativeList<BodyID> bodyIDs, Activation activation) => Bindings.JPH_BodyInterface_AddBodies(Handle, bodyIDs, activation);
+        
+        public void RemoveBodies(NativeList<BodyID> bodyIDs) => Bindings.JPH_BodyInterface_RemoveBodies(Handle, bodyIDs);
+        
+        public void DestroyBodies(NativeList<BodyID> bodyIDs) => Bindings.JPH_BodyInterface_DestroyBodies(Handle, bodyIDs);
+        
         public bool IsActive(BodyID bodyID) => Bindings.JPH_BodyInterface_IsActive(Handle, bodyID);
         
         public bool IsAdded(BodyID bodyID) => Bindings.JPH_BodyInterface_IsAdded(Handle, bodyID);
@@ -111,6 +118,8 @@ namespace Jolt
         public void ActivateBody(BodyID bodyID) => Bindings.JPH_BodyInterface_ActivateBody(Handle, bodyID);
         
         public void DeactivateBody(BodyID bodyID) => Bindings.JPH_BodyInterface_DeactivateBody(Handle, bodyID);
+        
+        public void ActivateBodiesInAABox(AABox box, BroadPhaseLayerFilter broadPhaseLayerFilter, ObjectLayerFilter objectLayerFilter) => Bindings.JPH_BodyInterface_ActivateBodiesInAABox(Handle, box, broadPhaseLayerFilter.Handle, objectLayerFilter.Handle);
         
         public void SetObjectLayer(BodyID bodyID, ObjectLayer layer) => Bindings.JPH_BodyInterface_SetObjectLayer(Handle, bodyID, layer);
         

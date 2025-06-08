@@ -43,6 +43,8 @@ namespace UnityEngine
 
         public static void LogWarning(string _) { }
 
+        public static void LogError(string _) { }
+
         public static void LogException(System.Exception _) { }
     }
 
@@ -51,7 +53,7 @@ namespace UnityEngine
 
 namespace Unity.Collections
 {
-    public struct NativeList<T> : System.IDisposable
+    public unsafe struct NativeList<T> : System.IDisposable where T : unmanaged
     {
         public NativeList(int _, Allocator __) { }
 
@@ -68,6 +70,8 @@ namespace Unity.Collections
         public bool Contains(T _) => true;
 
         public void Clear() { }
+
+        public T* GetUnsafePtr() => null;
 
         public T this[int index] => dummy;
 
@@ -176,3 +180,13 @@ namespace Unity.Collections.LowLevel.Unsafe
 {
 
 }
+
+namespace AOT
+{
+    [System.AttributeUsage(System.AttributeTargets.Method)]
+    public class MonoPInvokeCallbackAttribute : System.Attribute
+    {
+        public MonoPInvokeCallbackAttribute(System.Type type) { }
+    }
+}
+

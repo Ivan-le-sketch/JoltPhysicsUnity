@@ -1,6 +1,7 @@
 ﻿using System;
 using Jolt;
 using Unity.Mathematics;
+using Unity.Collections;
 
 namespace Jolt
 {
