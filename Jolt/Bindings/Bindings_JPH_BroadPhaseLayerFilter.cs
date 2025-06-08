@@ -6,7 +6,9 @@ namespace Jolt
     {
         public static NativeHandle<JPH_BroadPhaseLayerFilter> JPH_BroadPhaseLayerFilter_Create(JPH_BroadPhaseLayerFilter_Procs* procs, void* userData)
         {
-            return CreateHandle(UnsafeBindings.JPH_BroadPhaseLayerFilter_Create(procs, userData));
+            UnsafeBindings.JPH_BroadPhaseLayerFilter_SetProcs(procs);
+
+            return CreateHandle(UnsafeBindings.JPH_BroadPhaseLayerFilter_Create(userData));
         }
 
         public static void JPH_BroadPhaseLayerFilter_Destroy(NativeHandle<JPH_BroadPhaseLayerFilter> filter) 

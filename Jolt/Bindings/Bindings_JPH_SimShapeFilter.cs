@@ -9,17 +9,19 @@ namespace Jolt
     {
         public static NativeHandle<JPH_SimShapeFilter> JPH_SimShapeFilter_Create(ISimShapeFilterImplementation filter)
         {
+            fixed (JPH_SimShapeFilter_Procs* procsPtr = &UnsafeSimShapeFilterProcs)
+            {
+                UnsafeBindings.JPH_SimShapeFilter_SetProcs(procsPtr);
+            }
+
             var gch = GCHandle.Alloc(filter);
             var ptr = GCHandle.ToIntPtr(gch);
 
-            fixed (JPH_SimShapeFilter_Procs* procsPtr = &UnsafeSimShapeFilterProcs)
-            {
-                var handle = CreateHandle(UnsafeBindings.JPH_SimShapeFilter_Create(procsPtr, (void*)ptr));
+            var handle = CreateHandle(UnsafeBindings.JPH_SimShapeFilter_Create((void*)ptr));
 
-                ManagedReference.Add(handle, gch);
+            ManagedReference.Add(handle, gch);
 
-                return handle;
-            }
+            return handle;
         }
 
         public static void JPH_SimShapeFilter_Destroy(NativeHandle<JPH_SimShapeFilter> filter)

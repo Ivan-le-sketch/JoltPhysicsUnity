@@ -9,19 +9,21 @@ namespace Jolt
     {
         public static NativeHandle<JPH_BodyActivationListener> JPH_BodyActivationListener_Create(IBodyActivationListenerImplementation listener)
         {
+            fixed (JPH_BodyActivationListener_Procs* procsPtr = &UnsafeBodyActivationListenerProcs)
+            {
+                UnsafeBindings.JPH_BodyActivationListener_SetProcs(procsPtr);
+            }
+
             // See Bindings_JPH_ContactListener for comments.
 
             var gch = GCHandle.Alloc(listener);
             var ptr = GCHandle.ToIntPtr(gch);
 
-            fixed (JPH_BodyActivationListener_Procs* procsPtr = &UnsafeBodyActivationListenerProcs)
-            {
-                var handle = CreateHandle(UnsafeBindings.JPH_BodyActivationListener_Create(procsPtr, (void*)ptr));
+            var handle = CreateHandle(UnsafeBindings.JPH_BodyActivationListener_Create((void*)ptr));
 
-                ManagedReference.Add(handle, gch);
+            ManagedReference.Add(handle, gch);
 
-                return handle;
-            }
+            return handle;
         }
 
         public static void JPH_BodyActivationListener_Destroy(NativeHandle<JPH_BodyActivationListener> listener)

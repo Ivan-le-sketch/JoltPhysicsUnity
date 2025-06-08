@@ -10,6 +10,11 @@ namespace Jolt
     {
         public static NativeHandle<JPH_ContactListener> JPH_ContactListener_Create(IContactListenerImplementation listener)
         {
+            fixed (JPH_ContactListener_Procs* procsPtr = &UnsafeContactListenerProcs)
+            {
+                UnsafeBindings.JPH_ContactListener_SetProcs(procsPtr);
+            }
+
             // Getting the listeners to work requires a lot of indirection, because the listeners are represented as
             // heap objects in the native plugin with their own lifetimes. The joltc constructor for the listener takes
             // a "user data" parameter that lets us provide context to the callbacks when they are invoked.
@@ -22,13 +27,10 @@ namespace Jolt
             var gch = GCHandle.Alloc(listener);
             var ptr = GCHandle.ToIntPtr(gch);
 
-            fixed (JPH_ContactListener_Procs* procsPtr = &UnsafeContactListenerProcs)
-            {
-                var handle = CreateHandle(UnsafeBindings.JPH_ContactListener_Create(procsPtr, (void*)ptr));
-                ManagedReference.Add(handle, gch);
+            var handle = CreateHandle(UnsafeBindings.JPH_ContactListener_Create((void*)ptr));
+            ManagedReference.Add(handle, gch);
 
-                return handle;
-            }
+            return handle;
         }
 
         public static void JPH_ContactListener_Destroy(NativeHandle<JPH_ContactListener> listener)

@@ -4,7 +4,9 @@
     {
         public static NativeHandle<JPH_BodyFilter> JPH_BodyFilter_Create(JPH_BodyFilter_Procs* procs, void* userData)
         {
-            return CreateHandle(UnsafeBindings.JPH_BodyFilter_Create(procs, userData));
+            UnsafeBindings.JPH_BodyFilter_SetProcs(procs);
+
+            return CreateHandle(UnsafeBindings.JPH_BodyFilter_Create(userData));
         }
 
         public static void JPH_BodyFilter_Destroy(NativeHandle<JPH_BodyFilter> filter)
