@@ -67,8 +67,11 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Collision/PhysicsMaterialSimple.h"
+#include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
+#include "Jolt/Physics/Vehicle/VehicleController.h"
+#include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/StateRecorderImpl.h"
 
 #include <iostream>
@@ -142,6 +145,9 @@ DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 DEF_MAP_DECL(Skeleton, JPH_Skeleton)
 DEF_MAP_DECL(RagdollSettings, JPH_RagdollSettings)
 DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
+DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
+DEF_MAP_DECL(GroupFilterTable, JPH_GroupFilterTable)
+DEF_MAP_DECL(WheeledVehicleController, JPH_WheeledVehicleController)
 
 // Callback for traces, connect this to your own trace function if you have one
 static JPH_TraceFunc s_TraceFunc = nullptr;
@@ -379,6 +385,13 @@ static inline JPH_CollideShapeResult FromJolt(const JPH::CollideShapeResult& jol
 	return result;
 }
 
+static inline void FromJolt(const CollisionGroup& jolt, JPH_CollisionGroup* result)
+{
+	result->groupFilter = ToGroupFilter(jolt.GetGroupFilter());
+	result->groupID = jolt.GetGroupID();
+	result->subGroupID = jolt.GetSubGroupID();
+}
+
 // To Jolt conversion methods
 static inline JPH::Vec3 ToJolt(const JPH_Vec3& vec)
 {
@@ -491,6 +504,17 @@ static inline JPH::MotorSettings ToJolt(const JPH_MotorSettings* settings)
 	result.mMaxTorqueLimit = settings->maxTorqueLimit;
 	return result;
 }
+
+static inline JPH::CollisionGroup ToJolt(const JPH_CollisionGroup* group)
+{
+	JPH::CollisionGroup result(
+		AsGroupFilter(group->groupFilter),
+		static_cast<JPH::CollisionGroup::GroupID>(group->groupID),
+		static_cast<JPH::CollisionGroup::SubGroupID>(group->subGroupID)
+	);
+	return result;
+}
+
 void JPH_MassProperties_DecomposePrincipalMomentsOfInertia(JPH_MassProperties* properties, JPH_Matrix4x4* rotation, JPH_Vec3* diagonal)
 {
 	JPH::Mat44 joltRotation;
@@ -512,6 +536,28 @@ void JPH_MassProperties_ScaleToMass(JPH_MassProperties* properties, float mass)
 void JPH_MassProperties_GetEquivalentSolidBoxSize(float mass, const JPH_Vec3* inertiaDiagonal, JPH_Vec3* result)
 {
 	FromJolt(JPH::MassProperties::sGetEquivalentSolidBoxSize(mass, ToJolt(inertiaDiagonal)), result);
+}
+
+JPH_CAPI void JPH_RayCast_GetPointOnRay(const JPH_Vec3* origin, const JPH_Vec3* direction, float fraction, JPH_Vec3* result)
+{
+	JPH_ASSERT(origin);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(result);
+
+	JPH::RayCast ray(ToJolt(origin), ToJolt(direction));
+	JPH::Vec3 point = ray.GetPointOnRay(fraction);
+	FromJolt(point, result);
+}
+
+JPH_CAPI void JPH_RRayCast_GetPointOnRay(const JPH_RVec3* origin, const JPH_Vec3* direction, float fraction, JPH_RVec3* result)
+{
+	JPH_ASSERT(origin);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(result);
+
+	JPH::RRayCast ray(ToJolt(origin), ToJolt(direction));
+	JPH::RVec3 point = ray.GetPointOnRay(fraction);
+	FromJolt(point, result);
 }
 
 static JPH::Triangle ToTriangle(const JPH_Triangle& triangle)
@@ -1068,33 +1114,37 @@ static const JPH::BroadPhaseLayerFilter& ToJolt(JPH_BroadPhaseLayerFilter* bpFil
 class ManagedBroadPhaseLayerFilter final : public JPH::BroadPhaseLayerFilter
 {
 public:
-	ManagedBroadPhaseLayerFilter() = default;
+	static const JPH_BroadPhaseLayerFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBroadPhaseLayerFilter(const ManagedBroadPhaseLayerFilter&) = delete;
-	ManagedBroadPhaseLayerFilter(const ManagedBroadPhaseLayerFilter&&) = delete;
-	ManagedBroadPhaseLayerFilter& operator=(const ManagedBroadPhaseLayerFilter&) = delete;
-	ManagedBroadPhaseLayerFilter& operator=(const ManagedBroadPhaseLayerFilter&&) = delete;
+	ManagedBroadPhaseLayerFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(BroadPhaseLayer inLayer) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
+			return s_Procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
 		}
 
 		return true;
 	}
-
-	const JPH_BroadPhaseLayerFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(const JPH_BroadPhaseLayerFilter_Procs* procs, void* userData)
+const JPH_BroadPhaseLayerFilter_Procs* ManagedBroadPhaseLayerFilter::s_Procs = nullptr;
+
+void JPH_BroadPhaseLayerFilter_SetProcs(const JPH_BroadPhaseLayerFilter_Procs* procs)
 {
-	auto filter = new ManagedBroadPhaseLayerFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBroadPhaseLayerFilter::s_Procs = procs;
+}
+
+JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData)
+{
+	auto filter = new ManagedBroadPhaseLayerFilter(userData);
 	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
 }
 
@@ -1116,21 +1166,23 @@ static const JPH::ObjectLayerFilter& ToJolt(JPH_ObjectLayerFilter* opFilter)
 class ManagedObjectLayerFilter final : public JPH::ObjectLayerFilter
 {
 public:
-	ManagedObjectLayerFilter() = default;
+	static const JPH_ObjectLayerFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedObjectLayerFilter(const ManagedObjectLayerFilter&) = delete;
-	ManagedObjectLayerFilter(const ManagedObjectLayerFilter&&) = delete;
-	ManagedObjectLayerFilter& operator=(const ManagedObjectLayerFilter&) = delete;
-	ManagedObjectLayerFilter& operator=(const ManagedObjectLayerFilter&&) = delete;
+	ManagedObjectLayerFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(ObjectLayer inLayer) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
 			JPH_ObjectLayer* inLayerPtr = new JPH_ObjectLayer(static_cast<JPH_ObjectLayer>(inLayer));
 
-			bool result = procs->ShouldCollide(userData, inLayerPtr) == 1;
+			bool result = s_Procs->ShouldCollide(userData, inLayerPtr) == 1;
 
 			delete inLayerPtr;
 
@@ -1139,16 +1191,18 @@ public:
 
 		return true;
 	}
-
-	const JPH_ObjectLayerFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(const JPH_ObjectLayerFilter_Procs* procs, void* userData)
+const JPH_ObjectLayerFilter_Procs* ManagedObjectLayerFilter::s_Procs = nullptr;
+
+void JPH_ObjectLayerFilter_SetProcs(const JPH_ObjectLayerFilter_Procs* procs)
 {
-	auto filter = new ManagedObjectLayerFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedObjectLayerFilter::s_Procs = procs;
+}
+
+JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData)
+{
+	auto filter = new ManagedObjectLayerFilter(userData);
 	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
 }
 
@@ -1170,19 +1224,21 @@ static const JPH::BodyFilter& ToJolt(const JPH_BodyFilter* bodyFilter)
 class ManagedBodyFilter final : public JPH::BodyFilter
 {
 public:
-	ManagedBodyFilter() = default;
+	static const JPH_BodyFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBodyFilter(const ManagedBodyFilter&) = delete;
-	ManagedBodyFilter(const ManagedBodyFilter&&) = delete;
-	ManagedBodyFilter& operator=(const ManagedBodyFilter&) = delete;
-	ManagedBodyFilter& operator=(const ManagedBodyFilter&&) = delete;
+	ManagedBodyFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide(const BodyID& bodyID) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollide)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollide)
 		{
-			return procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
+			return s_Procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
 		}
 
 		return true;
@@ -1190,24 +1246,26 @@ public:
 
 	bool ShouldCollideLocked(const Body& body) const override
 	{
-		if (procs != nullptr
-			&& procs->ShouldCollideLocked)
+		if (s_Procs != nullptr
+			&& s_Procs->ShouldCollideLocked)
 		{
-			return procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
+			return s_Procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
 		}
 
 		return true;
 	}
-
-	const JPH_BodyFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BodyFilter* JPH_BodyFilter_Create(const JPH_BodyFilter_Procs* procs, void* userData)
+const JPH_BodyFilter_Procs* ManagedBodyFilter::s_Procs = nullptr;
+
+void JPH_BodyFilter_SetProcs(const JPH_BodyFilter_Procs* procs)
 {
-	auto filter = new ManagedBodyFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBodyFilter::s_Procs = procs;
+}
+
+JPH_BodyFilter* JPH_BodyFilter_Create(void* userData)
+{
+	auto filter = new ManagedBodyFilter(userData);
 	return reinterpret_cast<JPH_BodyFilter*>(filter);
 }
 
@@ -1229,19 +1287,21 @@ static const JPH::ShapeFilter& ToJolt(const JPH_ShapeFilter* filter)
 class ManagedShapeFilter final : public JPH::ShapeFilter
 {
 public:
-	ManagedShapeFilter() = default;
+	static const JPH_ShapeFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedShapeFilter(const ManagedShapeFilter&) = delete;
-	ManagedShapeFilter(const ManagedShapeFilter&&) = delete;
-	ManagedShapeFilter& operator=(const ManagedShapeFilter&) = delete;
-	ManagedShapeFilter& operator=(const ManagedShapeFilter&&) = delete;
+	ManagedShapeFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
-		if (procs != nullptr && procs->ShouldCollide)
+		if (s_Procs != nullptr && s_Procs->ShouldCollide)
 		{
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
-			return procs->ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
+			return s_Procs->ShouldCollide(userData, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
@@ -1249,27 +1309,28 @@ public:
 
 	bool ShouldCollide([[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
 	{
-		if (procs != nullptr && procs->ShouldCollide2)
+		if (s_Procs != nullptr && s_Procs->ShouldCollide2)
 		{
 			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
 
-			return procs->ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
+			return s_Procs->ShouldCollide2(userData, ToShape(inShape1), &subShapeIDOfShape1, ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
 	}
-
-	const JPH_ShapeFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
+const JPH_ShapeFilter_Procs* ManagedShapeFilter::s_Procs = nullptr;
 
-JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* procs, void* userData)
+void JPH_ShapeFilter_SetProcs(const JPH_ShapeFilter_Procs* procs)
 {
-	auto filter = new ManagedShapeFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedShapeFilter::s_Procs = procs;
+}
+
+JPH_ShapeFilter* JPH_ShapeFilter_Create(void* userData)
+{
+	auto filter = new ManagedShapeFilter(userData);
 	return reinterpret_cast<JPH_ShapeFilter*>(filter);
 }
 
@@ -1301,39 +1362,47 @@ static const JPH::SimShapeFilter& ToJolt(const JPH_SimShapeFilter* filter)
 class ManagedSimShapeFilter final : public JPH::SimShapeFilter
 {
 public:
-	ManagedSimShapeFilter() = default;
+	static const JPH_SimShapeFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedSimShapeFilter(const ManagedSimShapeFilter&) = delete;
-	ManagedSimShapeFilter(const ManagedSimShapeFilter&&) = delete;
-	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&) = delete;
-	ManagedSimShapeFilter& operator=(const ManagedSimShapeFilter&&) = delete;
-
-	bool ShouldCollide([[maybe_unused]] const Body& inBody1, [[maybe_unused]] const Shape* inShape1, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
-		[[maybe_unused]] const Body& inBody2, [[maybe_unused]] const Shape* inShape2, [[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
+	ManagedSimShapeFilter(void* userData_)
+		: userData(userData_)
 	{
-		if (procs != nullptr && procs->ShouldCollide)
+
+	}
+
+	bool ShouldCollide(
+		[[maybe_unused]] const Body& inBody1,
+		[[maybe_unused]] const Shape* inShape1,
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape1,
+		[[maybe_unused]] const Body& inBody2,
+		[[maybe_unused]] const Shape* inShape2,
+		[[maybe_unused]] const SubShapeID& inSubShapeIDOfShape2) const override
+	{
+		if (s_Procs != nullptr && s_Procs->ShouldCollide)
 		{
 
 			auto subShapeIDOfShape1 = inSubShapeIDOfShape1.GetValue();
 			auto subShapeIDOfShape2 = inSubShapeIDOfShape2.GetValue();
-			return procs->ShouldCollide(userData,
+			return s_Procs->ShouldCollide(userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1), ToShape(inShape1), &subShapeIDOfShape1,
 				reinterpret_cast<const JPH_Body*>(&inBody2), ToShape(inShape2), &subShapeIDOfShape2);
 		}
 
 		return true;
 	}
-
-	const JPH_SimShapeFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
+const JPH_SimShapeFilter_Procs* ManagedSimShapeFilter::s_Procs = nullptr;
 
-JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData)
+void JPH_SimShapeFilter_SetProcs(const JPH_SimShapeFilter_Procs* procs)
 {
-	auto filter = new ManagedSimShapeFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedSimShapeFilter::s_Procs = procs;
+}
+
+JPH_SimShapeFilter* JPH_SimShapeFilter_Create(void* userData)
+{
+	auto filter = new ManagedSimShapeFilter(userData);
 	return reinterpret_cast<JPH_SimShapeFilter*>(filter);
 }
 
@@ -1750,6 +1819,20 @@ void JPH_Matrix4x4_Scale(JPH_Matrix4x4* result, const JPH_Vec3* scale) {
 	FromJolt(mat, result);
 }
 
+void JPH_Matrix4x4_Transposed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Transposed(), result);
+}
+
+void JPH_Matrix4x4_Inversed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Inversed(), result);
+}
+
 void JPH_RMatrix4x4_Zero(JPH_RMatrix4x4* result) {
 	const JPH::RMat44 mat = JPH::RMat44::sZero();
 	FromJolt(mat, result);
@@ -1783,6 +1866,13 @@ void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH
 void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale) {
 	const JPH::RMat44 mat = JPH::RMat44::sScale(ToJolt(scale));
 	FromJolt(mat, result);
+}
+
+void JPH_RMatrix4x4_Inversed(const JPH_RMatrix4x4* m, JPH_RMatrix4x4* result)
+{
+	JPH_ASSERT(m && result);
+	auto joltM = ToJolt(m);
+	FromJolt(joltM.Inversed(), result);
 }
 
 void JPH_Matrix4x4_GetAxisX(const JPH_Matrix4x4* matrix, JPH_Vec3* result)
@@ -1852,6 +1942,52 @@ uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material)
 	return AsPhysicsMaterial(material)->GetDebugColor().GetUInt32();
 }
 
+/* GroupFilter/GroupFilterTable */
+void JPH_GroupFilter_Destroy(JPH_GroupFilter* groupFilter)
+{
+	if (groupFilter)
+	{
+		AsGroupFilter(groupFilter)->Release();
+	}
+}
+
+bool JPH_GroupFilter_CanCollide(JPH_GroupFilter* groupFilter, const JPH_CollisionGroup* group1, const JPH_CollisionGroup* group2)
+{
+	return AsGroupFilter(groupFilter)->CanCollide(ToJolt(group1), ToJolt(group2));
+}
+
+JPH_GroupFilterTable* JPH_GroupFilterTable_Create(uint32_t numSubGroups)
+{
+	auto material = new JPH::GroupFilterTable(numSubGroups);
+	material->AddRef();
+
+	return ToGroupFilterTable(material);
+}
+
+void JPH_GroupFilterTable_DisableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	AsGroupFilterTable(table)->DisableCollision(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
+}
+
+void JPH_GroupFilterTable_EnableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	AsGroupFilterTable(table)->EnableCollision(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
+}
+
+bool JPH_GroupFilterTable_IsCollisionEnabled(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2)
+{
+	return AsGroupFilterTable(table)->IsCollisionEnabled(
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup1),
+		static_cast<JPH::CollisionGroup::SubGroupID>(subGroup2)
+	);
+}
+
 /* ShapeSettings */
 void JPH_ShapeSettings_Destroy(JPH_ShapeSettings* settings)
 {
@@ -1876,11 +2012,7 @@ void JPH_ShapeSettings_SetUserData(JPH_ShapeSettings* settings, uint64_t userDat
 /* Shape */
 void JPH_Shape_Destroy(JPH_Shape* shape)
 {
-	if (shape)
-	{
-		auto joltShape = reinterpret_cast<JPH::Shape*>(shape);
-		joltShape->Release();
-	}
+	AsShape(shape)->Release();
 }
 
 JPH_ShapeType JPH_Shape_GetType(const JPH_Shape* shape)
@@ -1962,6 +2094,38 @@ void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeI
 	joltSubShapeID.SetValue(subShapeID);
 	Vec3 joltNormal = AsShape(shape)->GetSurfaceNormal(joltSubShapeID, ToJolt(localPosition));
 	FromJolt(joltNormal, normal);
+}
+
+JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape,
+	const JPH_SubShapeID subShapeID,
+	const JPH_Vec3* direction,
+	const JPH_Vec3* scale,
+	const JPH_Matrix4x4* centerOfMassTransform,
+	JPH_SupportingFace* outVertices)
+{
+	JPH_ASSERT(shape);
+	JPH_ASSERT(subShapeID);
+	JPH_ASSERT(direction);
+	JPH_ASSERT(scale);
+	JPH_ASSERT(centerOfMassTransform);
+	JPH_ASSERT(outVertices);
+
+	auto joltSubShapeID = JPH::SubShapeID();
+	joltSubShapeID.SetValue(subShapeID);
+
+	JPH::Vec3 joltDirection = ToJolt(direction);
+	JPH::Vec3 joltScale = ToJolt(scale);
+	JPH::Mat44 joltTransform = ToJolt(centerOfMassTransform);
+
+	JPH::Shape::SupportingFace joltFace;
+	AsShape(shape)->GetSupportingFace(joltSubShapeID, joltDirection, joltScale, joltTransform, joltFace);
+
+	outVertices->count = static_cast<uint32_t>(joltFace.size());
+	JPH_ASSERT(outVertices->count <= 32);
+
+	for (uint32_t i = 0; i < outVertices->count && i < 32; ++i) {
+		FromJolt(joltFace[i], &outVertices->vertices[i]);
+	}
 }
 
 float JPH_Shape_GetVolume(const JPH_Shape* shape)
@@ -3182,6 +3346,16 @@ JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSe
 void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value)
 {
 	AsBodyCreationSettings(settings)->mObjectLayer = static_cast<JPH::ObjectLayer>(value);
+}
+
+void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBodyCreationSettings(settings)->mCollisionGroup, result);
+}
+
+void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value)
+{
+	AsBodyCreationSettings(settings)->mCollisionGroup = ToJolt(value);
 }
 
 JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings)
@@ -4619,6 +4793,123 @@ void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(const JPH_SixDOFConstraint
 	FromJolt(AsSixDOFConstraint(constraint)->GetTotalLambdaMotorRotation(), result);
 }
 
+void JPH_SixDOFConstraint_GetTranslationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTranslationLimitsMin(), result);
+}
+
+void JPH_SixDOFConstraint_GetTranslationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTranslationLimitsMax(), result);
+}
+
+void JPH_SixDOFConstraint_GetRotationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationLimitsMin(), result);
+}
+
+void JPH_SixDOFConstraint_GetRotationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationLimitsMax(), result);
+}
+
+bool JPH_SixDOFConstraint_IsFixedAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->IsFixedAxis(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+bool JPH_SixDOFConstraint_IsFreeAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->IsFreeAxis(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+void JPH_SixDOFConstraint_GetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* result, JPH_SixDOFConstraintAxis axis)
+{
+	auto joltConstraint = reinterpret_cast<JPH::SixDOFConstraint*>(constraint);
+	FromJolt(joltConstraint->GetLimitsSpringSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis)), result);
+}
+
+void JPH_SixDOFConstraint_SetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* settings, JPH_SixDOFConstraintAxis axis)
+{
+	auto joltConstraint = reinterpret_cast<JPH::SixDOFConstraint*>(constraint);
+	joltConstraint->SetLimitsSpringSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis), ToJolt(settings));
+}
+
+void JPH_SixDOFConstraint_SetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, float inFriction)
+{
+	AsSixDOFConstraint(constraint)->SetMaxFriction(static_cast<JPH::SixDOFConstraint::EAxis>(axis), inFriction);
+}
+
+float JPH_SixDOFConstraint_GetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return AsSixDOFConstraint(constraint)->GetMaxFriction(static_cast<JPH::SixDOFConstraint::EAxis>(axis));
+}
+
+void JPH_SixDOFConstraint_GetRotationInConstraintSpace(JPH_SixDOFConstraint* constraint, JPH_Quat* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetRotationInConstraintSpace(), result);
+}
+
+void JPH_SixDOFConstraint_GetMotorSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorSettings* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetMotorSettings(static_cast<JPH::SixDOFConstraint::EAxis>(axis)), result);
+}
+
+void JPH_SixDOFConstraint_SetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorState state)
+{
+	AsSixDOFConstraint(constraint)->SetMotorState(static_cast<JPH::SixDOFConstraint::EAxis>(axis), static_cast<JPH::EMotorState>(state));
+}
+
+JPH_MotorState JPH_SixDOFConstraint_GetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis)
+{
+	return static_cast<JPH_MotorState>(AsSixDOFConstraint(constraint)->GetMotorState(static_cast<JPH::SixDOFConstraint::EAxis>(axis)));
+}
+
+void JPH_SixDOFConstraint_SetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inVelocity)
+{
+	AsSixDOFConstraint(constraint)->SetTargetVelocityCS(ToJolt(inVelocity));
+}
+
+void JPH_SixDOFConstraint_GetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetVelocityCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inAngularVelocity)
+{
+	AsSixDOFConstraint(constraint)->SetTargetAngularVelocityCS(ToJolt(inAngularVelocity));
+}
+
+void JPH_SixDOFConstraint_GetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetAngularVelocityCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inPosition)
+{
+	AsSixDOFConstraint(constraint)->SetTargetPositionCS(ToJolt(inPosition));
+}
+
+void JPH_SixDOFConstraint_GetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetPositionCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation)
+{
+	AsSixDOFConstraint(constraint)->SetTargetOrientationCS(ToJolt(inOrientation));
+}
+
+void JPH_SixDOFConstraint_GetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* result)
+{
+	FromJolt(AsSixDOFConstraint(constraint)->GetTargetOrientationCS(), result);
+}
+
+void JPH_SixDOFConstraint_SetTargetOrientationBS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation)
+{
+	AsSixDOFConstraint(constraint)->SetTargetOrientationBS(ToJolt(inOrientation));
+}
+
 /* JPH_GearConstraint */
 void JPH_GearConstraintSettings_FromJolt(JPH_GearConstraintSettings* settings, const GearConstraintSettings& joltSettings)
 {
@@ -4897,6 +5188,22 @@ void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constrai
 	}
 
 	system->physicsSystem->RemoveConstraints(joltConstraints.data(), (int)count);
+}
+
+void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+	JPH_ASSERT(system);
+	JPH_ASSERT(listener);
+
+	system->physicsSystem->AddStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
+}
+
+void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener)
+{
+	JPH_ASSERT(system);
+	JPH_ASSERT(listener);
+
+	system->physicsSystem->RemoveStepListener(reinterpret_cast<JPH::PhysicsStepListener*>(listener));
 }
 
 void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count)
@@ -5196,6 +5503,16 @@ void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_
 void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity)
 {
 	AsBodyInterface(interface)->SetPositionRotationAndVelocity(JPH::BodyID(bodyId), ToJolt(position), ToJolt(rotation), ToJolt(linearVelocity), ToJolt(angularVelocity));
+}
+
+void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBodyInterface(interface)->GetCollisionGroup(JPH::BodyID(bodyId)), result);
+}
+
+void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group)
+{
+	AsBodyInterface(interface)->SetCollisionGroup(JPH::BodyID(bodyId), ToJolt(group));
 }
 
 const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId)
@@ -7250,6 +7567,16 @@ JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body)
 	return static_cast<JPH_ObjectLayer>(AsBody(body)->GetObjectLayer());
 }
 
+void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result)
+{
+	FromJolt(AsBody(body)->GetCollisionGroup(), result);
+}
+
+void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value)
+{
+	AsBody(body)->SetCollisionGroup(ToJolt(value));
+}
+
 bool JPH_Body_GetAllowSleeping(JPH_Body* body)
 {
 	return AsBody(body)->GetAllowSleeping();
@@ -7495,18 +7822,27 @@ JPH_Body* JPH_Body_GetFixedToWorldBody(void)
 class ManagedContactListener final : public JPH::ContactListener
 {
 public:
+	static const JPH_ContactListener_Procs* s_Procs;
+	void* userData = nullptr;
+
+	ManagedContactListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
+
 	ValidateResult OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult) override
 	{
 		JPH_UNUSED(inCollisionResult);
 		JPH_RVec3 baseOffset;
 		FromJolt(inBaseOffset, &baseOffset);
 
-		if (procs != nullptr
-			&& procs->OnContactValidate)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactValidate)
 		{
 			JPH_CollideShapeResult collideShapeResult = FromJolt(inCollisionResult);
 
-			JPH_ValidateResult result = procs->OnContactValidate(
+			JPH_ValidateResult result = s_Procs->OnContactValidate(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -7525,10 +7861,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs != nullptr
-			&& procs->OnContactAdded)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactAdded)
 		{
-			procs->OnContactAdded(
+			s_Procs->OnContactAdded(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -7543,10 +7879,10 @@ public:
 		JPH_UNUSED(inManifold);
 		JPH_UNUSED(ioSettings);
 
-		if (procs != nullptr
-			&& procs->OnContactPersisted)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactPersisted)
 		{
-			procs->OnContactPersisted(
+			s_Procs->OnContactPersisted(
 				userData,
 				reinterpret_cast<const JPH_Body*>(&inBody1),
 				reinterpret_cast<const JPH_Body*>(&inBody2),
@@ -7558,25 +7894,28 @@ public:
 
 	void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override
 	{
-		if (procs != nullptr
-			&& procs->OnContactRemoved)
+		if (s_Procs != nullptr
+			&& s_Procs->OnContactRemoved)
 		{
-			procs->OnContactRemoved(
+			s_Procs->OnContactRemoved(
 				userData,
 				reinterpret_cast<const JPH_SubShapeIDPair*>(&inSubShapePair)
 			);
 		}
 	}
 
-	const JPH_ContactListener_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_ContactListener* JPH_ContactListener_Create(const JPH_ContactListener_Procs* procs, void* userData)
+const JPH_ContactListener_Procs* ManagedContactListener::s_Procs = nullptr;
+
+void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* procs)
 {
-	auto listener = new ManagedContactListener();
-	listener->procs = procs;
-	listener->userData = userData;
+	ManagedContactListener::s_Procs = procs;
+}
+
+JPH_ContactListener* JPH_ContactListener_Create(void* userData)
+{
+	auto listener = new ManagedContactListener(userData);
 	return reinterpret_cast<JPH_ContactListener*>(listener);
 }
 
@@ -7592,11 +7931,20 @@ void JPH_ContactListener_Destroy(JPH_ContactListener* listener)
 class ManagedBodyActivationListener final : public JPH::BodyActivationListener
 {
 public:
+	static const JPH_BodyActivationListener_Procs* s_Procs;
+	void* userData = nullptr;
+
+	ManagedBodyActivationListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
+
 	void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs != nullptr && procs->OnBodyDeactivated)
+		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
 		{
-			procs->OnBodyActivated(
+			s_Procs->OnBodyActivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
@@ -7606,25 +7954,27 @@ public:
 
 	void OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData) override
 	{
-		if (procs != nullptr && procs->OnBodyDeactivated)
+		if (s_Procs != nullptr && s_Procs->OnBodyDeactivated)
 		{
-			procs->OnBodyDeactivated(
+			s_Procs->OnBodyDeactivated(
 				userData,
 				inBodyID.GetIndexAndSequenceNumber(),
 				inBodyUserData
 			);
 		}
 	}
-
-	const JPH_BodyActivationListener_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
 
-JPH_BodyActivationListener* JPH_BodyActivationListener_Create(const JPH_BodyActivationListener_Procs* procs, void* userData)
+const JPH_BodyActivationListener_Procs* ManagedBodyActivationListener::s_Procs = nullptr;
+
+void JPH_BodyActivationListener_SetProcs(const JPH_BodyActivationListener_Procs* procs)
 {
-	auto listener = new ManagedBodyActivationListener();
-	listener->procs = procs;
-	listener->userData = userData;
+	ManagedBodyActivationListener::s_Procs = procs;
+}
+
+JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void* userData)
+{
+	auto listener = new ManagedBodyActivationListener(userData);
 	return reinterpret_cast<JPH_BodyActivationListener*>(listener);
 }
 
@@ -8505,8 +8855,14 @@ bool JPH_CharacterVirtual_HasCollidedWithCharacter(JPH_CharacterVirtual* charact
 class ManagedCharacterContactListener final : public JPH::CharacterContactListener
 {
 public:
-	const JPH_CharacterContactListener_Procs* procs = nullptr;
+	static const JPH_CharacterContactListener_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedCharacterContactListener(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) override
 	{
@@ -8514,9 +8870,9 @@ public:
 		FromJolt(ioLinearVelocity, &linearVelocity);
 		FromJolt(ioAngularVelocity, &angularVelocity);
 
-		if (procs != nullptr && procs->OnAdjustBodyVelocity)
+		if (s_Procs != nullptr && s_Procs->OnAdjustBodyVelocity)
 		{
-			procs->OnAdjustBodyVelocity(
+			s_Procs->OnAdjustBodyVelocity(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToBody(&inBody2),
@@ -8531,9 +8887,9 @@ public:
 
 	bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnContactValidate)
+		if (s_Procs != nullptr && s_Procs->OnContactValidate)
 		{
-			return procs->OnContactValidate(
+			return s_Procs->OnContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8546,9 +8902,9 @@ public:
 
 	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
 	{
-		if (procs != nullptr && procs->OnCharacterContactValidate)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactValidate)
 		{
-			return procs->OnCharacterContactValidate(
+			return s_Procs->OnCharacterContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8561,7 +8917,7 @@ public:
 
 	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnContactAdded)
+		if (s_Procs != nullptr && s_Procs->OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8573,7 +8929,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnContactAdded(
+			s_Procs->OnContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8590,7 +8946,7 @@ public:
 
 	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnContactPersisted)
+		if (s_Procs != nullptr && s_Procs->OnContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8602,7 +8958,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnContactPersisted(
+			s_Procs->OnContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8619,9 +8975,9 @@ public:
 
 	void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnContactRemoved)
+		if (s_Procs != nullptr && s_Procs->OnContactRemoved)
 		{
-			procs->OnContactRemoved(
+			s_Procs->OnContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8632,7 +8988,7 @@ public:
 
 	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactAdded)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8644,7 +9000,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnCharacterContactAdded(
+			s_Procs->OnCharacterContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8661,7 +9017,7 @@ public:
 
 	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactPersisted)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
@@ -8673,7 +9029,7 @@ public:
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
 			settings.canReceiveImpulses = ioSettings.mCanReceiveImpulses;
 
-			procs->OnCharacterContactPersisted(
+			s_Procs->OnCharacterContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8690,9 +9046,9 @@ public:
 
 	void OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactRemoved)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactRemoved)
 		{
-			procs->OnCharacterContactRemoved(
+			s_Procs->OnCharacterContactRemoved(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_CharacterID)inOtherCharacterID.GetValue(),
@@ -8706,7 +9062,7 @@ public:
 		const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity,
 		Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs != nullptr && procs->OnContactSolve)
+		if (s_Procs != nullptr && s_Procs->OnContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8717,7 +9073,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs->OnContactSolve(
+			s_Procs->OnContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
@@ -8736,7 +9092,7 @@ public:
 
 	void OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) override
 	{
-		if (procs != nullptr && procs->OnCharacterContactSolve)
+		if (s_Procs != nullptr && s_Procs->OnCharacterContactSolve)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal, contactVelocity, characterVelocity, newCharacterVelocity;
@@ -8747,7 +9103,7 @@ public:
 			FromJolt(inCharacterVelocity, &characterVelocity);
 			FromJolt(ioNewCharacterVelocity, &newCharacterVelocity);
 
-			procs->OnCharacterContactSolve(
+			s_Procs->OnCharacterContactSolve(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				ToCharacterVirtual(inOtherCharacter),
@@ -8765,11 +9121,16 @@ public:
 	}
 };
 
-JPH_CharacterContactListener* JPH_CharacterContactListener_Create(const JPH_CharacterContactListener_Procs* procs, void* userData)
+const JPH_CharacterContactListener_Procs* ManagedCharacterContactListener::s_Procs = nullptr;
+
+void JPH_CharacterContactListener_SetProcs(const JPH_CharacterContactListener_Procs* procs)
 {
-	auto impl = new ManagedCharacterContactListener();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedCharacterContactListener::s_Procs = procs;
+}
+
+JPH_CharacterContactListener* JPH_CharacterContactListener_Create(void* userData)
+{
+	auto impl = new ManagedCharacterContactListener(userData);
 	return reinterpret_cast<JPH_CharacterContactListener*>(impl);
 }
 
@@ -8785,8 +9146,14 @@ void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener
 class ManagedCharacterVsCharacterCollision final : public JPH::CharacterVsCharacterCollision
 {
 public:
-	const JPH_CharacterVsCharacterCollision_Procs* procs = nullptr;
+	static const JPH_CharacterVsCharacterCollision_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedCharacterVsCharacterCollision(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void CollideCharacter(const CharacterVirtual* inCharacter,
 		RMat44Arg inCenterOfMassTransform,
@@ -8794,7 +9161,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CollideShapeCollector& ioCollector) const override
 	{
-		if (procs != nullptr && procs->CollideCharacter)
+		if (s_Procs != nullptr && s_Procs->CollideCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_RVec3 baseOffset;
@@ -8803,7 +9170,7 @@ public:
 			FromJolt(inCenterOfMassTransform, &centerOfMassTransform);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs->CollideCharacter(
+			s_Procs->CollideCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -8820,7 +9187,7 @@ public:
 		RVec3Arg inBaseOffset,
 		CastShapeCollector& ioCollector) const override
 	{
-		if (procs != nullptr && procs->CastCharacter)
+		if (s_Procs != nullptr && s_Procs->CastCharacter)
 		{
 			JPH_RMatrix4x4 centerOfMassTransform;
 			JPH_Vec3 direction;
@@ -8831,7 +9198,7 @@ public:
 			FromJolt(inDirection, &direction);
 			FromJolt(inBaseOffset, &baseOffset);
 
-			procs->CastCharacter(
+			s_Procs->CastCharacter(
 				userData,
 				ToCharacterVirtual(inCharacter),
 				&centerOfMassTransform,
@@ -8843,11 +9210,16 @@ public:
 	}
 };
 
-JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(const JPH_CharacterVsCharacterCollision_Procs* procs, void* userData)
+const JPH_CharacterVsCharacterCollision_Procs* ManagedCharacterVsCharacterCollision::s_Procs = nullptr;
+
+void JPH_CharacterVsCharacterCollision_SetProcs(const JPH_CharacterVsCharacterCollision_Procs* procs)
 {
-	auto impl = new ManagedCharacterVsCharacterCollision();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedCharacterVsCharacterCollision::s_Procs = procs;
+}
+
+JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(void* userData)
+{
+	auto impl = new ManagedCharacterVsCharacterCollision(userData);
 	return reinterpret_cast<JPH_CharacterVsCharacterCollision*>(impl);
 }
 
@@ -9396,32 +9768,35 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 class ManagedBodyDrawFilter final : public JPH::BodyDrawFilter
 {
 public:
-	ManagedBodyDrawFilter() = default;
+	static const JPH_BodyDrawFilter_Procs* s_Procs;
+	void* userData = nullptr;
 
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter(const ManagedBodyDrawFilter&&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&) = delete;
-	ManagedBodyDrawFilter& operator=(const ManagedBodyDrawFilter&&) = delete;
+	ManagedBodyDrawFilter(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	bool ShouldDraw([[maybe_unused]] const Body& inBody) const override
 	{
-		if (procs != nullptr && procs->ShouldDraw)
+		if (s_Procs != nullptr && s_Procs->ShouldDraw)
 		{
-			return procs->ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
+			return s_Procs->ShouldDraw(userData, reinterpret_cast<const JPH_Body*>(&inBody));
 		}
 
 		return true;
 	}
-
-	const JPH_BodyDrawFilter_Procs* procs = nullptr;
-	void* userData = nullptr;
 };
+const JPH_BodyDrawFilter_Procs* ManagedBodyDrawFilter::s_Procs = nullptr;
 
-JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(const JPH_BodyDrawFilter_Procs* procs, void* userData)
+void JPH_BodyDrawFilter_SetProcs(const JPH_BodyDrawFilter_Procs* procs)
 {
-	auto filter = new ManagedBodyDrawFilter();
-	filter->procs = procs;
-	filter->userData = userData;
+	ManagedBodyDrawFilter::s_Procs = procs;
+}
+
+JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(void* userData)
+{
+	auto filter = new ManagedBodyDrawFilter(userData);
 	return reinterpret_cast<JPH_BodyDrawFilter*>(filter);
 }
 
@@ -9437,25 +9812,31 @@ void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter)
 class ManagedDebugRendererSimple final : public DebugRendererSimple
 {
 public:
-	const JPH_DebugRenderer_Procs* procs = nullptr;
+	static const JPH_DebugRenderer_Procs* s_Procs;
 	void* userData = nullptr;
+
+	ManagedDebugRendererSimple(void* userData_)
+		: userData(userData_)
+	{
+
+	}
 
 	void DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override
 	{
-		if (procs != nullptr && procs->DrawLine)
+		if (s_Procs != nullptr && s_Procs->DrawLine)
 		{
 			JPH_RVec3 from, to;
 
 			FromJolt(inFrom, &from);
 			FromJolt(inTo, &to);
 
-			procs->DrawLine(userData, &from, &to, inColor.GetUInt32());
+			s_Procs->DrawLine(userData, &from, &to, inColor.GetUInt32());
 		}
 	}
 
 	void DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::Off) override
 	{
-		if (procs != nullptr && procs->DrawTriangle)
+		if (s_Procs != nullptr && s_Procs->DrawTriangle)
 		{
 			JPH_RVec3 v1, v2, v3;
 
@@ -9463,7 +9844,7 @@ public:
 			FromJolt(inV2, &v2);
 			FromJolt(inV3, &v3);
 
-			procs->DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
+			s_Procs->DrawTriangle(userData, &v1, &v2, &v3, inColor.GetUInt32(), static_cast<JPH_DebugRenderer_CastShadow>(inCastShadow));
 		}
 		else
 		{
@@ -9473,22 +9854,27 @@ public:
 
 	void DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight) override
 	{
-		if (procs != nullptr && procs->DrawText3D)
+		if (s_Procs != nullptr && s_Procs->DrawText3D)
 		{
 			JPH_RVec3 position;
 
 			FromJolt(inPosition, &position);
 
-			procs->DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
+			s_Procs->DrawText3D(userData, &position, inString.data(), inColor.GetUInt32(), inHeight);
 		}
 	}
 };
 
-JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(const JPH_DebugRenderer_Procs* procs, void* userData)
+const JPH_DebugRenderer_Procs* ManagedDebugRendererSimple::s_Procs = nullptr;
+
+void JPH_DebugRenderer_SetProcs(const JPH_DebugRenderer_Procs* procs)
 {
-	auto impl = new ManagedDebugRendererSimple();
-	impl->procs = procs;
-	impl->userData = userData;
+	ManagedDebugRendererSimple::s_Procs = procs;
+}
+
+JPH_DebugRenderer* JPH_DebugRenderer_Create(void* userData)
+{
+	auto impl = new ManagedDebugRendererSimple(userData);
 	return reinterpret_cast<JPH_DebugRenderer*>(impl);
 }
 
@@ -9500,57 +9886,207 @@ void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer)
 
 void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->NextFrame();
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->NextFrame();
+}
+
+void JPH_DebugRenderer_SetCameraPos(JPH_DebugRenderer* renderer, const JPH_RVec3* position)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->SetCameraPos(ToJolt(position));
 }
 
 void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawLine(ToJolt(from), ToJolt(to), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawLine(ToJolt(from), ToJolt(to), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(box), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireBox(ToJolt(box), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireBox(ToJolt(matrix), ToJolt(box), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireBox(ToJolt(matrix), ToJolt(box), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawMarker(JPH_DebugRenderer* renderer, const JPH_RVec3* position, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawMarker(ToJolt(position), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawMarker(ToJolt(position), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawArrow(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawArrow(ToJolt(from), ToJolt(to), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawArrow(ToJolt(from), ToJolt(to), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawCoordinateSystem(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawCoordinateSystem(ToJolt(matrix), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCoordinateSystem(ToJolt(matrix), size);
 }
 
 void JPH_DebugRenderer_DrawPlane(JPH_DebugRenderer* renderer, const JPH_RVec3* point, const JPH_Vec3* normal, JPH_Color color, float size)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawPlane(ToJolt(point), ToJolt(normal), JPH::Color(color), size);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawPlane(ToJolt(point), ToJolt(normal), JPH::Color(color), size);
 }
 
 void JPH_DebugRenderer_DrawWireTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireTriangle(ToJolt(v2), ToJolt(v2), ToJolt(v3), JPH::Color(color));
 }
 
 void JPH_DebugRenderer_DrawWireSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, int level)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireSphere(ToJolt(center), radius, JPH::Color(color), level);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireSphere(ToJolt(center), radius, JPH::Color(color), level);
 }
 
 void JPH_DebugRenderer_DrawWireUnitSphere(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, JPH_Color color, int level)
 {
-	reinterpret_cast<DebugRenderer*>(renderer)->DrawWireUnitSphere(ToJolt(matrix), JPH::Color(color), level);
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawWireUnitSphere(ToJolt(matrix), JPH::Color(color), level);
+}
+
+void JPH_DebugRenderer_DrawTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawTriangle(
+		ToJolt(v1), ToJolt(v2), ToJolt(v3),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow)
+	);
+}
+
+void JPH_DebugRenderer_DrawBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawBox(
+		ToJolt(box),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawBox(
+		ToJolt(matrix),
+		ToJolt(box),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSphere(
+		ToJolt(center),
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawUnitSphere(JPH_DebugRenderer* renderer, JPH_RMatrix4x4 matrix, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawUnitSphere(
+		ToJolt(&matrix),
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawCapsule(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeightOfCylinder, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCapsule(
+		ToJolt(matrix),
+		halfHeightOfCylinder,
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeight, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawCylinder(
+		ToJolt(matrix),
+		halfHeight,
+		radius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawOpenCone(JPH_DebugRenderer* renderer, const JPH_RVec3* top, const JPH_Vec3* axis, const JPH_Vec3* perpendicular, float halfAngle, float length, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawOpenCone(
+		ToJolt(top),
+		ToJolt(axis),
+		ToJolt(perpendicular),
+		halfAngle,
+		length,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSwingConeLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float swingYHalfAngle, float swingZHalfAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSwingConeLimits(
+		ToJolt(matrix),
+		swingYHalfAngle,
+		swingZHalfAngle,
+		edgeLength,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawSwingPyramidLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float minSwingYAngle, float maxSwingYAngle, float minSwingZAngle, float maxSwingZAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawSwingPyramidLimits(
+		ToJolt(matrix),
+		minSwingYAngle,
+		maxSwingYAngle,
+		minSwingZAngle,
+		maxSwingZAngle,
+		edgeLength,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+void JPH_DebugRenderer_DrawPie(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, const JPH_Vec3* normal, const JPH_Vec3* axis, float minAngle, float maxAngle, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawPie(
+		ToJolt(center),
+		radius,
+		ToJolt(normal),
+		ToJolt(axis),
+		minAngle,
+		maxAngle,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
+}
+
+void JPH_DebugRenderer_DrawTaperedCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* inMatrix, float top, float bottom, float topRadius, float bottomRadius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode)
+{
+	reinterpret_cast<ManagedDebugRendererSimple*>(renderer)->DrawTaperedCylinder(
+		ToJolt(inMatrix),
+		top,
+		bottom,
+		topRadius,
+		bottomRadius,
+		JPH::Color(color),
+		static_cast<JPH::DebugRenderer::ECastShadow>(castShadow),
+		static_cast<JPH::DebugRenderer::EDrawMode>(drawMode)
+	);
 }
 #endif
 
@@ -9740,6 +10276,413 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 			result->impulses[i].frictionImpulse2 = joltResult.mImpulses[i].mFrictionImpulse2;
 		}
 	}
+}
+
+/* WheelWV */
+JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
+	const JPH_Vec3* position,
+	const JPH_Vec3* suspensionForcePoint,
+	const JPH_Vec3* suspensionDirection,
+	const JPH_Vec3* steeringAxis,
+	const JPH_Vec3* wheelUp,
+	const JPH_Vec3* wheelForward,
+	float						suspensionMinLength,
+	float						suspensionMaxLength,
+	float						suspensionPreloadLength,
+	const JPH_SpringSettings* suspensionSpring,
+	float						radius,
+	float						width,
+	bool						enableSuspensionForcePoint,
+	float						inertia,
+	float						angularDamping,
+	float						maxSteerAngle,
+	//LinearCurve				longitudinalFriction,	// NOTE: BGE: just using default values for now.
+	//LinearCurve				lateralFriction,		// NOTE: BGE: just using default values for now.
+	float						maxBrakeTorque,
+	float						maxHandBrakeTorque)
+{
+	JPH_ASSERT(position);
+	JPH_ASSERT(suspensionForcePoint);
+	JPH_ASSERT(suspensionDirection);
+	JPH_ASSERT(steeringAxis);
+	JPH_ASSERT(wheelUp);
+	JPH_ASSERT(wheelForward);
+	JPH_ASSERT(suspensionSpring);
+
+	auto settings = new JPH::WheelSettingsWV();
+	settings->mPosition = ToJolt(position);
+	settings->mSuspensionForcePoint = ToJolt(suspensionForcePoint);
+	settings->mSuspensionDirection = ToJolt(suspensionDirection);
+	settings->mSteeringAxis = ToJolt(steeringAxis);
+	settings->mWheelUp = ToJolt(wheelUp);
+	settings->mWheelForward = ToJolt(wheelForward);
+	settings->mSuspensionMinLength = suspensionMinLength;
+	settings->mSuspensionMaxLength = suspensionMaxLength;
+	settings->mSuspensionPreloadLength = suspensionPreloadLength;
+	settings->mSuspensionSpring = ToJolt(suspensionSpring);
+	settings->mRadius = radius;
+	settings->mWidth = width;
+	settings->mEnableSuspensionForcePoint = enableSuspensionForcePoint;
+	settings->mInertia = inertia;
+	settings->mAngularDamping = angularDamping;
+	settings->mMaxSteerAngle = maxSteerAngle;
+	//settings->mLongitudinalFriction = ToJolt(mLongitudinalFriction);	// NOTE: BGE: just using default values for now.
+	//settings->mLateralFriction = ToJolt(mLateralFriction);			// NOTE: BGE: just using default values for now.
+	settings->mMaxBrakeTorque = maxBrakeTorque;
+	settings->mMaxHandBrakeTorque = maxHandBrakeTorque;
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_WheelSettingsWV*>(settings);
+}
+
+void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings)
+{
+	if (settings)
+	{
+		auto joltSettings = reinterpret_cast<JPH::WheelSettingsWV*>(settings);
+		joltSettings->Release();
+	}
+}
+
+JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings)
+{
+	JPH_ASSERT(settings);
+
+	const JPH::WheelSettingsWV* joltSettings = reinterpret_cast<const JPH::WheelSettingsWV*>(settings);
+	auto wheel = new JPH::WheelWV(*joltSettings);
+	return reinterpret_cast<JPH_WheelWV*>(wheel);
+}
+
+void JPH_WheelWV_Destroy(JPH_WheelWV* wheel)
+{
+	if (wheel)
+	{
+		delete reinterpret_cast<JPH::WheelWV*>(wheel);
+	}
+}
+
+bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel)
+{
+	JPH_ASSERT(wheel);
+
+	auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
+	auto hasContact = joltShape->HasContact();
+	return hasContact;
+}
+
+bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel)
+{
+	JPH_ASSERT(wheel);
+
+	auto joltShape = reinterpret_cast<const JPH::WheelWV*>(wheel);
+	auto hasHitHardPart = joltShape->HasHitHardPoint();
+	return hasHitHardPart;
+}
+
+JPH_VehicleEngineSettings* JPH_VehicleEngineSettings_Create(
+	float			maxTorque,
+	float			minRPM,
+	float			maxRPM,
+	//LinearCurve	normalizedTorque, // NOTE: BGE: just using default values for now.
+	float			inertia,
+	float			angularDamping)
+{
+	auto settings = new JPH::VehicleEngineSettings();
+	settings->mMaxTorque = maxTorque;
+	settings->mMinRPM = minRPM;
+	settings->mMaxRPM = maxRPM;
+	//settings->mNormalizedTorque = ToJolt(normalizedTorque); // NOTE: BGE: just using default values for now.
+	settings->mInertia = inertia;
+	settings->mAngularDamping = angularDamping;
+	return reinterpret_cast<JPH_VehicleEngineSettings*>(settings);
+}
+
+void JPH_VehicleEngineSettings_Destroy(JPH_VehicleEngineSettings* settings)
+{
+	if (settings)
+	{
+		delete reinterpret_cast<JPH::VehicleEngineSettings*>(settings);
+	}
+}
+
+JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
+	JPH_TransmissionMode	mode,
+	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
+	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
+	float					switchTime,
+	float					clutchReleaseTime,
+	float					switchLatency,
+	float					shiftUpRPM,
+	float					shiftDownRPM,
+	float					clutchStrength)
+{
+	auto settings = new JPH::VehicleTransmissionSettings();
+	settings->mMode = static_cast<JPH::ETransmissionMode>(mode);
+	//settings->mGearRatios = ToJolt(gearRatios);				// NOTE: BGE: just using default values for now.
+	//settings->mReverseGearRatios = ToJolt(reverseGearRatios);	// NOTE: BGE: just using default values for now.
+	settings->mSwitchTime = switchTime;
+	settings->mClutchReleaseTime = clutchReleaseTime;
+	settings->mSwitchLatency = switchLatency;
+	settings->mShiftUpRPM = shiftUpRPM;
+	settings->mShiftDownRPM = shiftDownRPM;
+	settings->mClutchStrength = clutchStrength;
+	return reinterpret_cast<JPH_VehicleTransmissionSettings*>(settings);
+}
+
+void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings)
+{
+	if (settings)
+	{
+		delete reinterpret_cast<JPH::VehicleTransmissionSettings*>(settings);
+	}
+}
+
+JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle)
+{
+	JPH_ASSERT(up);
+
+	auto tester = new JPH::VehicleCollisionTesterRay(static_cast<JPH::ObjectLayer>(layer), ToJolt(up), maxSlopeAngle);
+	tester->AddRef();
+
+	return reinterpret_cast<JPH_VehicleCollisionTesterRay*>(tester);
+}
+
+void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester)
+{
+	if (tester)
+	{
+		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterRay*>(tester);
+		joltTester->Release();
+	}
+}
+
+JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle)
+{
+	JPH_ASSERT(up);
+
+	auto tester = new JPH::VehicleCollisionTesterCastSphere(static_cast<JPH::ObjectLayer>(layer), radius, ToJolt(up), maxSlopeAngle);
+	tester->AddRef();
+
+	return reinterpret_cast<JPH_VehicleCollisionTesterCastSphere*>(tester);
+}
+
+void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester)
+{
+	if (tester)
+	{
+		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastSphere*>(tester);
+		joltTester->Release();
+	}
+}
+
+JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction)
+{
+	auto tester = new JPH::VehicleCollisionTesterCastCylinder(static_cast<JPH::ObjectLayer>(layer), convexRadiusFraction);
+	tester->AddRef();
+
+	return reinterpret_cast<JPH_VehicleCollisionTesterCastCylinder*>(tester);
+}
+
+void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester)
+{
+	if (tester)
+	{
+		auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTesterCastCylinder*>(tester);
+		joltTester->Release();
+	}
+}
+
+JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
+	const JPH_Vec3* up,
+	const JPH_Vec3* forward,
+	float							maxPitchRollAngle,
+	JPH_WheelSettingsWV** wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
+	int								wheelsCount,
+	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	//int							antiRollBarsCount,	// NOTE: BGE: just using default values for now.
+	JPH_VehicleControllerSettings* settings)
+{
+	JPH_ASSERT(up);
+	JPH_ASSERT(forward);
+	JPH_ASSERT(wheels);
+	JPH_ASSERT(settings);
+
+	auto vehicleConstraintSettings = new JPH::VehicleConstraintSettings();
+	vehicleConstraintSettings->mUp = ToJolt(up);
+	vehicleConstraintSettings->mForward = ToJolt(forward);
+	vehicleConstraintSettings->mMaxPitchRollAngle = maxPitchRollAngle;
+	for (int i = 0; i < wheelsCount; ++i)
+	{
+		auto wheelSettings = reinterpret_cast<JPH::WheelSettingsWV*>(wheels[i]);
+		JPH_ASSERT(wheelSettings);
+		auto wheelSettingsRef = StaticCast<JPH::WheelSettings>(JPH::Ref<JPH::WheelSettingsWV>(wheelSettings));
+		vehicleConstraintSettings->mWheels.push_back(wheelSettingsRef);
+	}
+	//vehicleConstraintSettings->mAntiRollBars = ToJolt(antiRollBars); // NOTE: BGE: just using default values for now.
+	vehicleConstraintSettings->mController = Ref<JPH::VehicleControllerSettings>(reinterpret_cast<JPH::VehicleControllerSettings*>(settings));
+	vehicleConstraintSettings->AddRef();
+
+	return reinterpret_cast<JPH_VehicleConstraintSettings*>(vehicleConstraintSettings);
+}
+
+void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings)
+{
+	if (settings)
+	{
+		auto joltSettings = reinterpret_cast<JPH::VehicleConstraintSettings*>(settings);
+		joltSettings->Release();
+	}
+}
+
+JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* constraintSettings)
+{
+	JPH_ASSERT(body);
+	JPH_ASSERT(constraintSettings);
+
+	auto vehicleConstraint = new JPH::VehicleConstraint(*AsBody(body), *reinterpret_cast<const JPH::VehicleConstraintSettings*>(constraintSettings));
+	vehicleConstraint->AddRef();
+
+	return reinterpret_cast<JPH_VehicleConstraint*>(vehicleConstraint);
+}
+
+void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint)
+{
+	if (constraint)
+	{
+		auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+		joltConstraint->Release();
+	}
+}
+
+JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint)
+{
+	JPH_ASSERT(constraint);
+
+	auto joltContraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+	auto joltListener = static_cast<JPH::PhysicsStepListener*>(joltContraint);
+	return reinterpret_cast<JPH_PhysicsStepListener*>(joltListener);
+}
+
+JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint)
+{
+	JPH_ASSERT(constraint);
+
+	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+	auto controller = StaticCast<WheeledVehicleController>(joltConstraint->GetController()); // NOTE: BGE: this should really be a DynamicCast.
+	return reinterpret_cast<JPH_WheeledVehicleController*>(controller);
+}
+
+void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester)
+{
+	JPH_ASSERT(constraint);
+	JPH_ASSERT(tester);
+
+	auto joltConstraint = reinterpret_cast<JPH::VehicleConstraint*>(constraint);
+	auto joltTester = reinterpret_cast<const JPH::VehicleCollisionTester*>(tester);
+	joltConstraint->SetVehicleCollisionTester(joltTester);
+}
+
+JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
+	const JPH_VehicleEngineSettings* engine,
+	const JPH_VehicleTransmissionSettings* transmission,
+	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	float									differentialLimitedSlipRatio)
+{
+	JPH_ASSERT(engine);
+	JPH_ASSERT(transmission);
+
+	auto settings = new JPH::WheeledVehicleControllerSettings();
+	settings->mEngine = *reinterpret_cast<const JPH::VehicleEngineSettings*>(engine);
+	settings->mTransmission = *reinterpret_cast<const JPH::VehicleTransmissionSettings*>(transmission);
+	settings->mDifferentials.resize(1); // NOTE: BGE: just using default values for now.
+	settings->mDifferentials[0].mLeftWheel = 0;
+	settings->mDifferentials[0].mRightWheel = 1;
+	settings->mDifferentialLimitedSlipRatio = differentialLimitedSlipRatio;
+	settings->AddRef();
+
+	return reinterpret_cast<JPH_WheeledVehicleControllerSettings*>(settings);
+}
+
+void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings)
+{
+	if (settings)
+	{
+		auto joltSettings = reinterpret_cast<JPH::WheeledVehicleControllerSettings*>(settings);
+		joltSettings->Release();
+	}
+}
+
+JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* controller)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	auto constraint = &joltController->GetConstraint();
+	return reinterpret_cast<JPH_Constraint*>(constraint);
+}
+
+void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* controller, float forward)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	joltController->SetForwardInput(forward);
+}
+
+float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* controller)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+	return joltController->GetForwardInput();
+}
+
+void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* controller, float right)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	joltController->SetRightInput(right);
+}
+
+float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* controller)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+	return joltController->GetRightInput();
+}
+
+void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* controller, float brake)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	joltController->SetBrakeInput(brake);
+}
+
+float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* controller)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+	return joltController->GetBrakeInput();
+}
+
+void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* controller, float handBrake)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<JPH::WheeledVehicleController*>(controller);
+	joltController->SetHandBrakeInput(handBrake);
+}
+
+float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* controller)
+{
+	JPH_ASSERT(controller);
+
+	auto joltController = reinterpret_cast<const JPH::WheeledVehicleController*>(controller);
+	return joltController->GetHandBrakeInput();
 }
 
 /* StateRecorderFilter */

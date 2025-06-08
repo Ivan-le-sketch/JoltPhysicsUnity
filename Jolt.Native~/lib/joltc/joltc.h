@@ -13,7 +13,7 @@
 #       define _JPH_EXPORT
 #       pragma warning "Unknown dynamic link import/export semantics."
 #   endif
-#elif defined(VIMAGE_SHARED_LIBRARY_INCLUDE)
+#elif defined(JPH_SHARED_LIBRARY_INCLUDE)
 #   if defined(_MSC_VER)
 #       define _JPH_EXPORT __declspec(dllimport)
 #   else
@@ -47,16 +47,116 @@
 #define JPH_DEFAULT_CONVEX_RADIUS (0.05f) // float cDefaultConvexRadius = 0.05f
 #define JPH_CAPSULE_PROJECTION_SLOP (0.02f) // float cCapsuleProjectionSlop = 0.02f
 #define JPH_MAX_PHYSICS_JOBS (2048) // int cMaxPhysicsJobs = 2048
-#define JPH_MAX_PHYSICS_BARRIERS (2048) // int cMaxPhysicsBarriers = 8
+#define JPH_MAX_PHYSICS_BARRIERS (8) // int cMaxPhysicsBarriers = 8
+#define JPH_INVALID_COLLISION_GROUP_ID (~0U)
+#define JPH_INVALID_COLLISION_SUBGROUP_ID (~0U)
 
 typedef uint32_t JPH_BodyID;
 typedef uint32_t JPH_SubShapeID;
-typedef uint16_t JPH_ObjectLayer;
+typedef uint32_t JPH_ObjectLayer;
 typedef uint8_t  JPH_BroadPhaseLayer;
 typedef uint32_t JPH_CollisionGroupID;
 typedef uint32_t JPH_CollisionSubGroupID;
 typedef uint32_t JPH_CharacterID;
 
+/* Forward declarations */
+typedef struct JPH_BroadPhaseLayerInterface				JPH_BroadPhaseLayerInterface;
+typedef struct JPH_ObjectVsBroadPhaseLayerFilter		JPH_ObjectVsBroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerPairFilter				JPH_ObjectLayerPairFilter;
+
+typedef struct JPH_BroadPhaseLayerFilter				JPH_BroadPhaseLayerFilter;
+typedef struct JPH_ObjectLayerFilter					JPH_ObjectLayerFilter;
+typedef struct JPH_BodyFilter							JPH_BodyFilter;
+typedef struct JPH_ShapeFilter							JPH_ShapeFilter;
+
+typedef struct JPH_SimShapeFilter						JPH_SimShapeFilter;
+
+typedef struct JPH_PhysicsSystem						JPH_PhysicsSystem;
+
+typedef struct JPH_PhysicsMaterial						JPH_PhysicsMaterial;
+
+/* ShapeSettings */
+typedef struct JPH_ShapeSettings						JPH_ShapeSettings;
+typedef struct JPH_ConvexShapeSettings					JPH_ConvexShapeSettings;
+typedef struct JPH_SphereShapeSettings					JPH_SphereShapeSettings;
+typedef struct JPH_BoxShapeSettings						JPH_BoxShapeSettings;
+typedef struct JPH_PlaneShapeSettings					JPH_PlaneShapeSettings;
+typedef struct JPH_TriangleShapeSettings				JPH_TriangleShapeSettings;
+typedef struct JPH_CapsuleShapeSettings					JPH_CapsuleShapeSettings;
+typedef struct JPH_TaperedCapsuleShapeSettings			JPH_TaperedCapsuleShapeSettings;
+typedef struct JPH_CylinderShapeSettings				JPH_CylinderShapeSettings;
+typedef struct JPH_TaperedCylinderShapeSettings			JPH_TaperedCylinderShapeSettings;
+typedef struct JPH_ConvexHullShapeSettings				JPH_ConvexHullShapeSettings;
+typedef struct JPH_CompoundShapeSettings				JPH_CompoundShapeSettings;
+typedef struct JPH_StaticCompoundShapeSettings			JPH_StaticCompoundShapeSettings;
+typedef struct JPH_MutableCompoundShapeSettings			JPH_MutableCompoundShapeSettings;
+typedef struct JPH_MeshShapeSettings					JPH_MeshShapeSettings;
+typedef struct JPH_HeightFieldShapeSettings				JPH_HeightFieldShapeSettings;
+typedef struct JPH_RotatedTranslatedShapeSettings		JPH_RotatedTranslatedShapeSettings;
+typedef struct JPH_ScaledShapeSettings					JPH_ScaledShapeSettings;
+typedef struct JPH_OffsetCenterOfMassShapeSettings		JPH_OffsetCenterOfMassShapeSettings;
+typedef struct JPH_EmptyShapeSettings					JPH_EmptyShapeSettings;
+
+/* Shape */
+typedef struct JPH_Shape								JPH_Shape;
+typedef struct JPH_ConvexShape							JPH_ConvexShape;
+typedef struct JPH_SphereShape							JPH_SphereShape;
+typedef struct JPH_BoxShape								JPH_BoxShape;
+typedef struct JPH_PlaneShape							JPH_PlaneShape;
+typedef struct JPH_CapsuleShape							JPH_CapsuleShape;
+typedef struct JPH_CylinderShape						JPH_CylinderShape;
+typedef struct JPH_TaperedCylinderShape					JPH_TaperedCylinderShape;
+typedef struct JPH_TriangleShape						JPH_TriangleShape;
+typedef struct JPH_TaperedCapsuleShape					JPH_TaperedCapsuleShape;
+typedef struct JPH_ConvexHullShape						JPH_ConvexHullShape;
+typedef struct JPH_CompoundShape						JPH_CompoundShape;
+typedef struct JPH_StaticCompoundShape					JPH_StaticCompoundShape;
+typedef struct JPH_MutableCompoundShape					JPH_MutableCompoundShape;
+typedef struct JPH_MeshShape							JPH_MeshShape;
+typedef struct JPH_HeightFieldShape						JPH_HeightFieldShape;
+typedef struct JPH_DecoratedShape						JPH_DecoratedShape;
+typedef struct JPH_RotatedTranslatedShape				JPH_RotatedTranslatedShape;
+typedef struct JPH_ScaledShape							JPH_ScaledShape;
+typedef struct JPH_OffsetCenterOfMassShape				JPH_OffsetCenterOfMassShape;
+typedef struct JPH_EmptyShape							JPH_EmptyShape;
+
+typedef struct JPH_BodyCreationSettings					JPH_BodyCreationSettings;
+typedef struct JPH_SoftBodyCreationSettings				JPH_SoftBodyCreationSettings;
+typedef struct JPH_BodyInterface						JPH_BodyInterface;
+typedef struct JPH_BodyLockInterface					JPH_BodyLockInterface;
+typedef struct JPH_BroadPhaseQuery						JPH_BroadPhaseQuery;
+typedef struct JPH_NarrowPhaseQuery						JPH_NarrowPhaseQuery;
+typedef struct JPH_MotionProperties						JPH_MotionProperties;
+typedef struct JPH_MassProperties						JPH_MassProperties;
+typedef struct JPH_Body									JPH_Body;
+
+typedef struct JPH_CollideShapeResult					JPH_CollideShapeResult;
+typedef struct JPH_ContactListener						JPH_ContactListener;
+typedef struct JPH_ContactManifold						JPH_ContactManifold;
+typedef struct JPH_ContactSettings						JPH_ContactSettings;
+
+typedef struct JPH_GroupFilter							JPH_GroupFilter;
+typedef struct JPH_GroupFilterTable						JPH_GroupFilterTable;  /* Inherics JPH_GroupFilter */
+
+/* Vehicle and Related */
+typedef struct JPH_WheelSettingsWV						JPH_WheelSettingsWV;
+typedef struct JPH_WheelWV								JPH_WheelWV;
+//typedef struct JPH_AntiRollBars						JPH_AntiRollBars; // NOTE: BGE: just using default values for now.
+typedef struct JPH_VehicleEngineSettings				JPH_VehicleEngineSettings;
+typedef struct JPH_VehicleTransmissionSettings			JPH_VehicleTransmissionSettings;
+//typedef struct JPH_VehicleDifferentialSettings		JPH_VehicleDifferentialSettings; // NOTE: BGE: just using default values for now.
+typedef struct JPH_VehicleCollisionTester				JPH_VehicleCollisionTester;
+typedef struct JPH_VehicleCollisionTesterRay			JPH_VehicleCollisionTesterRay;
+typedef struct JPH_VehicleCollisionTesterCastSphere		JPH_VehicleCollisionTesterCastSphere;
+typedef struct JPH_VehicleCollisionTesterCastCylinder	JPH_VehicleCollisionTesterCastCylinder;
+typedef struct JPH_VehicleConstraintSettings			JPH_VehicleConstraintSettings;
+typedef struct JPH_VehicleConstraint					JPH_VehicleConstraint;
+typedef struct JPH_VehicleControllerSettings			JPH_VehicleControllerSettings;
+typedef struct JPH_WheeledVehicleControllerSettings		JPH_WheeledVehicleControllerSettings;
+typedef struct JPH_WheeledVehicleController				JPH_WheeledVehicleController;
+typedef struct JPH_PhysicsStepListener					JPH_PhysicsStepListener;
+
+/* Enums */
 typedef enum JPH_PhysicsUpdateError {
 	JPH_PhysicsUpdateError_None = 0,
 	JPH_PhysicsUpdateError_ManifoldCacheFull = 1 << 0,
@@ -345,6 +445,13 @@ typedef enum JPH_Mesh_Shape_BuildQuality {
 	_JPH_Mesh_Shape_BuildQuality_Force32 = 0x7FFFFFFF
 } JPH_Mesh_Shape_BuildQuality;
 
+typedef enum JPH_TransmissionMode {
+	JPH_TransmissionMode_Auto = 0,
+	JPH_TransmissionMode_Manual = 1,
+	_JPH_TransmissionMode_Count,
+	_JPH_TransmissionMode_Force32 = 0x7FFFFFFF
+} JPH_TransmissionMode;;
+
 typedef enum JPH_StateRecorderState : uint8_t
 {
 	JPH_StateRecorderState_None = 0,
@@ -465,7 +572,6 @@ typedef struct JPH_CollideShapeSettings {
 	JPH_BackFaceMode			backFaceMode/* = JPH_BackFaceMode_IgnoreBackFaces*/;
 } JPH_CollideShapeSettings;
 
-
 /* ShapeCastSettings */
 typedef struct JPH_ShapeCastSettings {
 	JPH_CollideSettingsBase     base;    /* Inherics JPH_CollideSettingsBase */
@@ -581,6 +687,17 @@ typedef struct JPH_DrawSettings {
 	JPH_SoftBodyConstraintColor	drawSoftBodyConstraintColor;        ///< Coloring scheme to use for soft body constraints
 } JPH_DrawSettings;
 
+typedef struct JPH_SupportingFace {
+	uint32_t count;
+	JPH_Vec3 vertices[32];
+} JPH_SupportingFace;
+
+typedef struct JPH_CollisionGroup {
+	const JPH_GroupFilter* groupFilter;
+	JPH_CollisionGroupID	groupID;
+	JPH_CollisionSubGroupID	subGroupID;
+} JPH_CollisionGroup;
+
 typedef void JPH_CastRayResultCallback(void* context, const JPH_RayCastResult* result);
 typedef void JPH_RayCastBodyResultCallback(void* context, const JPH_BroadPhaseCastResult* result);
 typedef void JPH_CollideShapeBodyResultCallback(void* context, const JPH_BodyID result);
@@ -594,81 +711,6 @@ typedef float JPH_CollideShapeBodyCollectorCallback(void* context, const JPH_Bod
 typedef float JPH_CollidePointCollectorCallback(void* context, const JPH_CollidePointResult* result);
 typedef float JPH_CollideShapeCollectorCallback(void* context, const JPH_CollideShapeResult* result);
 typedef float JPH_CastShapeCollectorCallback(void* context, const JPH_ShapeCastResult* result);
-
-typedef struct JPH_BroadPhaseLayerInterface			JPH_BroadPhaseLayerInterface;
-typedef struct JPH_ObjectVsBroadPhaseLayerFilter	JPH_ObjectVsBroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerPairFilter			JPH_ObjectLayerPairFilter;
-
-typedef struct JPH_BroadPhaseLayerFilter            JPH_BroadPhaseLayerFilter;
-typedef struct JPH_ObjectLayerFilter                JPH_ObjectLayerFilter;
-typedef struct JPH_BodyFilter                       JPH_BodyFilter;
-typedef struct JPH_ShapeFilter                      JPH_ShapeFilter;
-
-typedef struct JPH_SimShapeFilter					JPH_SimShapeFilter;
-
-typedef struct JPH_PhysicsSystem                    JPH_PhysicsSystem;
-
-typedef struct JPH_PhysicsMaterial					JPH_PhysicsMaterial;
-
-/* ShapeSettings */
-typedef struct JPH_ShapeSettings                    JPH_ShapeSettings;
-typedef struct JPH_ConvexShapeSettings			    JPH_ConvexShapeSettings;
-typedef struct JPH_SphereShapeSettings              JPH_SphereShapeSettings;
-typedef struct JPH_BoxShapeSettings                 JPH_BoxShapeSettings;
-typedef struct JPH_PlaneShapeSettings               JPH_PlaneShapeSettings;
-typedef struct JPH_TriangleShapeSettings            JPH_TriangleShapeSettings;
-typedef struct JPH_CapsuleShapeSettings             JPH_CapsuleShapeSettings;
-typedef struct JPH_TaperedCapsuleShapeSettings      JPH_TaperedCapsuleShapeSettings;
-typedef struct JPH_CylinderShapeSettings            JPH_CylinderShapeSettings;
-typedef struct JPH_TaperedCylinderShapeSettings     JPH_TaperedCylinderShapeSettings;
-typedef struct JPH_ConvexHullShapeSettings          JPH_ConvexHullShapeSettings;
-typedef struct JPH_CompoundShapeSettings            JPH_CompoundShapeSettings;
-typedef struct JPH_StaticCompoundShapeSettings      JPH_StaticCompoundShapeSettings;
-typedef struct JPH_MutableCompoundShapeSettings     JPH_MutableCompoundShapeSettings;
-typedef struct JPH_MeshShapeSettings                JPH_MeshShapeSettings;
-typedef struct JPH_HeightFieldShapeSettings         JPH_HeightFieldShapeSettings;
-typedef struct JPH_RotatedTranslatedShapeSettings   JPH_RotatedTranslatedShapeSettings;
-typedef struct JPH_ScaledShapeSettings              JPH_ScaledShapeSettings;
-typedef struct JPH_OffsetCenterOfMassShapeSettings  JPH_OffsetCenterOfMassShapeSettings;
-typedef struct JPH_EmptyShapeSettings               JPH_EmptyShapeSettings;
-
-/* Shape */
-typedef struct JPH_Shape                            JPH_Shape;
-typedef struct JPH_ConvexShape                      JPH_ConvexShape;
-typedef struct JPH_SphereShape                      JPH_SphereShape;
-typedef struct JPH_BoxShape                         JPH_BoxShape;
-typedef struct JPH_PlaneShape                       JPH_PlaneShape;
-typedef struct JPH_CapsuleShape                     JPH_CapsuleShape;
-typedef struct JPH_CylinderShape                    JPH_CylinderShape;
-typedef struct JPH_TaperedCylinderShape             JPH_TaperedCylinderShape;
-typedef struct JPH_TriangleShape				    JPH_TriangleShape;
-typedef struct JPH_TaperedCapsuleShape			    JPH_TaperedCapsuleShape;
-typedef struct JPH_ConvexHullShape                  JPH_ConvexHullShape;
-typedef struct JPH_CompoundShape                    JPH_CompoundShape;
-typedef struct JPH_StaticCompoundShape              JPH_StaticCompoundShape;
-typedef struct JPH_MutableCompoundShape             JPH_MutableCompoundShape;
-typedef struct JPH_MeshShape                        JPH_MeshShape;
-typedef struct JPH_HeightFieldShape                 JPH_HeightFieldShape;
-typedef struct JPH_DecoratedShape                   JPH_DecoratedShape;
-typedef struct JPH_RotatedTranslatedShape           JPH_RotatedTranslatedShape;
-typedef struct JPH_ScaledShape                      JPH_ScaledShape;
-typedef struct JPH_OffsetCenterOfMassShape          JPH_OffsetCenterOfMassShape;
-typedef struct JPH_EmptyShape                       JPH_EmptyShape;
-
-typedef struct JPH_BodyCreationSettings             JPH_BodyCreationSettings;
-typedef struct JPH_SoftBodyCreationSettings         JPH_SoftBodyCreationSettings;
-typedef struct JPH_BodyInterface                    JPH_BodyInterface;
-typedef struct JPH_BodyLockInterface                JPH_BodyLockInterface;
-typedef struct JPH_BroadPhaseQuery                  JPH_BroadPhaseQuery;
-typedef struct JPH_NarrowPhaseQuery                 JPH_NarrowPhaseQuery;
-typedef struct JPH_MotionProperties                 JPH_MotionProperties;
-typedef struct JPH_MassProperties                   JPH_MassProperties;
-typedef struct JPH_Body                             JPH_Body;
-
-typedef struct JPH_CollideShapeResult               JPH_CollideShapeResult;
-typedef struct JPH_ContactListener                  JPH_ContactListener;
-typedef struct JPH_ContactManifold                  JPH_ContactManifold;
-typedef struct JPH_ContactSettings                  JPH_ContactSettings;
 
 typedef struct JPH_CollisionEstimationResultImpulse {
 	float	contactImpulse;
@@ -1094,6 +1136,9 @@ JPH_CAPI void JPH_PhysicsSystem_RemoveConstraint(JPH_PhysicsSystem* system, JPH_
 JPH_CAPI void JPH_PhysicsSystem_AddConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_RemoveConstraints(JPH_PhysicsSystem* system, JPH_Constraint** constraints, uint32_t count);
 
+JPH_CAPI void JPH_PhysicsSystem_AddStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
+JPH_CAPI void JPH_PhysicsSystem_RemoveStepListener(JPH_PhysicsSystem* system, JPH_PhysicsStepListener* listener);
+
 JPH_CAPI void JPH_PhysicsSystem_GetBodies(const JPH_PhysicsSystem* system, JPH_BodyID* ids, uint32_t count);
 JPH_CAPI void JPH_PhysicsSystem_GetConstraints(const JPH_PhysicsSystem* system, const JPH_Constraint** constraints, uint32_t count);
 
@@ -1167,6 +1212,8 @@ JPH_CAPI void JPH_Matrix4x4_Translation(JPH_Matrix4x4* result, const JPH_Vec3* t
 JPH_CAPI void JPH_Matrix4x4_RotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);
 JPH_CAPI void JPH_Matrix4x4_InverseRotationTranslation(JPH_Matrix4x4* result, const JPH_Quat* rotation, const JPH_Vec3* translation);
 JPH_CAPI void JPH_Matrix4x4_Scale(JPH_Matrix4x4* result, const JPH_Vec3* scale);
+JPH_CAPI void JPH_Matrix4x4_Inversed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_Matrix4x4_Transposed(const JPH_Matrix4x4* m, JPH_Matrix4x4* result);
 
 JPH_CAPI void JPH_RMatrix4x4_Zero(JPH_RMatrix4x4* result);
 JPH_CAPI void JPH_RMatrix4x4_Identity(JPH_RMatrix4x4* result);
@@ -1175,6 +1222,7 @@ JPH_CAPI void JPH_RMatrix4x4_Translation(JPH_RMatrix4x4* result, const JPH_RVec3
 JPH_CAPI void JPH_RMatrix4x4_RotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation);
 JPH_CAPI void JPH_RMatrix4x4_InverseRotationTranslation(JPH_RMatrix4x4* result, const JPH_Quat* rotation, const JPH_RVec3* translation);
 JPH_CAPI void JPH_RMatrix4x4_Scale(JPH_RMatrix4x4* result, const JPH_Vec3* scale);
+JPH_CAPI void JPH_RMatrix4x4_Inversed(const JPH_RMatrix4x4* m, JPH_RMatrix4x4* result);
 
 JPH_CAPI void JPH_Matrix4x4_GetAxisX(const JPH_Matrix4x4* matrix, JPH_Vec3* result);
 JPH_CAPI void JPH_Matrix4x4_GetAxisY(const JPH_Matrix4x4* matrix, JPH_Vec3* result);
@@ -1187,6 +1235,15 @@ JPH_CAPI JPH_PhysicsMaterial* JPH_PhysicsMaterial_Create(const char* name, uint3
 JPH_CAPI void JPH_PhysicsMaterial_Destroy(JPH_PhysicsMaterial* material);
 JPH_CAPI const char* JPH_PhysicsMaterial_GetDebugName(const JPH_PhysicsMaterial* material);
 JPH_CAPI uint32_t JPH_PhysicsMaterial_GetDebugColor(const JPH_PhysicsMaterial* material);
+
+/* GroupFilter/GroupFilterTable */
+JPH_CAPI void JPH_GroupFilter_Destroy(JPH_GroupFilter* groupFilter);
+JPH_CAPI bool JPH_GroupFilter_CanCollide(JPH_GroupFilter* groupFilter, const JPH_CollisionGroup* group1, const JPH_CollisionGroup* group2);
+
+JPH_CAPI JPH_GroupFilterTable* JPH_GroupFilterTable_Create(uint32_t numSubGroups/* = 0*/);
+JPH_CAPI void JPH_GroupFilterTable_DisableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
+JPH_CAPI void JPH_GroupFilterTable_EnableCollision(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
+JPH_CAPI bool JPH_GroupFilterTable_IsCollisionEnabled(JPH_GroupFilterTable* table, JPH_CollisionSubGroupID subGroup1, JPH_CollisionSubGroupID subGroup2);
 
 /* ShapeSettings */
 JPH_CAPI void JPH_ShapeSettings_Destroy(JPH_ShapeSettings* settings);
@@ -1209,6 +1266,7 @@ JPH_CAPI void JPH_Shape_GetMassProperties(const JPH_Shape* shape, JPH_MassProper
 JPH_CAPI const JPH_Shape* JPH_Shape_GetLeafShape(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_SubShapeID* remainder);
 JPH_CAPI const JPH_PhysicsMaterial* JPH_Shape_GetMaterial(const JPH_Shape* shape, JPH_SubShapeID subShapeID);
 JPH_CAPI void JPH_Shape_GetSurfaceNormal(const JPH_Shape* shape, JPH_SubShapeID subShapeID, JPH_Vec3* localPosition, JPH_Vec3* normal);
+JPH_CAPI void JPH_Shape_GetSupportingFace(const JPH_Shape* shape, const JPH_SubShapeID subShapeID, const JPH_Vec3* direction, const JPH_Vec3* scale, const JPH_Matrix4x4* centerOfMassTransform, JPH_SupportingFace* outVertices);
 JPH_CAPI float JPH_Shape_GetVolume(const JPH_Shape* shape);
 JPH_CAPI bool JPH_Shape_IsValidScale(const JPH_Shape* shape, const JPH_Vec3* scale);
 JPH_CAPI void JPH_Shape_MakeScaleValid(const JPH_Shape* shape, const JPH_Vec3* scale, JPH_Vec3* result);
@@ -1411,6 +1469,9 @@ JPH_CAPI void JPH_BodyCreationSettings_SetUserData(JPH_BodyCreationSettings* set
 
 JPH_CAPI JPH_ObjectLayer JPH_BodyCreationSettings_GetObjectLayer(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetObjectLayer(JPH_BodyCreationSettings* settings, JPH_ObjectLayer value);
+
+JPH_CAPI void JPH_BodyCreationSettings_GetCollissionGroup(const JPH_BodyCreationSettings* settings, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyCreationSettings_SetCollissionGroup(JPH_BodyCreationSettings* settings, const JPH_CollisionGroup* value);
 
 JPH_CAPI JPH_MotionType JPH_BodyCreationSettings_GetMotionType(const JPH_BodyCreationSettings* settings);
 JPH_CAPI void JPH_BodyCreationSettings_SetMotionType(JPH_BodyCreationSettings* settings, JPH_MotionType value);
@@ -1634,6 +1695,32 @@ JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaPosition(const JPH_SixDOFConstr
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaRotation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaMotorTranslation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
 JPH_CAPI void JPH_SixDOFConstraint_GetTotalLambdaMotorRotation(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetTranslationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetTranslationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationLimitsMin(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationLimitsMax(const JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI bool JPH_SixDOFConstraint_IsFixedAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI bool JPH_SixDOFConstraint_IsFreeAxis(const JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_GetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* result, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetLimitsSpringSettings(JPH_SixDOFConstraint* constraint, JPH_SpringSettings* settings, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, float inFriction);
+JPH_CAPI float JPH_SixDOFConstraint_GetMaxFriction(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_GetRotationInConstraintSpace(JPH_SixDOFConstraint* constraint, JPH_Quat* result);
+JPH_CAPI void JPH_SixDOFConstraint_GetMotorSettings(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorSettings* settings);
+JPH_CAPI void JPH_SixDOFConstraint_SetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis, JPH_MotorState state);
+JPH_CAPI JPH_MotorState JPH_SixDOFConstraint_GetMotorState(JPH_SixDOFConstraint* constraint, JPH_SixDOFConstraintAxis axis);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inVelocity);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inAngularVelocity);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetAngularVelocityCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* inPosition);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetPositionCS(JPH_SixDOFConstraint* constraint, JPH_Vec3* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation);
+JPH_CAPI void JPH_SixDOFConstraint_GetTargetOrientationCS(JPH_SixDOFConstraint* constraint, JPH_Quat* result);
+JPH_CAPI void JPH_SixDOFConstraint_SetTargetOrientationBS(JPH_SixDOFConstraint* constraint, JPH_Quat* inOrientation);
+
+
+
 
 /* JPH_GearConstraint */
 JPH_CAPI void JPH_GearConstraintSettings_Init(JPH_GearConstraintSettings* settings);
@@ -1688,6 +1775,9 @@ JPH_CAPI void JPH_BodyInterface_SetPositionAndRotation(JPH_BodyInterface* interf
 JPH_CAPI void JPH_BodyInterface_SetPositionAndRotationWhenChanged(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_RVec3* position, const JPH_Quat* rotation, JPH_Activation activationMode);
 JPH_CAPI void JPH_BodyInterface_GetPositionAndRotation(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation);
 JPH_CAPI void JPH_BodyInterface_SetPositionRotationAndVelocity(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_RVec3* position, JPH_Quat* rotation, JPH_Vec3* linearVelocity, JPH_Vec3* angularVelocity);
+
+JPH_CAPI void JPH_BodyInterface_GetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_BodyInterface_SetCollissionGroup(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_CollisionGroup* group);
 
 JPH_CAPI const JPH_Shape* JPH_BodyInterface_GetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId);
 JPH_CAPI void JPH_BodyInterface_SetShape(JPH_BodyInterface* interface, JPH_BodyID bodyId, const JPH_Shape* shape, bool updateMassProperties, JPH_Activation activationMode);
@@ -1777,6 +1867,12 @@ JPH_CAPI void JPH_MotionProperties_GetInverseInertiaDiagonal(JPH_MotionPropertie
 JPH_CAPI void JPH_MotionProperties_GetInertiaRotation(JPH_MotionProperties* properties, JPH_Quat* result);
 JPH_CAPI void JPH_MotionProperties_SetInverseInertia(JPH_MotionProperties* properties, JPH_Vec3* diagonal, JPH_Quat* rot);
 JPH_CAPI void JPH_MotionProperties_ScaleToMass(JPH_MotionProperties* properties, float mass);
+
+//--------------------------------------------------------------------------------------------------
+// JPH_RayCast
+//--------------------------------------------------------------------------------------------------
+JPH_CAPI void JPH_RayCast_GetPointOnRay(const JPH_Vec3* origin, const JPH_Vec3* direction, float fraction, JPH_Vec3* result);
+JPH_CAPI void JPH_RRayCast_GetPointOnRay(const JPH_RVec3* origin, const JPH_Vec3* direction, float fraction, JPH_RVec3* result);
 
 //--------------------------------------------------------------------------------------------------
 // JPH_MassProperties
@@ -1997,6 +2093,9 @@ JPH_CAPI void JPH_Body_SetMotionType(JPH_Body* body, JPH_MotionType motionType);
 JPH_CAPI JPH_BroadPhaseLayer JPH_Body_GetBroadPhaseLayer(const JPH_Body* body);
 JPH_CAPI JPH_ObjectLayer JPH_Body_GetObjectLayer(const JPH_Body* body);
 
+JPH_CAPI void JPH_Body_GetCollissionGroup(const JPH_Body* body, JPH_CollisionGroup* result);
+JPH_CAPI void JPH_Body_SetCollissionGroup(JPH_Body* body, const JPH_CollisionGroup* value);
+
 JPH_CAPI bool JPH_Body_GetAllowSleeping(JPH_Body* body);
 JPH_CAPI void JPH_Body_SetAllowSleeping(JPH_Body* body, bool allowSleeping);
 JPH_CAPI void JPH_Body_ResetSleepTimer(JPH_Body* body);
@@ -2060,7 +2159,8 @@ typedef struct JPH_BroadPhaseLayerFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_BroadPhaseLayer layer);
 } JPH_BroadPhaseLayerFilter_Procs;
 
-JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(const JPH_BroadPhaseLayerFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BroadPhaseLayerFilter_SetProcs(const JPH_BroadPhaseLayerFilter_Procs* procs);
+JPH_CAPI JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData);
 JPH_CAPI void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filter);
 
 /* JPH_ObjectLayerFilter */
@@ -2068,7 +2168,8 @@ typedef struct JPH_ObjectLayerFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide)(void* userData, JPH_ObjectLayer* layer);
 } JPH_ObjectLayerFilter_Procs;
 
-JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(const JPH_ObjectLayerFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_ObjectLayerFilter_SetProcs(const JPH_ObjectLayerFilter_Procs* procs);
+JPH_CAPI JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData);
 JPH_CAPI void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter);
 
 /* JPH_BodyFilter */
@@ -2077,7 +2178,8 @@ typedef struct JPH_BodyFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollideLocked)(void* userData, const JPH_Body* bodyID);
 } JPH_BodyFilter_Procs;
 
-JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(const JPH_BodyFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyFilter_SetProcs(const JPH_BodyFilter_Procs* procs);
+JPH_CAPI JPH_BodyFilter* JPH_BodyFilter_Create(void* userData);
 JPH_CAPI void JPH_BodyFilter_Destroy(JPH_BodyFilter* filter);
 
 /* JPH_ShapeFilter */
@@ -2086,7 +2188,8 @@ typedef struct JPH_ShapeFilter_Procs {
 	bool(JPH_API_CALL* ShouldCollide2)(void* userData, const JPH_Shape* shape1, const JPH_SubShapeID* subShapeIDOfShape1, const JPH_Shape* shape2, const JPH_SubShapeID* subShapeIDOfShape2);
 } JPH_ShapeFilter_Procs;
 
-JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(const JPH_ShapeFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_ShapeFilter_SetProcs(const JPH_ShapeFilter_Procs* procs);
+JPH_CAPI JPH_ShapeFilter* JPH_ShapeFilter_Create(void* userData);
 JPH_CAPI void JPH_ShapeFilter_Destroy(JPH_ShapeFilter* filter);
 JPH_CAPI JPH_BodyID JPH_ShapeFilter_GetBodyID2(JPH_ShapeFilter* filter);
 JPH_CAPI void JPH_ShapeFilter_SetBodyID2(JPH_ShapeFilter* filter, JPH_BodyID id);
@@ -2103,7 +2206,8 @@ typedef struct JPH_SimShapeFilter_Procs {
 		);
 } JPH_SimShapeFilter_Procs;
 
-JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(const JPH_SimShapeFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_SimShapeFilter_SetProcs(const JPH_SimShapeFilter_Procs* procs);
+JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(void* userData);
 JPH_CAPI void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter);
 
 /* Contact listener */
@@ -2131,7 +2235,8 @@ typedef struct JPH_ContactListener_Procs {
 		);
 } JPH_ContactListener_Procs;
 
-JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(const JPH_ContactListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* procs);
+JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(void* userData);
 JPH_CAPI void JPH_ContactListener_Destroy(JPH_ContactListener* listener);
 
 /* BodyActivationListener */
@@ -2140,7 +2245,8 @@ typedef struct JPH_BodyActivationListener_Procs {
 	void(JPH_API_CALL* OnBodyDeactivated)(void* userData, JPH_BodyID bodyID, uint64_t bodyUserData);
 } JPH_BodyActivationListener_Procs;
 
-JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(const JPH_BodyActivationListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyActivationListener_SetProcs(const JPH_BodyActivationListener_Procs* procs);
+JPH_CAPI JPH_BodyActivationListener* JPH_BodyActivationListener_Create(void* userData);
 JPH_CAPI void JPH_BodyActivationListener_Destroy(JPH_BodyActivationListener* listener);
 
 /* JPH_BodyDrawFilter */
@@ -2148,7 +2254,8 @@ typedef struct JPH_BodyDrawFilter_Procs {
 	bool(JPH_API_CALL* ShouldDraw)(void* userData, const JPH_Body* body);
 } JPH_BodyDrawFilter_Procs;
 
-JPH_CAPI JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(const JPH_BodyDrawFilter_Procs* procs, void* userData);
+JPH_CAPI void JPH_BodyDrawFilter_SetProcs(const JPH_BodyDrawFilter_Procs* procs);
+JPH_CAPI JPH_BodyDrawFilter* JPH_BodyDrawFilter_Create(void* userData);
 JPH_CAPI void JPH_BodyDrawFilter_Destroy(JPH_BodyDrawFilter* filter);
 
 /* ContactManifold */
@@ -2393,7 +2500,8 @@ typedef struct JPH_CharacterContactListener_Procs {
 		);
 } JPH_CharacterContactListener_Procs;
 
-JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(const JPH_CharacterContactListener_Procs* procs, void* userData);
+JPH_CAPI void JPH_CharacterContactListener_SetProcs(const JPH_CharacterContactListener_Procs* procs);
+JPH_CAPI JPH_CharacterContactListener* JPH_CharacterContactListener_Create(void* userData);
 JPH_CAPI void JPH_CharacterContactListener_Destroy(JPH_CharacterContactListener* listener);
 
 /* JPH_CharacterVsCharacterCollision */
@@ -2414,7 +2522,8 @@ typedef struct JPH_CharacterVsCharacterCollision_Procs {
 		);
 } JPH_CharacterVsCharacterCollision_Procs;
 
-JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(const JPH_CharacterVsCharacterCollision_Procs* procs, void* userData);
+JPH_CAPI void JPH_CharacterVsCharacterCollision_SetProcs(const JPH_CharacterVsCharacterCollision_Procs* procs);
+JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_Create(void* userData);
 JPH_CAPI JPH_CharacterVsCharacterCollision* JPH_CharacterVsCharacterCollision_CreateSimple(void);
 JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_AddCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
 JPH_CAPI void JPH_CharacterVsCharacterCollisionSimple_RemoveCharacter(JPH_CharacterVsCharacterCollision* characterVsCharacter, JPH_CharacterVirtual* character);
@@ -2478,9 +2587,12 @@ typedef struct JPH_DebugRenderer_Procs {
 	void (JPH_API_CALL* DrawText3D)(void* userData, const JPH_RVec3* position, const char* str, JPH_Color color, float height);
 } JPH_DebugRenderer_Procs;
 
-JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(const JPH_DebugRenderer_Procs* procs, void* userData);
+JPH_CAPI void JPH_DebugRenderer_SetProcs(const JPH_DebugRenderer_Procs* procs);
+JPH_CAPI JPH_DebugRenderer* JPH_DebugRenderer_Create(void* userData);
 JPH_CAPI void JPH_DebugRenderer_Destroy(JPH_DebugRenderer* renderer);
 JPH_CAPI void JPH_DebugRenderer_NextFrame(JPH_DebugRenderer* renderer);
+JPH_CAPI void JPH_DebugRenderer_SetCameraPos(JPH_DebugRenderer* renderer, const JPH_RVec3* position);
+
 JPH_CAPI void JPH_DebugRenderer_DrawLine(JPH_DebugRenderer* renderer, const JPH_RVec3* from, const JPH_RVec3* to, JPH_Color color);
 JPH_CAPI void JPH_DebugRenderer_DrawWireBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color);
 JPH_CAPI void JPH_DebugRenderer_DrawWireBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color);
@@ -2491,6 +2603,19 @@ JPH_CAPI void JPH_DebugRenderer_DrawPlane(JPH_DebugRenderer* renderer, const JPH
 JPH_CAPI void JPH_DebugRenderer_DrawWireTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color);
 JPH_CAPI void JPH_DebugRenderer_DrawWireSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, int level);
 JPH_CAPI void JPH_DebugRenderer_DrawWireUnitSphere(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, JPH_Color color, int level);
+JPH_CAPI void JPH_DebugRenderer_DrawTriangle(JPH_DebugRenderer* renderer, const JPH_RVec3* v1, const JPH_RVec3* v2, const JPH_RVec3* v3, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow);
+JPH_CAPI void JPH_DebugRenderer_DrawBox(JPH_DebugRenderer* renderer, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawBox2(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, const JPH_AABox* box, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawSphere(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawUnitSphere(JPH_DebugRenderer* renderer, JPH_RMatrix4x4 matrix, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawCapsule(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeightOfCylinder, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float halfHeight, float radius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawOpenCone(JPH_DebugRenderer* renderer, const JPH_RVec3* top, const JPH_Vec3* axis, const JPH_Vec3* perpendicular, float halfAngle, float length, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawSwingConeLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float swingYHalfAngle, float swingZHalfAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawSwingPyramidLimits(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* matrix, float minSwingYAngle, float maxSwingYAngle, float minSwingZAngle, float maxSwingZAngle, float edgeLength, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawPie(JPH_DebugRenderer* renderer, const JPH_RVec3* center, float radius, const JPH_Vec3* normal, const JPH_Vec3* axis, float minAngle, float maxAngle, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+JPH_CAPI void JPH_DebugRenderer_DrawTaperedCylinder(JPH_DebugRenderer* renderer, const JPH_RMatrix4x4* inMatrix, float top, float bottom, float topRadius, float bottomRadius, JPH_Color color, JPH_DebugRenderer_CastShadow castShadow, JPH_DebugRenderer_DrawMode drawMode);
+
 
 /* Skeleton */
 typedef struct JPH_SkeletonJoint {
@@ -2533,6 +2658,103 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
+
+/* WheelWV */
+JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
+	const JPH_Vec3* position,
+	const JPH_Vec3* suspensionForcePoint,
+	const JPH_Vec3* suspensionDirection,
+	const JPH_Vec3* steeringAxis,
+	const JPH_Vec3* wheelUp,
+	const JPH_Vec3* wheelForward,
+	float						suspensionMinLength,
+	float						suspensionMaxLength,
+	float						suspensionPreloadLength,
+	const JPH_SpringSettings* suspensionSpring,
+	float						radius,
+	float						width,
+	bool						enableSuspensionForcePoint,
+	float						inertia,
+	float						angularDamping,
+	float						maxSteerAngle,
+	//LinearCurve				longitudinalFriction,	// NOTE: BGE: just using default values for now.
+	//LinearCurve				lateralFriction,		// NOTE: BGE: just using default values for now.
+	float						maxBrakeTorque,
+	float						maxHandBrakeTorque);
+JPH_CAPI void JPH_WheelSettingsWV_Destroy(JPH_WheelSettingsWV* settings);
+
+JPH_CAPI JPH_WheelWV* JPH_WheelWV_Create(const JPH_WheelSettingsWV* settings);
+JPH_CAPI void JPH_WheelWV_Destroy(JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasContact(const JPH_WheelWV* wheel);
+JPH_CAPI bool JPH_WheelWV_HasHitHardPoint(const JPH_WheelWV* wheel);
+
+/* VehicleEngine */
+JPH_CAPI JPH_VehicleEngineSettings* JPH_VehicleEngineSettings_Create(
+	float			maxTorque,
+	float			minRPM,
+	float			maxRPM,
+	//LinearCurve	normalizedTorque,	// NOTE: BGE: just using default values for now.
+	float			inertia,
+	float			angularDamping);
+JPH_CAPI void JPH_VehicleEngineSettings_Destroy(JPH_VehicleEngineSettings* settings);
+
+/* VehicleTransmission */
+JPH_CAPI JPH_VehicleTransmissionSettings* JPH_VehicleTransmissionSettings_Create(
+	JPH_TransmissionMode	mode,
+	//Array<float>			gearRatios,			// NOTE: BGE: just using default values for now.
+	//Array<float>			reverseGearRatios,	// NOTE: BGE: just using default values for now.
+	float					switchTime,
+	float					clutchReleaseTime,
+	float					switchLatency,
+	float					shiftUpRPM,
+	float					shiftDownRPM,
+	float					clutchStrength);
+JPH_CAPI void JPH_VehicleTransmissionSettings_Destroy(JPH_VehicleTransmissionSettings* settings);
+
+/* VehicleColliionTester */
+JPH_CAPI JPH_VehicleCollisionTesterRay* JPH_VehicleCollisionTesterRay_Create(JPH_ObjectLayer layer, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI void JPH_VehicleCollisionTesterRay_Destroy(JPH_VehicleCollisionTesterRay* tester);
+JPH_CAPI JPH_VehicleCollisionTesterCastSphere* JPH_VehicleCollisionTesterCastSphere_Create(JPH_ObjectLayer layer, float radius, const JPH_Vec3* up, float maxSlopeAngle);
+JPH_CAPI void JPH_VehicleCollisionTesterCastSphere_Destroy(JPH_VehicleCollisionTesterCastSphere* tester);
+JPH_CAPI JPH_VehicleCollisionTesterCastCylinder* JPH_VehicleCollisionTesterCastCylinder_Create(JPH_ObjectLayer layer, float convexRadiusFraction);
+JPH_CAPI void JPH_VehicleCollisionTesterCastCylinder_Destroy(JPH_VehicleCollisionTesterCastCylinder* tester);
+
+/* VehicleConstraint */
+JPH_CAPI JPH_VehicleConstraintSettings* JPH_VehicleConstraintSettings_Create(
+	const JPH_Vec3* up,
+	const JPH_Vec3* forward,
+	float							maxPitchRollAngle,
+	JPH_WheelSettingsWV** wheels,				// NOTE: BGE: just using an overly-specific pointer type for now.
+	int								wheelsCount,
+	//VehicleAntiRollBars			antiRollBars,		// NOTE: BGE: just using default values for now.
+	//int							antiRollBarsCount,	// NOTE: BGE: just using default values for now.
+	JPH_VehicleControllerSettings* settings);
+JPH_CAPI void JPH_VehicleConstraintSettings_Destroy(JPH_VehicleConstraintSettings* settings);
+
+JPH_CAPI JPH_VehicleConstraint* JPH_VehicleConstraint_Create(JPH_Body* body, const JPH_VehicleConstraintSettings* constraintSettings);
+JPH_CAPI void JPH_VehicleConstraint_Destroy(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_PhysicsStepListener* JPH_VehicleConstraint_AsPhysicsStepListener(JPH_VehicleConstraint* constraint);
+JPH_CAPI JPH_WheeledVehicleController* JPH_VehicleConstraint_GetWheeledVehicleController(JPH_VehicleConstraint* constraint);
+JPH_CAPI void JPH_VehicleConstraint_SetVehicleCollisionTester(JPH_VehicleConstraint* constraint, const JPH_VehicleCollisionTester* tester);
+
+/* WheeledVehicleController */
+JPH_CAPI JPH_WheeledVehicleControllerSettings* JPH_WheeledVehicleControllerSettings_Create(
+	const JPH_VehicleEngineSettings* engine,
+	const JPH_VehicleTransmissionSettings* transmission,
+	//Array<VehicleDifferentialSettings>	differentials,	// NOTE: BGE: just using default values for now.
+	float									differentialLimitedSlipRatio);
+JPH_CAPI void JPH_WheeledVehicleControllerSettings_Destroy(JPH_WheeledVehicleControllerSettings* settings);
+
+JPH_CAPI JPH_Constraint* JPH_WheeledVehicleController_GetConstraint(JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetForwardInput(JPH_WheeledVehicleController* vehicle, float forward);
+JPH_CAPI float JPH_WheeledVehicleController_GetForwardInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetRightInput(JPH_WheeledVehicleController* vehicle, float rightRatio);
+JPH_CAPI float JPH_WheeledVehicleController_GetRightInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetBrakeInput(JPH_WheeledVehicleController* vehicle, float brakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetBrakeInput(const JPH_WheeledVehicleController* vehicle);
+JPH_CAPI void JPH_WheeledVehicleController_SetHandBrakeInput(JPH_WheeledVehicleController* vehicle, float handBrakeInput);
+JPH_CAPI float JPH_WheeledVehicleController_GetHandBrakeInput(const JPH_WheeledVehicleController* vehicle);
+
 
 /* StateRecorder */
 JPH_CAPI JPH_StateRecorder* JPH_StateRecorder_Create();

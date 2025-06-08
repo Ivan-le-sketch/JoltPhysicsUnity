@@ -20,6 +20,7 @@ pub fn compile(options: Options, b: *Build, lib: *Build.Step.Compile) void {
        "-std=c++17",
        "-fdeclspec",
        "-DJPH_SHARED_LIBRARY_BUILD",
+       "-DJPH_OBJECT_LAYER_BITS=32",
        if (options.use_double_precision) "-DJPH_DOUBLE_PRECISION" else "",
        if (options.enable_asserts or lib.optimize == .Debug) "-DJPH_ENABLE_ASSERTS" else "",
        if (options.enable_cross_platform_determinism) "-DJPH_CROSS_PLATFORM_DETERMINISTIC" else "",
