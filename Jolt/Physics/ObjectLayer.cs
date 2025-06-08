@@ -11,19 +11,19 @@ namespace Jolt
         /// <summary>
         /// Number of bits in an object layer.
         /// </summary>
-        public const uint ObjectLayerBits = 16; // TODO can be 32 with compiler flag
+        public const uint ObjectLayerBits = 32;
 
         /// <summary>
         /// The invalid ObjectLayer (~0), all bits set.
         /// </summary>
-        public static readonly ObjectLayer Invalid = new ObjectLayer(unchecked((ushort)~0));
+        public static readonly ObjectLayer Invalid = new ObjectLayer(unchecked((uint)~0));
 
         /// <summary>
         /// The layer value.
         /// </summary>
-        public readonly ushort Value;
+        public readonly uint Value;
 
-        public ObjectLayer(ushort value)
+        public ObjectLayer(uint value)
         {
             Value = value;
         }
@@ -31,7 +31,7 @@ namespace Jolt
         /// <summary>
         /// Implicit cast from ushort. The inverse is not available to avoid confusion.
         /// </summary>
-        public static implicit operator ObjectLayer(ushort layer)
+        public static implicit operator ObjectLayer(uint layer)
         {
             return new ObjectLayer(layer);
         }

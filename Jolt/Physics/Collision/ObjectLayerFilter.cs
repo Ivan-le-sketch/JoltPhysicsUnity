@@ -73,7 +73,7 @@ namespace Jolt
 
                     if (layer.Value >= 0 && layer.Value < 64)
                     {
-                        mask &= ~(1UL << layer.Value);
+                        mask &= ~(1UL << (int)layer.Value);
                     }
                     else
                     {
@@ -94,7 +94,7 @@ namespace Jolt
 
                     if (layer.Value >= 0 && layer.Value < 64)
                     {
-                        mask |= (1UL << layer.Value); // Set the bit for each layer to collide
+                        mask |= (1UL << (int)layer.Value); // Set the bit for each layer to collide
                     }
                     else
                     {
@@ -175,7 +175,7 @@ namespace Jolt
         internal bool ShouldCollide(ObjectLayer layer)
         {
             // Shift 1 left by the number of the layer's value, then AND it with the collision mask to see if that bit is set.
-            return (collisionMask & (1u << layer.Value)) != 0;
+            return (collisionMask & (1u << (int)layer.Value)) != 0;
         }
 
         public void Dispose()
