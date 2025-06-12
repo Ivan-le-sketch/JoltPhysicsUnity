@@ -1,5 +1,6 @@
 ﻿using AOT;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
+        private static readonly Dictionary<NativeHandle<JPH_SimShapeFilter>, int> simShapeFilterIds = new();
+
         public static NativeHandle<JPH_SimShapeFilter> JPH_SimShapeFilter_Create(ISimShapeFilterImplementation filter)
         {
             fixed (JPH_SimShapeFilter_Procs* procsPtr = &UnsafeSimShapeFilterProcs)
@@ -14,12 +17,10 @@ namespace Jolt
                 UnsafeBindings.JPH_SimShapeFilter_SetProcs(procsPtr);
             }
 
-            var gch = GCHandle.Alloc(filter);
-            var ptr = GCHandle.ToIntPtr(gch);
-
+            int id = ManagedReference<ISimShapeFilterImplementation>.Add(filter);
+            var ptr = new IntPtr(id);
             var handle = CreateHandle(UnsafeBindings.JPH_SimShapeFilter_Create((void*)ptr));
-
-            ManagedReference.Add(handle, gch);
+            simShapeFilterIds[handle] = id;
 
             return handle;
         }
@@ -28,17 +29,17 @@ namespace Jolt
         {
             if (filter.HasUser()) return;
 
-            if (ManagedReference.Remove(filter, out var gch))
+            if (simShapeFilterIds.TryGetValue(filter, out var id))
             {
-                gch.Free();
+                ManagedReference<ISimShapeFilterImplementation>.Remove(id);
+                simShapeFilterIds.Remove(filter);
             }
             else
             {
-                Debug.LogError("Missing GCHandle for managed sim shape filter!");
+                Debug.LogError("Missing SimShapeFilter ID for managed filter destruction!");
             }
 
             UnsafeBindings.JPH_SimShapeFilter_Destroy(filter);
-
             filter.Dispose();
         }
 
@@ -59,23 +60,16 @@ namespace Jolt
         /// Unsafe static implementation for ShouldCollide
         /// </summary>
         [MonoPInvokeCallback(typeof(UnsafeShouldCollide))]
-        private static bool UnsafeShouldCollideCallback(IntPtr udata, 
+        private static bool UnsafeShouldCollideCallback(IntPtr udata,
             JPH_Body* body1, JPH_Shape* shape1, SubShapeID* subShapeID1,
             JPH_Body* body2, JPH_Shape* shape2, SubShapeID* subShapeID2)
         {
-            try
-            {
-                var body1Wrapper = new Body(new NativeHandle<JPH_Body>(body1));
-                var shape1Wrapper = new Shape(new NativeHandle<JPH_Shape>(shape1));
-                var body2Wrapper = new Body(new NativeHandle<JPH_Body>(body2));
-                var shape2Wrapper = new Shape(new NativeHandle<JPH_Shape>(shape2));
-                return ManagedReference.Deref<ISimShapeFilterImplementation>(udata).ShouldCollide(body1Wrapper, shape1Wrapper, *subShapeID1, body2Wrapper, shape2Wrapper, *subShapeID2);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return true;
-            }
+            var body1Wrapper = new Body(new NativeHandle<JPH_Body>(body1));
+            var shape1Wrapper = new Shape(new NativeHandle<JPH_Shape>(shape1));
+            var body2Wrapper = new Body(new NativeHandle<JPH_Body>(body2));
+            var shape2Wrapper = new Shape(new NativeHandle<JPH_Shape>(shape2));
+            int id = udata.ToInt32();
+            return ManagedReference<ISimShapeFilterImplementation>.Get(id).ShouldCollide(body1Wrapper, shape1Wrapper, *subShapeID1, body2Wrapper, shape2Wrapper, *subShapeID2);
         }
     }
 }

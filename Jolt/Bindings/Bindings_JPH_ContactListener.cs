@@ -1,5 +1,6 @@
 ﻿using AOT;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
+        private static readonly Dictionary<NativeHandle<JPH_ContactListener>, int> contactListenerIds = new();
+
         public static NativeHandle<JPH_ContactListener> JPH_ContactListener_Create(IContactListenerImplementation listener)
         {
             fixed (JPH_ContactListener_Procs* procsPtr = &UnsafeContactListenerProcs)
@@ -24,11 +27,10 @@ namespace Jolt
             // static class. When Jolt invokes the native listener, it invokes the joltc static listener, which invokes
             // our own static listeners with the GCHandle parameter, which we dereference to obtain the user listener.
 
-            var gch = GCHandle.Alloc(listener);
-            var ptr = GCHandle.ToIntPtr(gch);
-
+            int id = ManagedReference<IContactListenerImplementation>.Add(listener);
+            var ptr = new IntPtr(id);
             var handle = CreateHandle(UnsafeBindings.JPH_ContactListener_Create((void*)ptr));
-            ManagedReference.Add(handle, gch);
+            contactListenerIds.Add(handle, id);
 
             return handle;
         }
@@ -37,17 +39,17 @@ namespace Jolt
         {
             if (listener.HasUser()) return;
 
-            if (ManagedReference.Remove(listener, out var gch))
+            if (contactListenerIds.TryGetValue(listener, out var id))
             {
-                gch.Free();
+                ManagedReference<IContactListenerImplementation>.Remove(id);
+                contactListenerIds.Remove(listener);
             }
             else
             {
-                Debug.LogError("Missing GCHandle for managed contact listener!");
+                Debug.LogError("Missing id for managed contact listener!");
             }
 
             UnsafeBindings.JPH_ContactListener_Destroy(listener);
-
             listener.Dispose();
         }
 
@@ -103,18 +105,10 @@ namespace Jolt
         [MonoPInvokeCallback(typeof(UnsafeContactValidate))]
         private static ValidateResult UnsafeContactValidateCallback(void* udata, JPH_Body* bodyA, JPH_Body* bodyB, rvec3* offset, CollideShapeResult* result)
         {
-            try
-            {
-                var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
-                var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
-                return ManagedReference.Deref<IContactListenerImplementation>((IntPtr)udata).OnContactValidate(b1, b2, *offset, *result);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-
-            return ValidateResult.AcceptContact;
+            var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
+            var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
+            int id = (int)udata;
+            return ManagedReference<IContactListenerImplementation>.Get(id).OnContactValidate(b1, b2, *offset, *result);
         }
 
         /// <summary>
@@ -123,18 +117,12 @@ namespace Jolt
         [MonoPInvokeCallback(typeof(UnsafeContactAdded))]
         private static void UnsafeContactAddedCallback(void* udata, JPH_Body* bodyA, JPH_Body* bodyB, JPH_ContactManifold* manifold, JPH_ContactSettings* settings)
         {
-            try
-            {
-                var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
-                var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
-                var m = new ContactManifold(new NativeHandle<JPH_ContactManifold>(manifold));
-                var s = new ContactSettings(new NativeHandle<JPH_ContactSettings>(settings));
-                ManagedReference.Deref<IContactListenerImplementation>((IntPtr)udata).OnContactAdded(b1, b2, m, s);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+            var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
+            var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
+            var m = new ContactManifold(new NativeHandle<JPH_ContactManifold>(manifold));
+            var s = new ContactSettings(new NativeHandle<JPH_ContactSettings>(settings));
+            int id = (int)udata;
+            ManagedReference<IContactListenerImplementation>.Get(id).OnContactAdded(b1, b2, m, s);
         }
 
         /// <summary>
@@ -143,14 +131,8 @@ namespace Jolt
         [MonoPInvokeCallback(typeof(UnsafeContactRemoved))]
         private static void UnsafeContactRemovedCallback(void* udata, SubShapeIDPair* pair)
         {
-            try
-            {
-                ManagedReference.Deref<IContactListenerImplementation>((IntPtr)udata).OnContactRemoved(*pair);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+            int id = (int)udata;
+            ManagedReference<IContactListenerImplementation>.Get(id).OnContactRemoved(*pair);
         }
 
         /// <summary>
@@ -159,18 +141,12 @@ namespace Jolt
         [MonoPInvokeCallback(typeof(UnsafeContactPersisted))]
         private static void UnsafeContactPersistedCallback(void* udata, JPH_Body* bodyA, JPH_Body* bodyB, JPH_ContactManifold* manifold, JPH_ContactSettings* settings)
         {
-            try
-            {
-                var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
-                var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
-                var m = new ContactManifold(new NativeHandle<JPH_ContactManifold>(manifold));
-                var s = new ContactSettings(new NativeHandle<JPH_ContactSettings>(settings));
-                ManagedReference.Deref<IContactListenerImplementation>((IntPtr)udata).OnContactPersisted(b1, b2, m, s);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+            var b1 = new Body(new NativeHandle<JPH_Body>(bodyA));
+            var b2 = new Body(new NativeHandle<JPH_Body>(bodyB));
+            var m = new ContactManifold(new NativeHandle<JPH_ContactManifold>(manifold));
+            var s = new ContactSettings(new NativeHandle<JPH_ContactSettings>(settings));
+            int id = (int)udata;
+            ManagedReference<IContactListenerImplementation>.Get(id).OnContactPersisted(b1, b2, m, s);
         }
     }
 }
