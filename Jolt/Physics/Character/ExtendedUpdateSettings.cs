@@ -27,7 +27,7 @@ namespace Jolt
         {
             return new ExtendedUpdateSettings
             {
-                stickToFloorStepDown = new float3(0.0f, 0.5f, 0.0f),
+                stickToFloorStepDown = new float3(0.0f, -0.5f, 0.0f),
                 walkStairsStepUp = new float3(0.0f, 0.4f, 0.0f),
                 walkStairsMinStepForward = 0.02f,
                 walkStairsStepForwardTest = 0.15f,
