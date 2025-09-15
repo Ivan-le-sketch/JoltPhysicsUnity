@@ -57,7 +57,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CastRay2(Handle, origin, direction, settings, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CastRay(float3 origin, float3 direction, RayCastSettings settings,
+        public int CastRay(float3 origin, float3 direction, RayCastSettings settings,
             CollisionCollectorType collectorType, ref RayCastResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
             ObjectLayerFilter? objectLayerFilter = null,
@@ -88,7 +88,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CastShape(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CastShape(Shape shape, float4x4 worldTransform, float3 direction,
+        public int CastShape(Shape shape, float4x4 worldTransform, float3 direction,
             ShapeCastSettings settings, rvec3 baseOffset,
             CollisionCollectorType collectorType, ref ShapeCastResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
@@ -120,7 +120,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(Handle, shape.Handle, worldTransform, direction, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CastShapeIgnoreInitialOverlap(Shape shape, float4x4 worldTransform, float3 direction,
+        public int CastShapeIgnoreInitialOverlap(Shape shape, float4x4 worldTransform, float3 direction,
             ShapeCastSettings settings, rvec3 baseOffset,
             CollisionCollectorType collectorType, ref ShapeCastResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
@@ -151,7 +151,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CollidePoint(Handle, origin, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CollidePoint(float3 origin,
+        public int CollidePoint(float3 origin,
             CollisionCollectorType collectorType, ref CollidePointResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
             ObjectLayerFilter? objectLayerFilter = null,
@@ -182,7 +182,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CollideShape(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
+        public int CollideShape(Shape shape, float3 scale, float4x4 centerOfMassTransform,
             CollideShapeSettings settings, rvec3 baseOffset,
             CollisionCollectorType collectorType, ref CollideShapeResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,
@@ -214,7 +214,7 @@ namespace Jolt
             return Bindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(Handle, shape.Handle, scale, centerOfMassTransform, settings, baseOffset, ref collector, broadPhaseLayerFilterHandle, objectLayerFilterHandle, bodyFilterHandle, shapeFilterHandle);
         }
 
-        public bool CollideShapeWithInternalEdgeRemoval(Shape shape, float3 scale, float4x4 centerOfMassTransform,
+        public int CollideShapeWithInternalEdgeRemoval(Shape shape, float3 scale, float4x4 centerOfMassTransform,
             CollideShapeSettings settings, rvec3 baseOffset,
             CollisionCollectorType collectorType, ref CollideShapeResultCollector collector,
             BroadPhaseLayerFilter? broadPhaseLayerFilter = null,

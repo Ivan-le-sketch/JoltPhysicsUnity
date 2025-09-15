@@ -6413,11 +6413,11 @@ bool JPH_NarrowPhaseQuery_CastRay2(const JPH_NarrowPhaseQuery* query,
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* origin, const JPH_Vec3* direction,
 	const JPH_RayCastSettings* rayCastSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastRayResultCallback* callback, void* userData,
+	JPH_RayCastResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -6426,6 +6426,7 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 	JPH::RRayCast ray(ToJolt(origin), ToJolt(direction));
 	JPH::RayCastSettings raySettings = ToJolt(rayCastSettings);
 	JPH_RayCastResult hitResult{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -6453,11 +6454,14 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 				hitResult.fraction = hit.mFraction;
 				hitResult.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = hit.mSubShapeID2.GetValue();
-				callback(userData, &hitResult);
+				resultArray[hitCount++] = hitResult;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -6477,10 +6481,10 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 			hitResult.fraction = collector.mHit.mFraction;
 			hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 			hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-			callback(userData, &hitResult);
+			resultArray[hitCount++] = hitResult;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -6506,11 +6510,14 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 				hitResult.fraction = hit.mFraction;
 				hitResult.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 				hitResult.subShapeID2 = hit.mSubShapeID2.GetValue();
-				callback(userData, &hitResult);
+				resultArray[hitCount++] = hitResult;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -6530,14 +6537,14 @@ bool JPH_NarrowPhaseQuery_CastRay3(const JPH_NarrowPhaseQuery* query,
 			hitResult.fraction = collector.mHit.mFraction;
 			hitResult.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 			hitResult.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-			callback(userData, &hitResult);
+			resultArray[hitCount++] = hitResult;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -6564,10 +6571,10 @@ bool JPH_NarrowPhaseQuery_CollidePoint(const JPH_NarrowPhaseQuery* query,
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 	const JPH_RVec3* point,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollidePointResultCallback* callback, void* userData,
+	JPH_CollidePointResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
@@ -6575,6 +6582,7 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 {
 	auto joltPoint = ToJolt(point);
 	JPH_CollidePointResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -6600,11 +6608,14 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 			{
 				result.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -6622,10 +6633,10 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 		{
 			result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -6649,11 +6660,14 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 			{
 				result.bodyID = hit.mBodyID.GetIndexAndSequenceNumber();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -6671,14 +6685,14 @@ bool JPH_NarrowPhaseQuery_CollidePoint2(const JPH_NarrowPhaseQuery* query,
 		{
 			result.bodyID = collector.mHit.mBodyID.GetIndexAndSequenceNumber();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -6718,19 +6732,19 @@ bool JPH_NarrowPhaseQuery_CollideShape(const JPH_NarrowPhaseQuery* query,
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollideShapeResultCallback* callback, void* userData,
+	JPH_CollideShapeResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter)
 {
 
-	JPH_ASSERT(query && shape && scale && centerOfMassTransform && callback);
+	JPH_ASSERT(query && shape && scale && centerOfMassTransform);
 
 	auto joltScale = ToJolt(scale);
 	auto joltTransform = ToJolt(centerOfMassTransform);
@@ -6739,6 +6753,7 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 	auto joltBaseOffset = ToJolt(baseOffset);
 
 	JPH_CollideShapeResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -6767,11 +6782,14 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 			for (auto& hit : collector.mHits)
 			{
 				result = FromJolt(hit);
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -6792,10 +6810,10 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 		if (collector.HadHit())
 		{
 			result = FromJolt(collector.mHit);
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -6828,11 +6846,15 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 				result.subShapeID1 = hit.mSubShapeID1.GetValue();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -6853,14 +6875,14 @@ bool JPH_NarrowPhaseQuery_CollideShape2(const JPH_NarrowPhaseQuery* query,
 		if (collector.HadHit())
 		{
 			result = FromJolt(collector.mHit);
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -6900,19 +6922,19 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(const JPH_NarrowPh
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape, const JPH_Vec3* scale, const JPH_RMatrix4x4* centerOfMassTransform,
 	const JPH_CollideShapeSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollideShapeResultCallback* callback, void* userData,
+	JPH_CollideShapeResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter)
 {
 
-	JPH_ASSERT(query && shape && scale && centerOfMassTransform && callback);
+	JPH_ASSERT(query && shape && scale && centerOfMassTransform);
 
 	auto joltScale = ToJolt(scale);
 	auto joltTransform = ToJolt(centerOfMassTransform);
@@ -6921,6 +6943,7 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowP
 	auto joltBaseOffset = ToJolt(baseOffset);
 
 	JPH_CollideShapeResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -6955,11 +6978,15 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowP
 				result.subShapeID1 = hit.mSubShapeID1.GetValue();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -6986,10 +7013,9 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowP
 			result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-			callback(userData, &result);
-		}
 
-		return collector.HadHit();
+			resultArray[hitCount++] = result;
+		}
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -7022,11 +7048,15 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowP
 				result.subShapeID1 = hit.mSubShapeID1.GetValue();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -7053,14 +7083,15 @@ bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(const JPH_NarrowP
 			result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-			callback(userData, &result);
+
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -7102,19 +7133,19 @@ bool JPH_NarrowPhaseQuery_CastShape(const JPH_NarrowPhaseQuery* query,
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape,
 	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback, void* userData,
+	JPH_ShapeCastResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter)
 {
-	JPH_ASSERT(query && shape && worldTransform && direction && callback);
+	JPH_ASSERT(query && shape && worldTransform && direction);
 
 	RShapeCast shapeCast = RShapeCast::sFromWorldTransform(
 		AsShape(shape),
@@ -7127,6 +7158,7 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 	auto joltBaseOffset = ToJolt(baseOffset);
 
 	JPH_ShapeCastResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -7161,11 +7193,15 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -7192,10 +7228,11 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -7228,11 +7265,15 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -7259,14 +7300,15 @@ bool JPH_NarrowPhaseQuery_CastShape2(const JPH_NarrowPhaseQuery* query,
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -7308,19 +7350,19 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(const JPH_NarrowPhaseQue
 	return collector.hadHit;
 }
 
-bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQuery* query,
+int JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQuery* query,
 	const JPH_Shape* shape,
 	const JPH_RMatrix4x4* worldTransform, const JPH_Vec3* direction,
 	const JPH_ShapeCastSettings* settings,
 	JPH_RVec3* baseOffset,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback, void* userData,
+	JPH_ShapeCastResult* resultArray, int resultArraySize,
 	JPH_BroadPhaseLayerFilter* broadPhaseLayerFilter,
 	JPH_ObjectLayerFilter* objectLayerFilter,
 	const JPH_BodyFilter* bodyFilter,
 	const JPH_ShapeFilter* shapeFilter)
 {
-	JPH_ASSERT(query && shape && worldTransform && direction && callback);
+	JPH_ASSERT(query && shape && worldTransform && direction);
 
 	RShapeCast shapeCast = RShapeCast::sFromWorldTransform(
 		AsShape(shape),
@@ -7333,6 +7375,7 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQu
 	auto joltBaseOffset = ToJolt(baseOffset);
 
 	JPH_ShapeCastResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -7366,12 +7409,16 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQu
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
-				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+				result.isBackFaceHit = hit.mIsBackFaceHit;;
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -7398,10 +7445,11 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQu
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -7434,11 +7482,15 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQu
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+
+				resultArray[hitCount++] = result;
+
+				if (hitCount == resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -7465,14 +7517,15 @@ bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(const JPH_NarrowPhaseQu
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -9306,21 +9359,21 @@ bool JPH_CollisionDispatch_CollideShapeVsShape(
 	return collector.hadHit;
 }
 
-bool JPH_CollisionDispatch_CollideShapeVsShape2(
+int JPH_CollisionDispatch_CollideShapeVsShape2(
 	const JPH_Shape* shape1, const JPH_Shape* shape2,
 	const JPH_Vec3* scale1, const JPH_Vec3* scale2,
 	const JPH_Matrix4x4* centerOfMassTransform1, const JPH_Matrix4x4* centerOfMassTransform2,
 	const JPH_CollideShapeSettings* collideShapeSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CollideShapeResultCallback* callback,
-	void* userData,
+	JPH_CollideShapeResult* resultArray, int resultArraySize,
 	const JPH_ShapeFilter* shapeFilter)
 {
-	JPH_ASSERT(shape1 && shape2 && scale1 && scale2 && centerOfMassTransform1 && centerOfMassTransform2 && callback);
+	JPH_ASSERT(shape1 && shape2 && scale1 && scale2 && centerOfMassTransform1 && centerOfMassTransform2);
 
 	JPH::CollideShapeSettings joltSettings = ToJolt(collideShapeSettings);;
 
 	JPH_CollideShapeResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -9351,11 +9404,14 @@ bool JPH_CollisionDispatch_CollideShapeVsShape2(
 				result.subShapeID1 = hit.mSubShapeID1.GetValue();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -9378,10 +9434,10 @@ bool JPH_CollisionDispatch_CollideShapeVsShape2(
 			result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -9410,11 +9466,14 @@ bool JPH_CollisionDispatch_CollideShapeVsShape2(
 				result.subShapeID1 = hit.mSubShapeID1.GetValue();
 				result.subShapeID2 = hit.mSubShapeID2.GetValue();
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -9437,14 +9496,14 @@ bool JPH_CollisionDispatch_CollideShapeVsShape2(
 			result.subShapeID1 = collector.mHit.mSubShapeID1.GetValue();
 			result.subShapeID2 = collector.mHit.mSubShapeID2.GetValue();
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -9474,17 +9533,17 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace(
 	return collector.hadHit;
 }
 
-bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
+int JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
 	const JPH_Vec3* scale1InShape2LocalSpace, const JPH_Vec3* scale2,
 	JPH_Matrix4x4* centerOfMassTransform1InShape2LocalSpace, JPH_Matrix4x4* centerOfMassWorldTransform2,
 	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback, void* userData,
+	JPH_ShapeCastResult* resultArray, int resultArraySize,
 	const JPH_ShapeFilter* shapeFilter)
 {
 	JPH_ASSERT(direction && shape1 && shape2 && scale1InShape2LocalSpace && scale2
-		&& centerOfMassTransform1InShape2LocalSpace && centerOfMassWorldTransform2 && callback);
+		&& centerOfMassTransform1InShape2LocalSpace && centerOfMassWorldTransform2);
 
 	ShapeCast shapeCast(
 		AsShape(shape1),
@@ -9495,6 +9554,7 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 	ShapeCastSettings joltSettings = ToJolt(shapeCastSettings);
 
 	JPH_ShapeCastResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -9525,11 +9585,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -9552,10 +9615,10 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -9584,11 +9647,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -9611,14 +9677,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeLocalSpace2(
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 
@@ -9648,17 +9714,17 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace(
 	return collector.hadHit;
 }
 
-bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
+int JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 	const JPH_Vec3* direction, const JPH_Shape* shape1, const JPH_Shape* shape2,
 	const JPH_Vec3* scale1, const JPH_Vec3* scale2,
 	const JPH_Matrix4x4* centerOfMassWorldTransform1, const JPH_Matrix4x4* centerOfMassWorldTransform2,
 	const JPH_ShapeCastSettings* shapeCastSettings,
 	JPH_CollisionCollectorType collectorType,
-	JPH_CastShapeResultCallback* callback, void* userData,
+	JPH_ShapeCastResult* resultArray, int resultArraySize,
 	const JPH_ShapeFilter* shapeFilter)
 {
 	JPH_ASSERT(direction && shape1 && shape2 && scale1 && scale2
-		&& centerOfMassWorldTransform1 && centerOfMassWorldTransform2 && callback);
+		&& centerOfMassWorldTransform1 && centerOfMassWorldTransform2);
 
 	ShapeCast shapeCast = ShapeCast::sFromWorldTransform(
 		AsShape(shape1),
@@ -9669,6 +9735,7 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 	ShapeCastSettings joltSettings = ToJolt(shapeCastSettings);
 
 	JPH_ShapeCastResult result{};
+	int hitCount = 0;
 
 	switch (collectorType)
 	{
@@ -9699,11 +9766,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHit:
 	{
@@ -9726,10 +9796,10 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_ClosestHitPerBody:
 	case JPH_CollisionCollectorType_ClosestHitPerBodySorted:
@@ -9758,11 +9828,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 				result.bodyID2 = hit.mBodyID2.GetIndexAndSequenceNumber();
 				result.fraction = hit.mFraction;
 				result.isBackFaceHit = hit.mIsBackFaceHit;
-				callback(userData, &result);
+				resultArray[hitCount++] = result;
+
+				if (hitCount >= resultArraySize)
+					break;
 			}
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 	case JPH_CollisionCollectorType_AnyHit:
 	{
@@ -9785,14 +9858,14 @@ bool JPH_CollisionDispatch_CastShapeVsShapeWorldSpace2(
 			result.bodyID2 = collector.mHit.mBodyID2.GetIndexAndSequenceNumber();
 			result.fraction = collector.mHit.mFraction;
 			result.isBackFaceHit = collector.mHit.mIsBackFaceHit;
-			callback(userData, &result);
+			resultArray[hitCount++] = result;
 		}
 
-		return collector.HadHit();
+		return hitCount;
 	}
 
 	default:
-		return false;
+		return 0;
 	}
 }
 

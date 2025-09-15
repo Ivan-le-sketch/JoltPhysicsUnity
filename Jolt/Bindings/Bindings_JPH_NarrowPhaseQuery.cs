@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 
 namespace Jolt
 {
@@ -22,12 +23,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CastRay3(NativeHandle<JPH_NarrowPhaseQuery> query, rvec3 origin, float3 direction, RayCastSettings settings, CollisionCollectorType collectorType, ref RayCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CastRay3(NativeHandle<JPH_NarrowPhaseQuery> query, rvec3 origin, float3 direction, RayCastSettings settings, CollisionCollectorType collectorType, ref RayCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (RayCastResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CastRay3(query, &origin, &direction, &settings, collectorType, RayCastResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CastRay3(query, &origin, &direction, &settings, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
 
@@ -40,12 +41,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CastShape(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, rmatrix4x4 worldTransform, float3 direction, ShapeCastSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref ShapeCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CastShape(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, rmatrix4x4 worldTransform, float3 direction, ShapeCastSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref ShapeCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (ShapeCastResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CastShape2(query, shape, &worldTransform, &direction, &settings, &baseOffset, collectorType, ShapeCastResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CastShape2(query, shape, &worldTransform, &direction, &settings, &baseOffset, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
 
@@ -58,12 +59,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, rmatrix4x4 worldTransform, float3 direction, ShapeCastSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref ShapeCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, rmatrix4x4 worldTransform, float3 direction, ShapeCastSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref ShapeCastResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (ShapeCastResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(query, shape, &worldTransform, &direction, &settings, &baseOffset, collectorType, ShapeCastResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CastShapeIgnoreInitialOverlap2(query, shape, &worldTransform, &direction, null/*&settings*/, &baseOffset, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
 
@@ -76,12 +77,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CollidePoint2(NativeHandle<JPH_NarrowPhaseQuery> query, rvec3 point, CollisionCollectorType collectorType, ref CollidePointResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CollidePoint2(NativeHandle<JPH_NarrowPhaseQuery> query, rvec3 point, CollisionCollectorType collectorType, ref CollidePointResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (CollidePointResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CollidePoint2(query, &point, collectorType, CollidePointResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CollidePoint2(query, &point, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
 
@@ -94,12 +95,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CollideShape2(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, float3 scale, rmatrix4x4 centerOfMassTransform, CollideShapeSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref CollideShapeResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CollideShape2(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, float3 scale, rmatrix4x4 centerOfMassTransform, CollideShapeSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref CollideShapeResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (CollideShapeResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShape2(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, collectorType, CollideShapeResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShape2(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
 
@@ -112,12 +113,12 @@ namespace Jolt
             }
         }
 
-        public static bool JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, float3 scale, rmatrix4x4 centerOfMassTransform, CollideShapeSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref CollideShapeResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
+        public static int JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval(NativeHandle<JPH_NarrowPhaseQuery> query, NativeHandle<JPH_Shape> shape, float3 scale, rmatrix4x4 centerOfMassTransform, CollideShapeSettings settings, rvec3 baseOffset, CollisionCollectorType collectorType, ref CollideShapeResultCollector collector, NativeHandle<JPH_BroadPhaseLayerFilter>? broadPhaseLayerFilter, NativeHandle<JPH_ObjectLayerFilter>? objectLayerFilter, NativeHandle<JPH_BodyFilter>? bodyFilter, NativeHandle<JPH_ShapeFilter>? shapeFilter)
         {
             fixed (CollideShapeResultCollector* ptr = &collector)
             {
                 void* vPtr = ptr;
-                return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, collectorType, CollideShapeResultCollector.AddResultFuncPointer.Value, vPtr, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
+                return UnsafeBindings.JPH_NarrowPhaseQuery_CollideShapeWithInternalEdgeRemoval2(query, shape, &scale, &centerOfMassTransform, &settings, &baseOffset, collectorType, collector.Results.GetUnsafePtr(), collector.Results.Length, broadPhaseLayerFilter, objectLayerFilter, bodyFilter, shapeFilter);
             }
         }
     }

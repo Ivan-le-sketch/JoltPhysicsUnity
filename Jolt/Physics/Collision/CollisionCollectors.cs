@@ -89,6 +89,7 @@ namespace Jolt
         public ShapeCastResultCollector(int initialCapacity, Allocator allocator)
         {
             Results = new NativeList<ShapeCastResult>(initialCapacity, allocator);
+            for (int i = 0; i < initialCapacity; i++) Results.Add(new ShapeCastResult());
         }
 
         [BurstCompile]
