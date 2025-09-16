@@ -28,6 +28,14 @@ namespace Jolt
     {
     }
 
+    internal partial struct JPH_IgnoreSingleBodyFilter
+    {
+    }
+
+    internal partial struct JPH_IgnoreMultipleBodiesFilter
+    {
+    }
+
     internal partial struct JPH_ShapeFilter
     {
     }
@@ -881,27 +889,6 @@ namespace Jolt
         public JPH_ObjectLayerPairFilter* objectLayerPairFilter;
 
         public JPH_ObjectVsBroadPhaseLayerFilter* objectVsBroadPhaseLayerFilter;
-    }
-
-    internal partial struct JPH_BroadPhaseLayerFilter_Procs
-    {
-        [NativeTypeName("bool (*)(void *, JPH_BroadPhaseLayer) __attribute__((cdecl))")]
-        public IntPtr ShouldCollide;
-    }
-
-    internal partial struct JPH_ObjectLayerFilter_Procs
-    {
-        [NativeTypeName("bool (*)(void *, JPH_ObjectLayer *) __attribute__((cdecl))")]
-        public IntPtr ShouldCollide;
-    }
-
-    internal partial struct JPH_BodyFilter_Procs
-    {
-        [NativeTypeName("bool (*)(void *, JPH_BodyID) __attribute__((cdecl))")]
-        public IntPtr ShouldCollide;
-
-        [NativeTypeName("bool (*)(void *, const JPH_Body *) __attribute__((cdecl))")]
-        public IntPtr ShouldCollideLocked;
     }
 
     internal partial struct JPH_ShapeFilter_Procs
@@ -3256,31 +3243,43 @@ namespace Jolt
         public static extern JPH_Body* JPH_Body_GetFixedToWorldBody();
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_BroadPhaseLayerFilter_SetProcs([NativeTypeName("const JPH_BroadPhaseLayerFilter_Procs *")] JPH_BroadPhaseLayerFilter_Procs* procs);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData);
-
-        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_ObjectLayerFilter_SetProcs([NativeTypeName("const JPH_ObjectLayerFilter_Procs *")] JPH_ObjectLayerFilter_Procs* procs);
+        public static extern JPH_BroadPhaseLayerFilter* JPH_SpecifiedBroadPhaseLayerFilter_Create([NativeTypeName("JPH_BroadPhaseLayer")] BroadPhaseLayer layer);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData);
+        public static extern JPH_BroadPhaseLayerFilter* JPH_IncludeBroadPhaseLayerFilter_Create([NativeTypeName("JPH_BroadPhaseLayer *")] BroadPhaseLayer* layers, [NativeTypeName("uint8_t")] byte layerCount);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_BroadPhaseLayerFilter* JPH_IgnoreBroadPhaseLayerFilter_Create([NativeTypeName("JPH_BroadPhaseLayer *")] BroadPhaseLayer* layers, [NativeTypeName("uint8_t")] byte layerCount);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void JPH_BodyFilter_SetProcs([NativeTypeName("const JPH_BodyFilter_Procs *")] JPH_BodyFilter_Procs* procs);
+        public static extern JPH_ObjectLayerFilter* JPH_IncludeObjectLayerFilter_Create([NativeTypeName("JPH_ObjectLayer *")] ObjectLayer* layers, [NativeTypeName("int32_t")] int layerCount);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern JPH_BodyFilter* JPH_BodyFilter_Create(void* userData);
+        public static extern JPH_ObjectLayerFilter* JPH_IgnoreObjectLayerFilter_Create([NativeTypeName("JPH_ObjectLayer *")] ObjectLayer* layers, [NativeTypeName("int32_t")] int layerCount);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_BodyFilter_Destroy(JPH_BodyFilter* filter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_IgnoreSingleBodyFilter* JPH_IgnoreSingleBodyFilter_Create([NativeTypeName("const JPH_BodyID")] BodyID bodyID);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_IgnoreMultipleBodiesFilter* JPH_IgnoreMultipleBodiesFilter_Create();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_IgnoreMultipleBodiesFilter_Reserve(JPH_IgnoreMultipleBodiesFilter* filter, uint size);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_IgnoreMultipleBodiesFilter_Clear(JPH_IgnoreMultipleBodiesFilter* filter);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_IgnoreMultipleBodiesFilter_IgnoreBody(JPH_IgnoreMultipleBodiesFilter* filter, [NativeTypeName("JPH_BodyID")] BodyID bodyID);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ShapeFilter_SetProcs([NativeTypeName("const JPH_ShapeFilter_Procs *")] JPH_ShapeFilter_Procs* procs);

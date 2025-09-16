@@ -1111,49 +1111,81 @@ static const JPH::BroadPhaseLayerFilter& ToJolt(JPH_BroadPhaseLayerFilter* bpFil
 	return bpFilter ? *reinterpret_cast<JPH::BroadPhaseLayerFilter*>(bpFilter) : g_defaultBroadPhaseLayerFilter;
 }
 
-class ManagedBroadPhaseLayerFilter final : public JPH::BroadPhaseLayerFilter
-{
-public:
-	static const JPH_BroadPhaseLayerFilter_Procs* s_Procs;
-	void* userData = nullptr;
-
-	ManagedBroadPhaseLayerFilter(void* userData_)
-		: userData(userData_)
-	{
-
-	}
-
-	bool ShouldCollide(BroadPhaseLayer inLayer) const override
-	{
-		if (s_Procs != nullptr
-			&& s_Procs->ShouldCollide)
-		{
-			return s_Procs->ShouldCollide(userData, static_cast<JPH_BroadPhaseLayer>(inLayer)) == 1;
-		}
-
-		return true;
-	}
-};
-
-const JPH_BroadPhaseLayerFilter_Procs* ManagedBroadPhaseLayerFilter::s_Procs = nullptr;
-
-void JPH_BroadPhaseLayerFilter_SetProcs(const JPH_BroadPhaseLayerFilter_Procs* procs)
-{
-	ManagedBroadPhaseLayerFilter::s_Procs = procs;
-}
-
-JPH_BroadPhaseLayerFilter* JPH_BroadPhaseLayerFilter_Create(void* userData)
-{
-	auto filter = new ManagedBroadPhaseLayerFilter(userData);
-	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
-}
-
 void JPH_BroadPhaseLayerFilter_Destroy(JPH_BroadPhaseLayerFilter* filter)
 {
 	if (filter)
 	{
-		delete reinterpret_cast<ManagedBroadPhaseLayerFilter*>(filter);
+		delete reinterpret_cast<BroadPhaseLayerFilter*>(filter);
 	}
+}
+
+/* JPH_SpecifiedBroadPhaseLayerFilter */
+JPH_BroadPhaseLayerFilter* JPH_SpecifiedBroadPhaseLayerFilter_Create(JPH_BroadPhaseLayer layer)
+{
+	auto filter = new JPH::SpecifiedBroadPhaseLayerFilter(static_cast<JPH::BroadPhaseLayer>(layer));
+	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
+}
+
+/* JPH_IncludeBroadPhaseLayerFilter */
+/// Allows objects from specified broad phase layers
+class IncludeBroadPhaseLayerFilter : public BroadPhaseLayerFilter
+{
+public:
+	/// Constructor
+	explicit IncludeBroadPhaseLayerFilter(BroadPhaseLayer* inLayers, uint8_t layerCount)
+	{
+		mLayerMask = 0;
+		for (uint8_t i = 0; i < layerCount; ++i)
+		{
+			mLayerMask |= (1ULL << inLayers[i].GetValue());
+		}
+	}
+
+	// See BroadPhaseLayerFilter::ShouldCollide
+	virtual bool ShouldCollide(BroadPhaseLayer inLayer) const override
+	{
+		return (mLayerMask & (1ULL << inLayer.GetValue())) != 0;
+	}
+
+private:
+	uint64_t	mLayerMask;
+};
+
+JPH_BroadPhaseLayerFilter* JPH_IncludeBroadPhaseLayerFilter_Create(JPH_BroadPhaseLayer* layers, uint8_t layerCount)
+{
+	auto filter = new IncludeBroadPhaseLayerFilter((JPH::BroadPhaseLayer*)layers, layerCount);
+	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
+}
+
+/* JPH_IgnoreBroadPhaseLayerFilter */
+/// Ignores objects from specified broad phase layers
+class IgnoreBroadPhaseLayerFilter : public BroadPhaseLayerFilter
+{
+public:
+	/// Constructor
+	explicit IgnoreBroadPhaseLayerFilter(BroadPhaseLayer* inLayers, uint8_t layerCount)
+	{
+		mLayerMask = 0;
+		for (uint8_t i = 0; i < layerCount; ++i)
+		{
+			mLayerMask |= (1ULL << inLayers[i].GetValue());
+		}
+	}
+
+	// See BroadPhaseLayerFilter::ShouldCollide
+	virtual bool ShouldCollide(BroadPhaseLayer inLayer) const override
+	{
+		return (mLayerMask & (1ULL << inLayer.GetValue())) == 0;
+	}
+
+private:
+	uint64_t	mLayerMask;
+};
+
+JPH_BroadPhaseLayerFilter* JPH_IgnoreBroadPhaseLayerFilter_Create(JPH_BroadPhaseLayer* layers, uint8_t layerCount)
+{
+	auto filter = new IgnoreBroadPhaseLayerFilter((JPH::BroadPhaseLayer*)layers, layerCount);
+	return reinterpret_cast<JPH_BroadPhaseLayerFilter*>(filter);
 }
 
 /* JPH_ObjectLayerFilter */
@@ -1163,55 +1195,74 @@ static const JPH::ObjectLayerFilter& ToJolt(JPH_ObjectLayerFilter* opFilter)
 	return opFilter ? *reinterpret_cast<JPH::ObjectLayerFilter*>(opFilter) : g_defaultObjectLayerFilter;
 }
 
-class ManagedObjectLayerFilter final : public JPH::ObjectLayerFilter
-{
-public:
-	static const JPH_ObjectLayerFilter_Procs* s_Procs;
-	void* userData = nullptr;
-
-	ManagedObjectLayerFilter(void* userData_)
-		: userData(userData_)
-	{
-
-	}
-
-	bool ShouldCollide(ObjectLayer inLayer) const override
-	{
-		if (s_Procs != nullptr
-			&& s_Procs->ShouldCollide)
-		{
-			JPH_ObjectLayer* inLayerPtr = new JPH_ObjectLayer(static_cast<JPH_ObjectLayer>(inLayer));
-
-			bool result = s_Procs->ShouldCollide(userData, inLayerPtr) == 1;
-
-			delete inLayerPtr;
-
-			return result;
-		}
-
-		return true;
-	}
-};
-
-const JPH_ObjectLayerFilter_Procs* ManagedObjectLayerFilter::s_Procs = nullptr;
-
-void JPH_ObjectLayerFilter_SetProcs(const JPH_ObjectLayerFilter_Procs* procs)
-{
-	ManagedObjectLayerFilter::s_Procs = procs;
-}
-
-JPH_ObjectLayerFilter* JPH_ObjectLayerFilter_Create(void* userData)
-{
-	auto filter = new ManagedObjectLayerFilter(userData);
-	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
-}
-
 void JPH_ObjectLayerFilter_Destroy(JPH_ObjectLayerFilter* filter)
 {
 	if (filter)
 	{
-		delete reinterpret_cast<ManagedObjectLayerFilter*>(filter);
+		delete reinterpret_cast<ObjectLayerFilter*>(filter);
 	}
+}
+
+/// Allows objects from specified layers
+class IncludeObjectLayerFilter : public ObjectLayerFilter
+{
+public:
+	/// Constructor
+	explicit IncludeObjectLayerFilter(ObjectLayer* inLayers, int32_t layerCount)
+	{
+		mLayerMask = 0;
+		for (int32_t i = 0; i < layerCount; ++i)
+		{
+			mLayerMask |= (1ULL << inLayers[i]);
+		}
+
+	}
+
+	// See ObjectLayerFilter::ShouldCollide
+	virtual bool ShouldCollide(ObjectLayer inLayer) const override
+	{
+		return (mLayerMask & (1ULL << inLayer)) != 0;
+	}
+
+private:
+	uint64_t mLayerMask;
+};
+
+JPH_ObjectLayerFilter* JPH_IncludeObjectLayerFilter_Create(JPH_ObjectLayer* layers, int32_t layerCount)
+{
+	auto filter = new IncludeObjectLayerFilter((JPH::ObjectLayer*)layers, layerCount);
+	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
+}
+
+/// Ignores objects from specified layers
+class IgnoreObjectLayerFilter : public ObjectLayerFilter
+{
+public:
+	/// Constructor
+	explicit IgnoreObjectLayerFilter(ObjectLayer* inLayers, int32_t layerCount)
+	{
+		mLayerMask = 0;
+		for (int32_t i = 0; i < layerCount; ++i)
+		{
+			mLayerMask |= (1ULL << inLayers[i]);
+		}
+
+	}
+
+	// See ObjectLayerFilter::ShouldCollide
+	virtual bool ShouldCollide(ObjectLayer inLayer) const override
+	{
+		return (mLayerMask & (1ULL << inLayer)) == 0;
+	}
+
+private:
+	uint64_t mLayerMask;
+};
+
+JPH_ObjectLayerFilter* JPH_IgnoreObjectLayerFilter_Create(JPH_ObjectLayer* layers, int32_t layerCount)
+{
+	auto filter = new IgnoreObjectLayerFilter((JPH::ObjectLayer*)layers, layerCount);
+	return reinterpret_cast<JPH_ObjectLayerFilter*>(filter);
 }
 
 /* JPH_BodyFilter */
@@ -1221,60 +1272,45 @@ static const JPH::BodyFilter& ToJolt(const JPH_BodyFilter* bodyFilter)
 	return bodyFilter ? *reinterpret_cast<const JPH::BodyFilter*>(bodyFilter) : g_defaultBodyFilter;
 }
 
-class ManagedBodyFilter final : public JPH::BodyFilter
-{
-public:
-	static const JPH_BodyFilter_Procs* s_Procs;
-	void* userData = nullptr;
-
-	ManagedBodyFilter(void* userData_)
-		: userData(userData_)
-	{
-
-	}
-
-	bool ShouldCollide(const BodyID& bodyID) const override
-	{
-		if (s_Procs != nullptr
-			&& s_Procs->ShouldCollide)
-		{
-			return s_Procs->ShouldCollide(userData, (JPH_BodyID)bodyID.GetIndexAndSequenceNumber());
-		}
-
-		return true;
-	}
-
-	bool ShouldCollideLocked(const Body& body) const override
-	{
-		if (s_Procs != nullptr
-			&& s_Procs->ShouldCollideLocked)
-		{
-			return s_Procs->ShouldCollideLocked(userData, reinterpret_cast<const JPH_Body*>(&body));
-		}
-
-		return true;
-	}
-};
-
-const JPH_BodyFilter_Procs* ManagedBodyFilter::s_Procs = nullptr;
-
-void JPH_BodyFilter_SetProcs(const JPH_BodyFilter_Procs* procs)
-{
-	ManagedBodyFilter::s_Procs = procs;
-}
-
-JPH_BodyFilter* JPH_BodyFilter_Create(void* userData)
-{
-	auto filter = new ManagedBodyFilter(userData);
-	return reinterpret_cast<JPH_BodyFilter*>(filter);
-}
-
 void JPH_BodyFilter_Destroy(JPH_BodyFilter* filter)
 {
 	if (filter)
 	{
-		delete reinterpret_cast<ManagedBodyFilter*>(filter);
+		delete reinterpret_cast<BodyFilter*>(filter);
 	}
+}
+
+JPH_IgnoreSingleBodyFilter* JPH_IgnoreSingleBodyFilter_Create(const JPH_BodyID bodyID)
+{
+	auto filter = new JPH::IgnoreSingleBodyFilter(JPH::BodyID(bodyID));
+	return reinterpret_cast<JPH_IgnoreSingleBodyFilter*>(filter);
+}
+
+JPH_IgnoreMultipleBodiesFilter* JPH_IgnoreMultipleBodiesFilter_Create()
+{
+	auto filter = new JPH::IgnoreMultipleBodiesFilter();
+	return reinterpret_cast<JPH_IgnoreMultipleBodiesFilter*>(filter);
+}
+
+void JPH_IgnoreMultipleBodiesFilter_Reserve(JPH_IgnoreMultipleBodiesFilter* filter, uint32_t size)
+{
+	JPH_ASSERT(filter);
+
+	reinterpret_cast<JPH::IgnoreMultipleBodiesFilter*>(filter)->Reserve(size);
+}
+
+void JPH_IgnoreMultipleBodiesFilter_Clear(JPH_IgnoreMultipleBodiesFilter* filter)
+{
+	JPH_ASSERT(filter);
+
+	reinterpret_cast<JPH::IgnoreMultipleBodiesFilter*>(filter)->Clear();
+}
+
+void JPH_IgnoreMultipleBodiesFilter_IgnoreBody(JPH_IgnoreMultipleBodiesFilter* filter, JPH_BodyID bodyID)
+{
+	JPH_ASSERT(filter);
+
+	reinterpret_cast<JPH::IgnoreMultipleBodiesFilter*>(filter)->IgnoreBody(JPH::BodyID(bodyID));
 }
 
 /* JPH_ShapeFilter */
