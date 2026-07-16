@@ -1031,6 +1031,10 @@ namespace Jolt
         public static extern void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("uint64_t")]
+        public static extern ulong JPH_GetVersionID();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: NativeTypeName("bool")]
         public static extern NativeBool JPH_Init();
 

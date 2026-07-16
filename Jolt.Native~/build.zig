@@ -19,6 +19,8 @@ pub fn compile(options: Options, b: *Build, lib: *Build.Step.Compile) void {
        "-g",
        "-std=c++17",
        "-fdeclspec",
+       "-ffp-model=precise",
+       "-ffp-contract=off",
        "-DJPH_SHARED_LIBRARY_BUILD",
        "-DJPH_OBJECT_LAYER_BITS=32",
        if (options.use_double_precision) "-DJPH_DOUBLE_PRECISION" else "",
@@ -195,7 +197,7 @@ pub fn build(b: *Build) void {
         .use_double_precision = b.option(bool, "use_double_precision", "use double precision") orelse false,
         .enable_asserts = b.option(bool, "enable_asserts", "enable asserts") orelse false,
         .enable_debug_renderer = b.option(bool, "enable_debug_renderer", "enable debug renderer") orelse false,
-        .enable_cross_platform_determinism = b.option(bool, "enable_cross_platform_determinism", "enable cross platform determinism") orelse false,
+        .enable_cross_platform_determinism = b.option(bool, "enable_cross_platform_determinism", "enable cross platform determinism") orelse true,
     };
 
     compile(options, b, b.addSharedLibrary(.{ .name = "joltc", .target = target, .optimize = optimize }));

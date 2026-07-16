@@ -44,6 +44,7 @@ namespace Jolt
         public void Destroy()
         {
             JPH_PhysicsSystem_Destroy(Handle);
+            JPH_JobSystem_Destroy(JobSystemHandle);
         }
 
         /// <summary>

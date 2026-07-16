@@ -50,9 +50,9 @@
     </ItemGroup>
 
     <Target Name="Compile Jolt" AfterTargets="Build" Condition="'$(ZigExePath)' != ''">
-        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir windows-x64 -Dtarget=x86_64-windows -Doptimize=$(NativeOptimize)"/>
-        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir macos-x64   -Dtarget=x86_64-macos   -Doptimize=$(NativeOptimize)"/>
-        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir linux-x64   -Dtarget=x86_64-linux   -Doptimize=$(NativeOptimize)"/>
+        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir windows-x64 -Dtarget=x86_64-windows -Doptimize=$(NativeOptimize) -Denable_cross_platform_determinism=true"/>
+        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir macos-x64   -Dtarget=x86_64-macos   -Doptimize=$(NativeOptimize) -Denable_cross_platform_determinism=true"/>
+        <Exec Command="$(ZigExePath) build --prefix out/$(Configuration) --prefix-lib-dir linux-x64   -Dtarget=x86_64-linux   -Doptimize=$(NativeOptimize) -Denable_cross_platform_determinism=true"/>
     </Target>
 
     <Target Name="Export Jolt" AfterTargets="Compile Jolt">

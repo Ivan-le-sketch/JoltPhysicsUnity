@@ -4,6 +4,11 @@ namespace Jolt
 {
     internal static partial class Bindings
     {
+        public static ulong JPH_GetVersionID()
+        {
+            return UnsafeBindings.JPH_GetVersionID();
+        }
+
         public static bool JPH_Init()
         {
             return UnsafeBindings.JPH_Init();

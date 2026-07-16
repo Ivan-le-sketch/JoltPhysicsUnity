@@ -1021,6 +1021,7 @@ JPH_CAPI JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPool
 JPH_CAPI JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config);
 JPH_CAPI void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem);
 
+JPH_CAPI uint64_t JPH_GetVersionID(void);
 JPH_CAPI bool JPH_Init(void);
 JPH_CAPI void JPH_Shutdown(void);
 JPH_CAPI void JPH_SetTraceHandler(JPH_TraceFunc handler);

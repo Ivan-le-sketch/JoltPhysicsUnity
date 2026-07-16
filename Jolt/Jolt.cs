@@ -6,6 +6,7 @@ namespace Jolt
 {
     public static class Jolt
     {
+        private const ulong CrossPlatformDeterministicFeature = 1UL << 25;
 
         /// <summary>
         /// True Jolt is current initialized.
@@ -19,6 +20,12 @@ namespace Jolt
         {
             if (!Initialized)
             {
+                ulong versionID = JPH_GetVersionID();
+                if ((versionID & CrossPlatformDeterministicFeature) == 0)
+                {
+                    throw new InvalidOperationException($"The loaded Jolt native library (version ID 0x{versionID:X16}) was not built with JPH_CROSS_PLATFORM_DETERMINISTIC.");
+                }
+
                 Initialized = JPH_Init();
             }
 

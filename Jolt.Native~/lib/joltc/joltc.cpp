@@ -5,12 +5,21 @@
 
 #include <Jolt/Core/Core.h>
 
+#if !defined(JPH_CROSS_PLATFORM_DETERMINISTIC)
+	#error JoltPhysicsUnity requires JPH_CROSS_PLATFORM_DETERMINISTIC
+#endif
+
+#if defined(__FAST_MATH__)
+	#error JoltPhysicsUnity must not be compiled with fast math
+#endif
+
 JPH_SUPPRESS_WARNING_PUSH
 JPH_SUPPRESS_WARNINGS
 
 #include "Jolt/Jolt.h"
 #include "Jolt/RegisterTypes.h"
 #include "Jolt/Core/Factory.h"
+#include "Jolt/Core/FPControlWord.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Physics/PhysicsSettings.h"
@@ -79,6 +88,17 @@ JPH_SUPPRESS_WARNINGS
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
+
+#if defined(JPH_USE_SSE)
+static constexpr uint cDeterministicFPValue = _MM_ROUND_NEAREST | _MM_FLUSH_ZERO_ON | (1U << 6);
+static constexpr uint cDeterministicFPMask = _MM_ROUND_MASK | _MM_FLUSH_ZERO_MASK | (1U << 6);
+using DeterministicFPControl = FPControlWord<cDeterministicFPValue, cDeterministicFPMask>;
+
+static void SetDeterministicFPStateForCurrentThread()
+{
+	_mm_setcsr((_mm_getcsr() & ~cDeterministicFPMask) | cDeterministicFPValue);
+}
+#endif
 
 #define DEF_MAP_DECL(JoltType, c_type)        \
     static inline const JPH::JoltType& As##JoltType(const c_type& t) {    \
@@ -729,6 +749,9 @@ JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* c
 	jobSystem->SetThreadInitFunction([](int threadIndex)
 		{
 			AttachIL2CPPThread();
+#if defined(JPH_USE_SSE)
+			SetDeterministicFPStateForCurrentThread();
+#endif
 		});
 
 	// Set IL2CPP thread detach function
@@ -751,6 +774,11 @@ JPH_JobSystem* JPH_JobSystemCallback_Create(const JPH_JobSystemConfig* config)
 void JPH_JobSystem_Destroy(JPH_JobSystem* jobSystem)
 {
 	delete reinterpret_cast<JPH::JobSystem*>(jobSystem);
+}
+
+uint64_t JPH_GetVersionID()
+{
+	return JPH_VERSION_ID;
 }
 
 bool JPH_Init()
@@ -1067,6 +1095,9 @@ void JPH_PhysicsSystem_OptimizeBroadPhase(JPH_PhysicsSystem* system)
 
 JPH_PhysicsUpdateError JPH_PhysicsSystem_Update(JPH_PhysicsSystem* system, float deltaTime, int collisionSteps, JPH_JobSystem* jobSystem)
 {
+#if defined(JPH_USE_SSE)
+	DeterministicFPControl deterministicFPControl;
+#endif
 	JPH::JobSystem* joltJobSystem = reinterpret_cast<JPH::JobSystem*>(jobSystem);
 	return static_cast<JPH_PhysicsUpdateError>(system->physicsSystem->Update(deltaTime, collisionSteps, s_TempAllocator, joltJobSystem));
 }
