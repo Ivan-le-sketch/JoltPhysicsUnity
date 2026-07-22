@@ -1,5 +1,6 @@
 ﻿using AOT;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ namespace Jolt
 {
     internal static unsafe partial class Bindings
     {
+        private static readonly HashSet<NativeHandle<JPH_StateRecorderFilter>> nativeStateRecorderFilters = new();
+
         public static NativeHandle<JPH_StateRecorderFilter> JPH_StateRecorderFilter_Create(IStateRecorderFilter filter)
         {
             var gch = GCHandle.Alloc(filter);
@@ -22,17 +25,31 @@ namespace Jolt
             }
         }
 
+        public static NativeHandle<JPH_StateRecorderFilter> JPH_StateRecorderFilter_CreateNative(
+            bool saveOnlyBodiesInBroadPhase,
+            bool saveOnlyEnabledConstraints)
+        {
+            var handle = CreateHandle(UnsafeBindings.JPH_StateRecorderFilter_CreateNative(
+                saveOnlyBodiesInBroadPhase,
+                saveOnlyEnabledConstraints));
+            nativeStateRecorderFilters.Add(handle);
+            return handle;
+        }
+
         public static void JPH_StateRecorderFilter_Destroy(NativeHandle<JPH_StateRecorderFilter> filter)
         {
             if (filter.HasUser()) return;
 
-            if (ManagedReference.Remove(filter, out var gch))
+            if (!nativeStateRecorderFilters.Remove(filter))
             {
-                gch.Free();
-            }
-            else
-            {
-                Debug.LogError("Missing GCHandle for managed state recorder filter!");
+                if (ManagedReference.Remove(filter, out var gch))
+                {
+                    gch.Free();
+                }
+                else
+                {
+                    Debug.LogError("Missing GCHandle for managed state recorder filter!");
+                }
             }
 
             UnsafeBindings.JPH_StateRecorderFilter_Destroy(filter);
@@ -52,16 +69,16 @@ namespace Jolt
         };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool UnsafeShouldSaveBody(IntPtr userData, JPH_Body* body);
+        private delegate NativeBool UnsafeShouldSaveBody(IntPtr userData, JPH_Body* body);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool UnsafeShouldSaveConstraint(IntPtr userData, JPH_Constraint* constraint);
+        private delegate NativeBool UnsafeShouldSaveConstraint(IntPtr userData, JPH_Constraint* constraint);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool UnsafeShouldSaveContact(IntPtr userData, BodyID bodyID1, BodyID bodyID2);
+        private delegate NativeBool UnsafeShouldSaveContact(IntPtr userData, BodyID bodyID1, BodyID bodyID2);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool UnsafeShouldRestoreContact(IntPtr userData, BodyID bodyID1, BodyID bodyID2);
+        private delegate NativeBool UnsafeShouldRestoreContact(IntPtr userData, BodyID bodyID1, BodyID bodyID2);
 
         [MonoPInvokeCallback(typeof(UnsafeShouldSaveBody))]
-        private static bool UnsafeShouldSaveBodyCallback(IntPtr userData, JPH_Body* body)
+        private static NativeBool UnsafeShouldSaveBodyCallback(IntPtr userData, JPH_Body* body)
         {
             try
             {
@@ -76,7 +93,7 @@ namespace Jolt
         }
 
         [MonoPInvokeCallback(typeof(UnsafeShouldSaveConstraint))]
-        private static bool UnsafeShouldSaveConstraintCallback(IntPtr userData, JPH_Constraint* constraint)
+        private static NativeBool UnsafeShouldSaveConstraintCallback(IntPtr userData, JPH_Constraint* constraint)
         {
             try
             {
@@ -91,7 +108,7 @@ namespace Jolt
         }
 
         [MonoPInvokeCallback(typeof(UnsafeShouldSaveContact))]
-        private static bool UnsafeShouldSaveContactCallback(IntPtr userData, BodyID bodyID1, BodyID bodyID2)
+        private static NativeBool UnsafeShouldSaveContactCallback(IntPtr userData, BodyID bodyID1, BodyID bodyID2)
         {
             try
             {
@@ -105,7 +122,7 @@ namespace Jolt
         }
 
         [MonoPInvokeCallback(typeof(UnsafeShouldRestoreContact))]
-        private static bool UnsafeShouldRestoreContactCallback(IntPtr userData, BodyID bodyID1, BodyID bodyID2)
+        private static NativeBool UnsafeShouldRestoreContactCallback(IntPtr userData, BodyID bodyID1, BodyID bodyID2)
         {
             try
             {

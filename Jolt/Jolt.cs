@@ -1,5 +1,7 @@
 ﻿using System;
 
+using System.Runtime.InteropServices;
+
 using static Jolt.Bindings;
 
 namespace Jolt
@@ -7,6 +9,7 @@ namespace Jolt
     public static class Jolt
     {
         private const ulong CrossPlatformDeterministicFeature = 1UL << 25;
+        private const int NativeShapeCastResultSize = 60;
 
         /// <summary>
         /// True Jolt is current initialized.
@@ -20,6 +23,12 @@ namespace Jolt
         {
             if (!Initialized)
             {
+                int managedShapeCastResultSize = Marshal.SizeOf<ShapeCastResult>();
+                if (managedShapeCastResultSize != NativeShapeCastResultSize)
+                {
+                    throw new InvalidOperationException($"ShapeCastResult ABI size mismatch: managed size is {managedShapeCastResultSize} bytes, native size is {NativeShapeCastResultSize} bytes.");
+                }
+
                 ulong versionID = JPH_GetVersionID();
                 if ((versionID & CrossPlatformDeterministicFeature) == 0)
                 {

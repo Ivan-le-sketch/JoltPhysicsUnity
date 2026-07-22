@@ -906,6 +906,12 @@ namespace Jolt
         public IntPtr ShouldCollide;
     }
 
+    internal partial struct JPH_SimShapeFilterFast_Procs
+    {
+        [NativeTypeName("bool (*)(void *, const JPH_SimShapeFilterBodyData *, const JPH_SimShapeFilterBodyData *) __attribute__((cdecl))")]
+        public IntPtr ShouldCollide;
+    }
+
     internal partial struct JPH_ContactListener_Procs
     {
         [NativeTypeName("JPH_ValidateResult (*)(void *, const JPH_Body *, const JPH_Body *, const JPH_RVec3 *, const JPH_CollideShapeResult *) __attribute__((cdecl))")]
@@ -915,6 +921,21 @@ namespace Jolt
         public IntPtr OnContactAdded;
 
         [NativeTypeName("void (*)(void *, const JPH_Body *, const JPH_Body *, const JPH_ContactManifold *, JPH_ContactSettings *) __attribute__((cdecl))")]
+        public IntPtr OnContactPersisted;
+
+        [NativeTypeName("void (*)(void *, const JPH_SubShapeIDPair *) __attribute__((cdecl))")]
+        public IntPtr OnContactRemoved;
+    }
+
+    internal partial struct JPH_ContactListenerFast_Procs
+    {
+        [NativeTypeName("JPH_ValidateResult (*)(void *, JPH_ContactValidateData *) __attribute__((cdecl))")]
+        public IntPtr OnContactValidate;
+
+        [NativeTypeName("void (*)(void *, JPH_ContactData *) __attribute__((cdecl))")]
+        public IntPtr OnContactAdded;
+
+        [NativeTypeName("void (*)(void *, JPH_ContactData *) __attribute__((cdecl))")]
         public IntPtr OnContactPersisted;
 
         [NativeTypeName("void (*)(void *, const JPH_SubShapeIDPair *) __attribute__((cdecl))")]
@@ -3311,6 +3332,15 @@ namespace Jolt
         public static extern void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SimShapeFilterFast_SetProcs([NativeTypeName("const JPH_SimShapeFilterFast_Procs *")] JPH_SimShapeFilterFast_Procs* procs);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_SimShapeFilter* JPH_SimShapeFilterFast_Create(void* userData);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SimShapeFilterFast_SetBodyCallbackEnabled(JPH_SimShapeFilter* filter, [NativeTypeName("JPH_BodyID")] BodyID bodyID, [NativeTypeName("bool")] NativeBool enabled);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ContactListener_SetProcs([NativeTypeName("const JPH_ContactListener_Procs *")] JPH_ContactListener_Procs* procs);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -3318,6 +3348,15 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ContactListener_Destroy(JPH_ContactListener* listener);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_ContactListenerFast_SetProcs([NativeTypeName("const JPH_ContactListenerFast_Procs *")] JPH_ContactListenerFast_Procs* procs);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_ContactListener* JPH_ContactListenerFast_Create(void* userData);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_ContactListenerFast_SetBodyCallbackFlags(JPH_ContactListener* listener, [NativeTypeName("JPH_BodyID")] BodyID bodyID, uint flags);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_BodyActivationListener_SetProcs([NativeTypeName("const JPH_BodyActivationListener_Procs *")] JPH_BodyActivationListener_Procs* procs);
@@ -3359,6 +3398,12 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_ContactManifold_GetWorldSpaceContactPointOn2([NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, uint index, [NativeTypeName("JPH_RVec3 *")] rvec3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern uint JPH_ContactManifold_GetWorldSpaceContactPointsOn1([NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, [NativeTypeName("JPH_RVec3 *")] rvec3* results, uint capacity);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern uint JPH_ContactManifold_GetWorldSpaceContactPointsOn2([NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, [NativeTypeName("JPH_RVec3 *")] rvec3* results, uint capacity);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern float JPH_ContactSettings_GetFriction(JPH_ContactSettings* settings);
@@ -3922,6 +3967,9 @@ namespace Jolt
         public static extern void JPH_EstimateCollisionResponse([NativeTypeName("const JPH_Body *")] JPH_Body* body1, [NativeTypeName("const JPH_Body *")] JPH_Body* body2, [NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint numIterations, [NativeTypeName("JPH_CollisionEstimationResult *")] CollisionEstimationResult* result);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern uint JPH_EstimateCollisionResponseInto([NativeTypeName("const JPH_Body *")] JPH_Body* body1, [NativeTypeName("const JPH_Body *")] JPH_Body* body2, [NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint numIterations, [NativeTypeName("JPH_CollisionEstimationResultImpulse *")] CollisionEstimationResult.Impulse* impulses, uint impulseCapacity, [NativeTypeName("JPH_RVec3 *")] rvec3* contactPointsOn1, uint contactPointCapacity, [NativeTypeName("JPH_CollisionEstimationResult *")] CollisionEstimationResult* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create([NativeTypeName("const JPH_Vec3 *")] float3* position, [NativeTypeName("const JPH_Vec3 *")] float3* suspensionForcePoint, [NativeTypeName("const JPH_Vec3 *")] float3* suspensionDirection, [NativeTypeName("const JPH_Vec3 *")] float3* steeringAxis, [NativeTypeName("const JPH_Vec3 *")] float3* wheelUp, [NativeTypeName("const JPH_Vec3 *")] float3* wheelForward, float suspensionMinLength, float suspensionMaxLength, float suspensionPreloadLength, [NativeTypeName("const JPH_SpringSettings *")] SpringSettings* suspensionSpring, float radius, float width, [NativeTypeName("bool")] NativeBool enableSuspensionForcePoint, float inertia, float angularDamping, float maxSteerAngle, float maxBrakeTorque, float maxHandBrakeTorque);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -4068,6 +4116,9 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_StateRecorderFilter* JPH_StateRecorderFilter_CreateNative([NativeTypeName("bool")] NativeBool saveOnlyBodiesInBroadPhase, [NativeTypeName("bool")] NativeBool saveOnlyEnabledConstraints);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);

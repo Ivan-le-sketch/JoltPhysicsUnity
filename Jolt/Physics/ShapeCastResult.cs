@@ -4,7 +4,10 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    // JPH_ShapeCastResult is 4-byte aligned and has 3 bytes of tail padding after
+    // isBackFaceHit. The explicit size is important when native code writes an array:
+    // every element after index 0 must use the native 60-byte stride.
+    [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 60)]
     public struct ShapeCastResult
     {
         public float3 ContactPointOn1;

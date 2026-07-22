@@ -2212,6 +2212,30 @@ JPH_CAPI void JPH_SimShapeFilter_SetProcs(const JPH_SimShapeFilter_Procs* procs)
 JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilter_Create(void* userData);
 JPH_CAPI void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter);
 
+typedef struct JPH_SimShapeFilterBodyData {
+	const JPH_Body* body;
+	const JPH_Shape* shape;
+	const JPH_Shape* leafShape;
+	uint64_t bodyUserData;
+	uint64_t leafShapeUserData;
+	JPH_BodyID bodyID;
+	JPH_ObjectLayer objectLayer;
+	JPH_SubShapeID subShapeID;
+	JPH_SubShapeID leafShapeRemainder;
+	uint32_t bodyFlags;
+	float shapeVolume;
+} JPH_SimShapeFilterBodyData;
+
+typedef struct JPH_SimShapeFilterFast_Procs {
+	bool(JPH_API_CALL* ShouldCollide)(void* userData,
+		const JPH_SimShapeFilterBodyData* body1,
+		const JPH_SimShapeFilterBodyData* body2);
+} JPH_SimShapeFilterFast_Procs;
+
+JPH_CAPI void JPH_SimShapeFilterFast_SetProcs(const JPH_SimShapeFilterFast_Procs* procs);
+JPH_CAPI JPH_SimShapeFilter* JPH_SimShapeFilterFast_Create(void* userData);
+JPH_CAPI void JPH_SimShapeFilterFast_SetBodyCallbackEnabled(JPH_SimShapeFilter* filter, JPH_BodyID bodyID, bool enabled);
+
 /* Contact listener */
 typedef struct JPH_ContactListener_Procs {
 	JPH_ValidateResult(JPH_API_CALL* OnContactValidate)(void* userData,
@@ -2241,6 +2265,62 @@ JPH_CAPI void JPH_ContactListener_SetProcs(const JPH_ContactListener_Procs* proc
 JPH_CAPI JPH_ContactListener* JPH_ContactListener_Create(void* userData);
 JPH_CAPI void JPH_ContactListener_Destroy(JPH_ContactListener* listener);
 
+typedef struct JPH_ContactBodyData {
+	const JPH_Body* body;
+	uint64_t bodyUserData;
+	JPH_BodyID bodyID;
+	JPH_ObjectLayer objectLayer;
+	uint32_t bodyFlags;
+	JPH_Vec3 linearVelocity;
+	JPH_Vec3 angularVelocity;
+} JPH_ContactBodyData;
+
+typedef struct JPH_ContactManifoldData {
+	const JPH_ContactManifold* manifold;
+	JPH_Vec3 worldSpaceNormal;
+	float penetrationDepth;
+	JPH_SubShapeID subShapeID1;
+	JPH_SubShapeID subShapeID2;
+	uint32_t pointCount;
+} JPH_ContactManifoldData;
+
+typedef struct JPH_ContactSettingsData {
+	float friction;
+	float restitution;
+	float invMassScale1;
+	float invInertiaScale1;
+	float invMassScale2;
+	float invInertiaScale2;
+	uint32_t isSensor;
+	JPH_Vec3 relativeLinearSurfaceVelocity;
+	JPH_Vec3 relativeAngularSurfaceVelocity;
+} JPH_ContactSettingsData;
+
+typedef struct JPH_ContactValidateData {
+	JPH_ContactBodyData body1;
+	JPH_ContactBodyData body2;
+	const JPH_CollideShapeResult* collisionResult;
+	JPH_RVec3 baseOffset;
+} JPH_ContactValidateData;
+
+typedef struct JPH_ContactData {
+	JPH_ContactBodyData body1;
+	JPH_ContactBodyData body2;
+	JPH_ContactManifoldData manifold;
+	JPH_ContactSettingsData settings;
+} JPH_ContactData;
+
+typedef struct JPH_ContactListenerFast_Procs {
+	JPH_ValidateResult(JPH_API_CALL* OnContactValidate)(void* userData, JPH_ContactValidateData* contact);
+	void(JPH_API_CALL* OnContactAdded)(void* userData, JPH_ContactData* contact);
+	void(JPH_API_CALL* OnContactPersisted)(void* userData, JPH_ContactData* contact);
+	void(JPH_API_CALL* OnContactRemoved)(void* userData, const JPH_SubShapeIDPair* subShapePair);
+} JPH_ContactListenerFast_Procs;
+
+JPH_CAPI void JPH_ContactListenerFast_SetProcs(const JPH_ContactListenerFast_Procs* procs);
+JPH_CAPI JPH_ContactListener* JPH_ContactListenerFast_Create(void* userData);
+JPH_CAPI void JPH_ContactListenerFast_SetBodyCallbackFlags(JPH_ContactListener* listener, JPH_BodyID bodyID, uint32_t flags);
+
 /* BodyActivationListener */
 typedef struct JPH_BodyActivationListener_Procs {
 	void(JPH_API_CALL* OnBodyActivated)(void* userData, JPH_BodyID bodyID, uint64_t bodyUserData);
@@ -2268,6 +2348,8 @@ JPH_CAPI JPH_SubShapeID JPH_ContactManifold_GetSubShapeID2(const JPH_ContactMani
 JPH_CAPI uint32_t JPH_ContactManifold_GetPointCount(const JPH_ContactManifold* manifold);
 JPH_CAPI void JPH_ContactManifold_GetWorldSpaceContactPointOn1(const JPH_ContactManifold* manifold, uint32_t index, JPH_RVec3* result);
 JPH_CAPI void JPH_ContactManifold_GetWorldSpaceContactPointOn2(const JPH_ContactManifold* manifold, uint32_t index, JPH_RVec3* result);
+JPH_CAPI uint32_t JPH_ContactManifold_GetWorldSpaceContactPointsOn1(const JPH_ContactManifold* manifold, JPH_RVec3* results, uint32_t capacity);
+JPH_CAPI uint32_t JPH_ContactManifold_GetWorldSpaceContactPointsOn2(const JPH_ContactManifold* manifold, JPH_RVec3* results, uint32_t capacity);
 
 /* ContactSettings */
 JPH_CAPI float JPH_ContactSettings_GetFriction(JPH_ContactSettings* settings);
@@ -2660,6 +2742,7 @@ JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
+JPH_CAPI uint32_t JPH_EstimateCollisionResponseInto(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResultImpulse* impulses, uint32_t impulseCapacity, JPH_RVec3* contactPointsOn1, uint32_t contactPointCapacity, JPH_CollisionEstimationResult* result);
 
 /* WheelWV */
 JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
@@ -2781,6 +2864,7 @@ typedef struct JPH_StateRecorderFilter_Procs {
 } JPH_StateRecorderFilter_Procs;
 
 JPH_CAPI JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_Procs procs, void* userData);
+JPH_CAPI JPH_StateRecorderFilter* JPH_StateRecorderFilter_CreateNative(bool saveOnlyBodiesInBroadPhase, bool saveOnlyEnabledConstraints);
 JPH_CAPI void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter);
 
 #endif

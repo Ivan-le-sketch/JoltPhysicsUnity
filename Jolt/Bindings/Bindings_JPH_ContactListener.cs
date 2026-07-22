@@ -10,6 +10,7 @@ namespace Jolt
     internal static unsafe partial class Bindings
     {
         private static readonly Dictionary<NativeHandle<JPH_ContactListener>, int> contactListenerIds = new();
+        private static readonly Dictionary<NativeHandle<JPH_ContactListener>, int> fastContactListenerIds = new();
 
         public static NativeHandle<JPH_ContactListener> JPH_ContactListener_Create(IContactListenerImplementation listener)
         {
@@ -35,11 +36,39 @@ namespace Jolt
             return handle;
         }
 
+        public static NativeHandle<JPH_ContactListener> JPH_ContactListenerFast_Create(IFastContactListenerImplementation listener)
+        {
+            fixed (JPH_ContactListenerFast_Procs* procsPtr = &UnsafeFastContactListenerProcs)
+            {
+                UnsafeBindings.JPH_ContactListenerFast_SetProcs(procsPtr);
+            }
+
+            int id = ManagedReference<IFastContactListenerImplementation>.Add(listener);
+            var handle = CreateHandle(UnsafeBindings.JPH_ContactListenerFast_Create((void*)id));
+            fastContactListenerIds.Add(handle, id);
+            return handle;
+        }
+
+        public static void JPH_ContactListenerFast_SetBodyCallbackFlags(
+            NativeHandle<JPH_ContactListener> listener,
+            BodyID bodyID,
+            ContactCallbackFlags flags)
+        {
+            if (!fastContactListenerIds.ContainsKey(listener))
+                throw new InvalidOperationException("Body callback routing is only available on a fast contact listener.");
+            UnsafeBindings.JPH_ContactListenerFast_SetBodyCallbackFlags(listener, bodyID, (uint)flags);
+        }
+
         public static void JPH_ContactListener_Destroy(NativeHandle<JPH_ContactListener> listener)
         {
             if (listener.HasUser()) return;
 
-            if (contactListenerIds.TryGetValue(listener, out var id))
+            if (fastContactListenerIds.TryGetValue(listener, out var fastId))
+            {
+                ManagedReference<IFastContactListenerImplementation>.Remove(fastId);
+                fastContactListenerIds.Remove(listener);
+            }
+            else if (contactListenerIds.TryGetValue(listener, out var id))
             {
                 ManagedReference<IContactListenerImplementation>.Remove(id);
                 contactListenerIds.Remove(listener);
@@ -75,6 +104,14 @@ namespace Jolt
             OnContactPersisted = GetDelegatePointer((UnsafeContactPersisted)UnsafeContactPersistedCallback),
         };
 
+        private static readonly JPH_ContactListenerFast_Procs UnsafeFastContactListenerProcs = new JPH_ContactListenerFast_Procs
+        {
+            OnContactValidate = GetDelegatePointer((UnsafeFastContactValidate)UnsafeFastContactValidateCallback),
+            OnContactAdded = GetDelegatePointer((UnsafeFastContactAdded)UnsafeFastContactAddedCallback),
+            OnContactRemoved = GetDelegatePointer((UnsafeFastContactRemoved)UnsafeFastContactRemovedCallback),
+            OnContactPersisted = GetDelegatePointer((UnsafeFastContactPersisted)UnsafeFastContactPersistedCallback),
+        };
+
         /// <summary>
         /// Unsafe static delegate for OnContactValidate.
         /// </summary>
@@ -98,6 +135,18 @@ namespace Jolt
         /// </summary>
         [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
         private delegate void UnsafeContactPersisted(void* udata, JPH_Body* bodyA, JPH_Body* bodyB, JPH_ContactManifold* manifold, JPH_ContactSettings* settings);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate ValidateResult UnsafeFastContactValidate(void* udata, ContactValidateData* contact);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void UnsafeFastContactAdded(void* udata, ContactData* contact);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void UnsafeFastContactRemoved(void* udata, SubShapeIDPair* pair);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void UnsafeFastContactPersisted(void* udata, ContactData* contact);
 
         /// <summary>
         /// Unsafe static implementation for OnContactValidate.
@@ -147,6 +196,30 @@ namespace Jolt
             var s = new ContactSettings(new NativeHandle<JPH_ContactSettings>(settings));
             int id = (int)udata;
             ManagedReference<IContactListenerImplementation>.Get(id).OnContactPersisted(b1, b2, m, s);
+        }
+
+        [MonoPInvokeCallback(typeof(UnsafeFastContactValidate))]
+        private static ValidateResult UnsafeFastContactValidateCallback(void* udata, ContactValidateData* contact)
+        {
+            return ManagedReference<IFastContactListenerImplementation>.Get((int)udata).OnContactValidate(ref *contact);
+        }
+
+        [MonoPInvokeCallback(typeof(UnsafeFastContactAdded))]
+        private static void UnsafeFastContactAddedCallback(void* udata, ContactData* contact)
+        {
+            ManagedReference<IFastContactListenerImplementation>.Get((int)udata).OnContactAdded(ref *contact);
+        }
+
+        [MonoPInvokeCallback(typeof(UnsafeFastContactRemoved))]
+        private static void UnsafeFastContactRemovedCallback(void* udata, SubShapeIDPair* pair)
+        {
+            ManagedReference<IFastContactListenerImplementation>.Get((int)udata).OnContactRemoved(*pair);
+        }
+
+        [MonoPInvokeCallback(typeof(UnsafeFastContactPersisted))]
+        private static void UnsafeFastContactPersistedCallback(void* udata, ContactData* contact)
+        {
+            ManagedReference<IFastContactListenerImplementation>.Get((int)udata).OnContactPersisted(ref *contact);
         }
     }
 }

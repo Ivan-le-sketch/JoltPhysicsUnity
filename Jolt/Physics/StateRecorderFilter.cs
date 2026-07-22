@@ -20,6 +20,18 @@ namespace Jolt
             return new StateRecorderFilter { Handle = Bindings.JPH_StateRecorderFilter_Create(implementation) };
         }
 
+        public static StateRecorderFilter CreateNative(
+            bool saveOnlyBodiesInBroadPhase,
+            bool saveOnlyEnabledConstraints)
+        {
+            return new StateRecorderFilter
+            {
+                Handle = Bindings.JPH_StateRecorderFilter_CreateNative(
+                    saveOnlyBodiesInBroadPhase,
+                    saveOnlyEnabledConstraints)
+            };
+        }
+
         public void Destroy()
         {
             Bindings.JPH_StateRecorderFilter_Destroy(Handle);

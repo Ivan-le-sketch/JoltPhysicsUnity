@@ -41,8 +41,24 @@ namespace Jolt
         public static rvec3 JPH_ContactManifold_GetWorldSpaceContactPointOn2(NativeHandle<JPH_ContactManifold> manifold, uint index) 
         {
             rvec3 result;
-            UnsafeBindings.JPH_ContactManifold_GetWorldSpaceContactPointOn1(manifold, index, &result);
+            UnsafeBindings.JPH_ContactManifold_GetWorldSpaceContactPointOn2(manifold, index, &result);
             return result;
+        }
+
+        public static uint JPH_ContactManifold_GetWorldSpaceContactPointsOn1(
+            NativeHandle<JPH_ContactManifold> manifold,
+            rvec3* results,
+            uint capacity)
+        {
+            return UnsafeBindings.JPH_ContactManifold_GetWorldSpaceContactPointsOn1(manifold, results, capacity);
+        }
+
+        public static uint JPH_ContactManifold_GetWorldSpaceContactPointsOn2(
+            NativeHandle<JPH_ContactManifold> manifold,
+            rvec3* results,
+            uint capacity)
+        {
+            return UnsafeBindings.JPH_ContactManifold_GetWorldSpaceContactPointsOn2(manifold, results, capacity);
         }
     }
 }

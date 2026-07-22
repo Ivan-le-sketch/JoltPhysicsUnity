@@ -85,9 +85,22 @@ JPH_SUPPRESS_WARNINGS
 
 #include <iostream>
 #include <cstdarg>
+#include <mutex>
+#include <vector>
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
+
+static_assert(sizeof(JPH_SimShapeFilterBodyData) == 64);
+static_assert(sizeof(JPH_ContactBodyData) == 56);
+static_assert(sizeof(JPH_ContactManifoldData) == 40);
+static_assert(sizeof(JPH_ContactSettingsData) == 52);
+#if defined(JPH_DOUBLE_PRECISION)
+static_assert(sizeof(JPH_ContactValidateData) == 144);
+#else
+static_assert(sizeof(JPH_ContactValidateData) == 136);
+#endif
+static_assert(sizeof(JPH_ContactData) == 208);
 
 #if defined(JPH_USE_SSE)
 static constexpr uint cDeterministicFPValue = _MM_ROUND_NEAREST | _MM_FLUSH_ZERO_ON | (1U << 6);
@@ -679,33 +692,27 @@ private:
 static void* (*il2cpp_domain_get_func)() = nullptr;
 static void* (*il2cpp_thread_attach_func)(void*) = nullptr;
 static void  (*il2cpp_thread_detach_func)(void*) = nullptr;
+static std::once_flag g_il2cppResolveOnce;
+static thread_local void* g_il2cppThread = nullptr;
 
 static void ResolveIL2CPPSymbols()
 {
-	static bool resolved = false;
-	if (resolved) return;
-	resolved = true;
-
+	std::call_once(g_il2cppResolveOnce, []()
+	{
 #if defined(_WIN32)
-	HMODULE lib = GetModuleHandleA("GameAssembly.dll");
-	if (!lib) return;
-	il2cpp_domain_get_func = (void* (*)())GetProcAddress(lib, "il2cpp_domain_get");
-	il2cpp_thread_attach_func = (void* (*)(void*))GetProcAddress(lib, "il2cpp_thread_attach");
-	il2cpp_thread_detach_func = (void(*)(void*))GetProcAddress(lib, "il2cpp_thread_detach");
+		HMODULE lib = GetModuleHandleA("GameAssembly.dll");
+		if (!lib) return;
+		il2cpp_domain_get_func = (void* (*)())GetProcAddress(lib, "il2cpp_domain_get");
+		il2cpp_thread_attach_func = (void* (*)(void*))GetProcAddress(lib, "il2cpp_thread_attach");
+		il2cpp_thread_detach_func = (void(*)(void*))GetProcAddress(lib, "il2cpp_thread_detach");
 #else
-	void* handle = dlopen(nullptr, RTLD_LAZY);
-	il2cpp_domain_get_func = (void* (*)())dlsym(handle, "il2cpp_domain_get");
-	il2cpp_thread_attach_func = (void* (*)(void*))dlsym(handle, "il2cpp_thread_attach");
-	il2cpp_thread_detach_func = (void(*)(void*))dlsym(handle, "il2cpp_thread_detach");
+		void* handle = dlopen(nullptr, RTLD_LAZY);
+		il2cpp_domain_get_func = (void* (*)())dlsym(handle, "il2cpp_domain_get");
+		il2cpp_thread_attach_func = (void* (*)(void*))dlsym(handle, "il2cpp_thread_attach");
+		il2cpp_thread_detach_func = (void(*)(void*))dlsym(handle, "il2cpp_thread_detach");
 #endif
+	});
 }
-
-#include <thread>
-#include <unordered_map>
-#include <mutex>
-
-static std::mutex g_threadMapMutex;
-static std::unordered_map<std::thread::id, void*> g_il2cppThreads;
 
 static void AttachIL2CPPThread()
 {
@@ -713,25 +720,16 @@ static void AttachIL2CPPThread()
 	if (!il2cpp_domain_get_func || !il2cpp_thread_attach_func)
 		return;
 
-	void* domain = il2cpp_domain_get_func();
-	void* thread = il2cpp_thread_attach_func(domain);
-
-	std::lock_guard<std::mutex> lock(g_threadMapMutex);
-	g_il2cppThreads[std::this_thread::get_id()] = thread;
+	g_il2cppThread = il2cpp_thread_attach_func(il2cpp_domain_get_func());
 }
 
 static void DetachIL2CPPThread()
 {
-	if (!il2cpp_thread_detach_func)
+	if (!il2cpp_thread_detach_func || !g_il2cppThread)
 		return;
 
-	std::lock_guard<std::mutex> lock(g_threadMapMutex);
-	auto it = g_il2cppThreads.find(std::this_thread::get_id());
-	if (it != g_il2cppThreads.end())
-	{
-		il2cpp_thread_detach_func(it->second);
-		g_il2cppThreads.erase(it);
-	}
+	il2cpp_thread_detach_func(g_il2cppThread);
+	g_il2cppThread = nullptr;
 }
 
 JPH_JobSystem* JPH_JobSystemThreadPool_Create(const JobSystemThreadPoolConfig* config)
@@ -1477,8 +1475,103 @@ void JPH_SimShapeFilter_Destroy(JPH_SimShapeFilter* filter)
 {
 	if (filter)
 	{
-		delete reinterpret_cast<ManagedSimShapeFilter*>(filter);
+		delete reinterpret_cast<JPH::SimShapeFilter*>(filter);
 	}
+}
+
+static JPH_SimShapeFilterBodyData ToSimShapeFilterBodyData(
+	const Body& body,
+	const Shape* shape,
+	const SubShapeID& subShapeID)
+{
+	JPH_SimShapeFilterBodyData result{};
+	result.body = ToBody(&body);
+	result.shape = ToShape(shape);
+	SubShapeID leafShapeRemainder;
+	const Shape* leafShape = shape != nullptr ? shape->GetLeafShape(subShapeID, leafShapeRemainder) : nullptr;
+	result.leafShape = ToShape(leafShape);
+	result.bodyUserData = body.GetUserData();
+	result.leafShapeUserData = leafShape != nullptr ? leafShape->GetUserData() : 0;
+	result.bodyID = body.GetID().GetIndexAndSequenceNumber();
+	result.objectLayer = body.GetObjectLayer();
+	result.subShapeID = subShapeID.GetValue();
+	result.leafShapeRemainder = leafShapeRemainder.GetValue();
+	result.bodyFlags = body.IsStatic() ? 1u : 0u;
+	result.shapeVolume = shape != nullptr ? shape->GetVolume() : 0.0f;
+	return result;
+}
+
+class ManagedSimShapeFilterFast final : public JPH::SimShapeFilter
+{
+public:
+	static const JPH_SimShapeFilterFast_Procs* s_Procs;
+	void* userData = nullptr;
+
+	explicit ManagedSimShapeFilterFast(void* userData_)
+		: userData(userData_)
+	{
+	}
+
+	void SetBodyCallbackEnabled(JPH_BodyID bodyID, bool enabled)
+	{
+		mUseBodyRouting = true;
+		const uint32_t index = JPH::BodyID(bodyID).GetIndex();
+		if (index >= mManagedBodyIDs.size())
+			mManagedBodyIDs.resize(index + 1, JPH::BodyID::cInvalidBodyID);
+		mManagedBodyIDs[index] = enabled ? bodyID : JPH::BodyID::cInvalidBodyID;
+	}
+
+	bool ShouldCollide(
+		const Body& inBody1,
+		const Shape* inShape1,
+		const SubShapeID& inSubShapeIDOfShape1,
+		const Body& inBody2,
+		const Shape* inShape2,
+		const SubShapeID& inSubShapeIDOfShape2) const override
+	{
+		if (!IsBodyCallbackEnabled(inBody1) && !IsBodyCallbackEnabled(inBody2))
+			return true;
+
+		if (s_Procs == nullptr || s_Procs->ShouldCollide == nullptr)
+			return true;
+
+		JPH_SimShapeFilterBodyData body1 = ToSimShapeFilterBodyData(inBody1, inShape1, inSubShapeIDOfShape1);
+		JPH_SimShapeFilterBodyData body2 = ToSimShapeFilterBodyData(inBody2, inShape2, inSubShapeIDOfShape2);
+		return s_Procs->ShouldCollide(userData, &body1, &body2);
+	}
+
+private:
+	bool IsBodyCallbackEnabled(const Body& body) const
+	{
+		if (!mUseBodyRouting)
+			return true;
+
+		const BodyID& bodyID = body.GetID();
+		const uint32_t index = bodyID.GetIndex();
+		return index < mManagedBodyIDs.size()
+			&& mManagedBodyIDs[index] == bodyID.GetIndexAndSequenceNumber();
+	}
+
+	bool mUseBodyRouting = false;
+	std::vector<JPH_BodyID> mManagedBodyIDs;
+};
+
+const JPH_SimShapeFilterFast_Procs* ManagedSimShapeFilterFast::s_Procs = nullptr;
+
+void JPH_SimShapeFilterFast_SetProcs(const JPH_SimShapeFilterFast_Procs* procs)
+{
+	ManagedSimShapeFilterFast::s_Procs = procs;
+}
+
+JPH_SimShapeFilter* JPH_SimShapeFilterFast_Create(void* userData)
+{
+	auto* filter = new ManagedSimShapeFilterFast(userData);
+	return reinterpret_cast<JPH_SimShapeFilter*>(filter);
+}
+
+void JPH_SimShapeFilterFast_SetBodyCallbackEnabled(JPH_SimShapeFilter* filter, JPH_BodyID bodyID, bool enabled)
+{
+	reinterpret_cast<ManagedSimShapeFilterFast*>(filter)->SetBodyCallbackEnabled(bodyID, enabled);
 }
 
 /* Math */
@@ -7974,6 +8067,35 @@ JPH_Body* JPH_Body_GetFixedToWorldBody(void)
 }
 
 /* Contact Listener */
+static JPH_CollideShapeResult FromJoltContactCallback(const JPH::CollideShapeResult& jolt)
+{
+	static thread_local std::vector<JPH_Vec3> shape1Faces;
+	static thread_local std::vector<JPH_Vec3> shape2Faces;
+
+	JPH_CollideShapeResult result{};
+	FromJolt(jolt.mContactPointOn1, &result.contactPointOn1);
+	FromJolt(jolt.mContactPointOn2, &result.contactPointOn2);
+	FromJolt(jolt.mPenetrationAxis, &result.penetrationAxis);
+	result.penetrationDepth = jolt.mPenetrationDepth;
+	result.subShapeID1 = jolt.mSubShapeID1.GetValue();
+	result.subShapeID2 = jolt.mSubShapeID2.GetValue();
+	result.bodyID2 = jolt.mBodyID2.GetIndexAndSequenceNumber();
+
+	shape1Faces.resize(jolt.mShape1Face.size());
+	for (uint32_t i = 0; i < shape1Faces.size(); ++i)
+		FromJolt(jolt.mShape1Face[i], &shape1Faces[i]);
+	result.shape1FaceCount = static_cast<uint32_t>(shape1Faces.size());
+	result.shape1Faces = shape1Faces.data();
+
+	shape2Faces.resize(jolt.mShape2Face.size());
+	for (uint32_t i = 0; i < shape2Faces.size(); ++i)
+		FromJolt(jolt.mShape2Face[i], &shape2Faces[i]);
+	result.shape2FaceCount = static_cast<uint32_t>(shape2Faces.size());
+	result.shape2Faces = shape2Faces.data();
+
+	return result;
+}
+
 class ManagedContactListener final : public JPH::ContactListener
 {
 public:
@@ -7995,7 +8117,7 @@ public:
 		if (s_Procs != nullptr
 			&& s_Procs->OnContactValidate)
 		{
-			JPH_CollideShapeResult collideShapeResult = FromJolt(inCollisionResult);
+			JPH_CollideShapeResult collideShapeResult = FromJoltContactCallback(inCollisionResult);
 
 			JPH_ValidateResult result = s_Procs->OnContactValidate(
 				userData,
@@ -8078,8 +8200,211 @@ void JPH_ContactListener_Destroy(JPH_ContactListener* listener)
 {
 	if (listener)
 	{
-		delete reinterpret_cast<ManagedContactListener*>(listener);
+		delete reinterpret_cast<JPH::ContactListener*>(listener);
 	}
+}
+
+static constexpr uint32_t ContactCallbackValidate = 1u << 0;
+static constexpr uint32_t ContactCallbackAdded = 1u << 1;
+static constexpr uint32_t ContactCallbackPersisted = 1u << 2;
+static constexpr uint32_t ContactCallbackRemoved = 1u << 3;
+static constexpr uint32_t ContactBodyIsStatic = 1u << 0;
+
+static JPH_ContactBodyData ToContactBodyData(const Body& body)
+{
+	JPH_ContactBodyData result{};
+	result.body = ToBody(&body);
+	result.bodyUserData = body.GetUserData();
+	result.bodyID = body.GetID().GetIndexAndSequenceNumber();
+	result.objectLayer = body.GetObjectLayer();
+	result.bodyFlags = body.IsStatic() ? ContactBodyIsStatic : 0u;
+	FromJolt(body.GetLinearVelocity(), &result.linearVelocity);
+	FromJolt(body.GetAngularVelocity(), &result.angularVelocity);
+	return result;
+}
+
+static JPH_ContactManifoldData ToContactManifoldData(const ContactManifold& manifold)
+{
+	JPH_ContactManifoldData result{};
+	result.manifold = ToContactManifold(&manifold);
+	FromJolt(manifold.mWorldSpaceNormal, &result.worldSpaceNormal);
+	result.penetrationDepth = manifold.mPenetrationDepth;
+	result.subShapeID1 = manifold.mSubShapeID1.GetValue();
+	result.subShapeID2 = manifold.mSubShapeID2.GetValue();
+	result.pointCount = static_cast<uint32_t>(manifold.mRelativeContactPointsOn1.size());
+	return result;
+}
+
+static JPH_ContactSettingsData ToContactSettingsData(const ContactSettings& settings)
+{
+	JPH_ContactSettingsData result{};
+	result.friction = settings.mCombinedFriction;
+	result.restitution = settings.mCombinedRestitution;
+	result.invMassScale1 = settings.mInvMassScale1;
+	result.invInertiaScale1 = settings.mInvInertiaScale1;
+	result.invMassScale2 = settings.mInvMassScale2;
+	result.invInertiaScale2 = settings.mInvInertiaScale2;
+	result.isSensor = settings.mIsSensor ? 1u : 0u;
+	FromJolt(settings.mRelativeLinearSurfaceVelocity, &result.relativeLinearSurfaceVelocity);
+	FromJolt(settings.mRelativeAngularSurfaceVelocity, &result.relativeAngularSurfaceVelocity);
+	return result;
+}
+
+static void ApplyContactSettingsData(const JPH_ContactSettingsData& data, ContactSettings& settings)
+{
+	settings.mCombinedFriction = data.friction;
+	settings.mCombinedRestitution = data.restitution;
+	settings.mInvMassScale1 = data.invMassScale1;
+	settings.mInvInertiaScale1 = data.invInertiaScale1;
+	settings.mInvMassScale2 = data.invMassScale2;
+	settings.mInvInertiaScale2 = data.invInertiaScale2;
+	settings.mIsSensor = data.isSensor != 0;
+	settings.mRelativeLinearSurfaceVelocity = ToJolt(data.relativeLinearSurfaceVelocity);
+	settings.mRelativeAngularSurfaceVelocity = ToJolt(data.relativeAngularSurfaceVelocity);
+}
+
+class ManagedContactListenerFast final : public JPH::ContactListener
+{
+public:
+	static const JPH_ContactListenerFast_Procs* s_Procs;
+	void* userData = nullptr;
+
+	explicit ManagedContactListenerFast(void* userData_)
+		: userData(userData_)
+	{
+	}
+
+	void SetBodyCallbackFlags(JPH_BodyID bodyID, uint32_t flags)
+	{
+		mUseBodyRouting = true;
+		const uint32_t index = JPH::BodyID(bodyID).GetIndex();
+		if (index >= mBodyCallbacks.size())
+			mBodyCallbacks.resize(index + 1);
+		mBodyCallbacks[index] = { bodyID, flags };
+	}
+
+	ValidateResult OnContactValidate(
+		const Body& inBody1,
+		const Body& inBody2,
+		RVec3Arg inBaseOffset,
+		const CollideShapeResult& inCollisionResult) override
+	{
+		if (((GetBodyCallbackFlags(inBody1) | GetBodyCallbackFlags(inBody2)) & ContactCallbackValidate) == 0)
+			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
+
+		if (s_Procs == nullptr || s_Procs->OnContactValidate == nullptr)
+			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
+
+		JPH_CollideShapeResult collisionResult = FromJoltContactCallback(inCollisionResult);
+		JPH_ContactValidateData data{};
+		data.body1 = ToContactBodyData(inBody1);
+		data.body2 = ToContactBodyData(inBody2);
+		data.collisionResult = &collisionResult;
+		FromJolt(inBaseOffset, &data.baseOffset);
+		return static_cast<JPH::ValidateResult>(s_Procs->OnContactValidate(userData, &data));
+	}
+
+	void OnContactAdded(
+		const Body& inBody1,
+		const Body& inBody2,
+		const ContactManifold& inManifold,
+		ContactSettings& ioSettings) override
+	{
+		if (((GetBodyCallbackFlags(inBody1) | GetBodyCallbackFlags(inBody2)) & ContactCallbackAdded) == 0)
+			return;
+
+		InvokeContact(s_Procs != nullptr ? s_Procs->OnContactAdded : nullptr, inBody1, inBody2, inManifold, ioSettings);
+	}
+
+	void OnContactPersisted(
+		const Body& inBody1,
+		const Body& inBody2,
+		const ContactManifold& inManifold,
+		ContactSettings& ioSettings) override
+	{
+		if (((GetBodyCallbackFlags(inBody1) | GetBodyCallbackFlags(inBody2)) & ContactCallbackPersisted) == 0)
+			return;
+
+		InvokeContact(s_Procs != nullptr ? s_Procs->OnContactPersisted : nullptr, inBody1, inBody2, inManifold, ioSettings);
+	}
+
+	void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override
+	{
+		const uint32_t flags = GetBodyCallbackFlags(inSubShapePair.GetBody1ID())
+			| GetBodyCallbackFlags(inSubShapePair.GetBody2ID());
+		if ((flags & ContactCallbackRemoved) != 0
+			&& s_Procs != nullptr
+			&& s_Procs->OnContactRemoved != nullptr)
+		{
+			s_Procs->OnContactRemoved(userData, reinterpret_cast<const JPH_SubShapeIDPair*>(&inSubShapePair));
+		}
+	}
+
+private:
+	struct BodyCallbacks
+	{
+		JPH_BodyID bodyID = JPH::BodyID::cInvalidBodyID;
+		uint32_t flags = 0;
+	};
+
+	using ContactCallback = void(JPH_API_CALL*)(void*, JPH_ContactData*);
+
+	uint32_t GetBodyCallbackFlags(const Body& body) const
+	{
+		return GetBodyCallbackFlags(body.GetID());
+	}
+
+	uint32_t GetBodyCallbackFlags(const BodyID& bodyID) const
+	{
+		if (!mUseBodyRouting)
+			return ContactCallbackValidate | ContactCallbackAdded | ContactCallbackPersisted | ContactCallbackRemoved;
+
+		const uint32_t index = bodyID.GetIndex();
+		if (index >= mBodyCallbacks.size())
+			return 0;
+		const BodyCallbacks& callbacks = mBodyCallbacks[index];
+		return callbacks.bodyID == bodyID.GetIndexAndSequenceNumber() ? callbacks.flags : 0;
+	}
+
+	void InvokeContact(
+		ContactCallback callback,
+		const Body& body1,
+		const Body& body2,
+		const ContactManifold& manifold,
+		ContactSettings& settings) const
+	{
+		if (callback == nullptr)
+			return;
+
+		JPH_ContactData data{};
+		data.body1 = ToContactBodyData(body1);
+		data.body2 = ToContactBodyData(body2);
+		data.manifold = ToContactManifoldData(manifold);
+		data.settings = ToContactSettingsData(settings);
+		callback(userData, &data);
+		ApplyContactSettingsData(data.settings, settings);
+	}
+
+	bool mUseBodyRouting = false;
+	std::vector<BodyCallbacks> mBodyCallbacks;
+};
+
+const JPH_ContactListenerFast_Procs* ManagedContactListenerFast::s_Procs = nullptr;
+
+void JPH_ContactListenerFast_SetProcs(const JPH_ContactListenerFast_Procs* procs)
+{
+	ManagedContactListenerFast::s_Procs = procs;
+}
+
+JPH_ContactListener* JPH_ContactListenerFast_Create(void* userData)
+{
+	auto* listener = new ManagedContactListenerFast(userData);
+	return reinterpret_cast<JPH_ContactListener*>(listener);
+}
+
+void JPH_ContactListenerFast_SetBodyCallbackFlags(JPH_ContactListener* listener, JPH_BodyID bodyID, uint32_t flags)
+{
+	reinterpret_cast<ManagedContactListenerFast*>(listener)->SetBodyCallbackFlags(bodyID, flags);
 }
 
 /* BodyActivationListener */
@@ -8175,6 +8500,24 @@ void JPH_ContactManifold_GetWorldSpaceContactPointOn1(const JPH_ContactManifold*
 void JPH_ContactManifold_GetWorldSpaceContactPointOn2(const JPH_ContactManifold* manifold, uint32_t index, JPH_RVec3* result)
 {
 	FromJolt(AsContactManifold(manifold)->GetWorldSpaceContactPointOn2(index), result);
+}
+
+uint32_t JPH_ContactManifold_GetWorldSpaceContactPointsOn1(const JPH_ContactManifold* manifold, JPH_RVec3* results, uint32_t capacity)
+{
+	const JPH::ContactManifold* joltManifold = AsContactManifold(manifold);
+	const uint32_t count = std::min(capacity, static_cast<uint32_t>(joltManifold->mRelativeContactPointsOn1.size()));
+	for (uint32_t i = 0; i < count; ++i)
+		FromJolt(joltManifold->GetWorldSpaceContactPointOn1(i), &results[i]);
+	return count;
+}
+
+uint32_t JPH_ContactManifold_GetWorldSpaceContactPointsOn2(const JPH_ContactManifold* manifold, JPH_RVec3* results, uint32_t capacity)
+{
+	const JPH::ContactManifold* joltManifold = AsContactManifold(manifold);
+	const uint32_t count = std::min(capacity, static_cast<uint32_t>(joltManifold->mRelativeContactPointsOn2.size()));
+	for (uint32_t i = 0; i < count; ++i)
+		FromJolt(joltManifold->GetWorldSpaceContactPointOn2(i), &results[i]);
+	return count;
 }
 
 /* ContactSettings */
@@ -10420,6 +10763,29 @@ void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll)
 
 /* CollisionEstimationResult */
 
+static void CopyCollisionEstimationResult(
+	const JPH::CollisionEstimationResult& joltResult,
+	JPH_CollisionEstimationResultImpulse* impulses,
+	uint32_t impulseCapacity,
+	JPH_CollisionEstimationResult* result)
+{
+	FromJolt(joltResult.mLinearVelocity1, &result->linearVelocity1);
+	FromJolt(joltResult.mAngularVelocity1, &result->angularVelocity1);
+	FromJolt(joltResult.mLinearVelocity2, &result->linearVelocity2);
+	FromJolt(joltResult.mAngularVelocity2, &result->angularVelocity2);
+	FromJolt(joltResult.mTangent1, &result->tangent1);
+	FromJolt(joltResult.mTangent2, &result->tangent2);
+
+	result->impulseCount = std::min(impulseCapacity, static_cast<uint32_t>(joltResult.mImpulses.size()));
+	result->impulses = impulses;
+	for (uint32_t i = 0; i < result->impulseCount; ++i)
+	{
+		result->impulses[i].contactImpulse = joltResult.mImpulses[i].mContactImpulse;
+		result->impulses[i].frictionImpulse1 = joltResult.mImpulses[i].mFrictionImpulse1;
+		result->impulses[i].frictionImpulse2 = joltResult.mImpulses[i].mFrictionImpulse2;
+	}
+}
+
 void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result)
 {
 	JPH_ASSERT(result);
@@ -10433,24 +10799,41 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 		minVelocityForRestitution,
 		numIterations);
 
-	FromJolt(joltResult.mLinearVelocity1, &result->linearVelocity1);
-	FromJolt(joltResult.mAngularVelocity1, &result->angularVelocity1);
-	FromJolt(joltResult.mLinearVelocity2, &result->linearVelocity2);
-	FromJolt(joltResult.mAngularVelocity2, &result->angularVelocity2);
-	FromJolt(joltResult.mTangent1, &result->tangent1);
-	FromJolt(joltResult.mTangent2, &result->tangent2);
+	const uint32_t impulseCount = static_cast<uint32_t>(joltResult.mImpulses.size());
+	auto* impulses = impulseCount > 0
+		? static_cast<JPH_CollisionEstimationResultImpulse*>(malloc(sizeof(JPH_CollisionEstimationResultImpulse) * impulseCount))
+		: nullptr;
+	CopyCollisionEstimationResult(joltResult, impulses, impulseCount, result);
+}
 
-	if (!joltResult.mImpulses.empty())
-	{
-		result->impulseCount = static_cast<uint32_t>(joltResult.mImpulses.size());
-		result->impulses = (JPH_CollisionEstimationResultImpulse*)malloc(sizeof(JPH_CollisionEstimationResultImpulse) * joltResult.mImpulses.size());
-		for (uint32_t i = 0; i < result->impulseCount; i++)
-		{
-			result->impulses[i].contactImpulse = joltResult.mImpulses[i].mContactImpulse;
-			result->impulses[i].frictionImpulse1 = joltResult.mImpulses[i].mFrictionImpulse1;
-			result->impulses[i].frictionImpulse2 = joltResult.mImpulses[i].mFrictionImpulse2;
-		}
-	}
+uint32_t JPH_EstimateCollisionResponseInto(
+	const JPH_Body* body1,
+	const JPH_Body* body2,
+	const JPH_ContactManifold* manifold,
+	float combinedFriction,
+	float combinedRestitution,
+	float minVelocityForRestitution,
+	uint32_t numIterations,
+	JPH_CollisionEstimationResultImpulse* impulses,
+	uint32_t impulseCapacity,
+	JPH_RVec3* contactPointsOn1,
+	uint32_t contactPointCapacity,
+	JPH_CollisionEstimationResult* result)
+{
+	JPH_ASSERT(result);
+	JPH_ASSERT(impulseCapacity == 0 || impulses != nullptr);
+	JPH_ASSERT(contactPointCapacity == 0 || contactPointsOn1 != nullptr);
+
+	JPH::CollisionEstimationResult joltResult;
+	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2),
+		*AsContactManifold(manifold), joltResult,
+		combinedFriction,
+		combinedRestitution,
+		minVelocityForRestitution,
+		numIterations);
+
+	CopyCollisionEstimationResult(joltResult, impulses, impulseCapacity, result);
+	return JPH_ContactManifold_GetWorldSpaceContactPointsOn1(manifold, contactPointsOn1, contactPointCapacity);
 }
 
 /* WheelWV */
@@ -10934,10 +11317,40 @@ JPH_StateRecorderFilter* JPH_StateRecorderFilter_Create(JPH_StateRecorderFilter_
 	return reinterpret_cast<JPH_StateRecorderFilter*>(impl);
 }
 
+class NativeStateRecorderFilter final : public JPH::StateRecorderFilter
+{
+public:
+	NativeStateRecorderFilter(bool saveOnlyBodiesInBroadPhase, bool saveOnlyEnabledConstraints)
+		: mSaveOnlyBodiesInBroadPhase(saveOnlyBodiesInBroadPhase)
+		, mSaveOnlyEnabledConstraints(saveOnlyEnabledConstraints)
+	{
+	}
+
+	bool ShouldSaveBody(const Body& body) const override
+	{
+		return !mSaveOnlyBodiesInBroadPhase || body.IsInBroadPhase();
+	}
+
+	bool ShouldSaveConstraint(const Constraint& constraint) const override
+	{
+		return !mSaveOnlyEnabledConstraints || constraint.GetEnabled();
+	}
+
+private:
+	bool mSaveOnlyBodiesInBroadPhase;
+	bool mSaveOnlyEnabledConstraints;
+};
+
+JPH_StateRecorderFilter* JPH_StateRecorderFilter_CreateNative(bool saveOnlyBodiesInBroadPhase, bool saveOnlyEnabledConstraints)
+{
+	auto* filter = new NativeStateRecorderFilter(saveOnlyBodiesInBroadPhase, saveOnlyEnabledConstraints);
+	return reinterpret_cast<JPH_StateRecorderFilter*>(filter);
+}
+
 void JPH_StateRecorderFilter_Destroy(JPH_StateRecorderFilter* filter)
 {
 	if (filter)
-		delete reinterpret_cast<ManagedStateRecorderFilter*>(filter);
+		delete reinterpret_cast<JPH::StateRecorderFilter*>(filter);
 }
 
 /* StateRecorder */
