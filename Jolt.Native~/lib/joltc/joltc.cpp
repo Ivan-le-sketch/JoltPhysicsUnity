@@ -79,6 +79,8 @@ JPH_SUPPRESS_WARNINGS
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Body/BodyLockMulti.h"
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
+#include "Jolt/Skeleton/SkeletalAnimation.h"
+#include "Jolt/Skeleton/SkeletonMapper.h"
 #include "Jolt/Physics/Vehicle/VehicleController.h"
 #include "Jolt/Physics/Vehicle/WheeledVehicleController.h"
 #include "Jolt/Physics/StateRecorderImpl.h"
@@ -176,6 +178,9 @@ DEF_MAP_DECL(GearConstraint, JPH_GearConstraint)
 DEF_MAP_DECL(Character, JPH_Character)
 DEF_MAP_DECL(CharacterVirtual, JPH_CharacterVirtual)
 DEF_MAP_DECL(Skeleton, JPH_Skeleton)
+DEF_MAP_DECL(SkeletonPose, JPH_SkeletonPose)
+DEF_MAP_DECL(SkeletalAnimation, JPH_SkeletalAnimation)
+DEF_MAP_DECL(SkeletonMapper, JPH_SkeletonMapper)
 DEF_MAP_DECL(RagdollSettings, JPH_RagdollSettings)
 DEF_MAP_DECL(Ragdoll, JPH_Ragdoll)
 DEF_MAP_DECL(GroupFilter, JPH_GroupFilter)
@@ -355,7 +360,7 @@ static inline const JPH_PhysicsMaterial* FromJolt(const JPH::PhysicsMaterial* jo
 	return joltMaterial != nullptr ? ToPhysicsMaterial(joltMaterial) : nullptr;
 }
 
-static inline void FromJolt(const CharacterVirtual::Contact& jolt, JPH_CharacterVirtualContact* result)
+static inline void FromJolt(const CharacterContact& jolt, JPH_CharacterVirtualContact* result)
 {
 	result->hash = jolt.GetHash();
 	result->bodyB = (JPH_BodyID)jolt.mBodyB.GetIndexAndSequenceNumber();
@@ -375,6 +380,7 @@ static inline void FromJolt(const CharacterVirtual::Contact& jolt, JPH_Character
 	result->hadCollision = jolt.mHadCollision;
 	result->wasDiscarded = jolt.mWasDiscarded;
 	result->canPushCharacter = jolt.mCanPushCharacter;
+	result->isBackFacingContact = jolt.mIsBackFacingContact;
 }
 
 static inline void FromJolt(const Skeleton::Joint& jolt, JPH_SkeletonJoint* result)
@@ -9383,45 +9389,45 @@ public:
 		}
 	}
 
-	bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override
+	bool OnContactValidate(const CharacterVirtual* inCharacter, const CharacterContact& inContact) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnContactValidate)
 		{
 			return s_Procs->OnContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
-				(JPH_SubShapeID)inSubShapeID2.GetValue()
+				(JPH_BodyID)inContact.mBodyB.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue()
 			);
 		}
 
 		return true;
 	}
 
-	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2)  override
+	bool OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterContact& inContact) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnCharacterContactValidate)
 		{
 			return s_Procs->OnCharacterContactValidate(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				ToCharacterVirtual(inOtherCharacter),
-				(JPH_SubShapeID)inSubShapeID2.GetValue()
+				ToCharacterVirtual(inContact.mCharacterB),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue()
 			);
 		}
 
 		return true;
 	}
 
-	void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	void OnContactAdded(const CharacterVirtual* inCharacter, const CharacterContact& inContact, CharacterContactSettings& ioSettings) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
 
-			FromJolt(inContactPosition, &contactPosition);
-			FromJolt(inContactNormal, &contactNormal);
+			FromJolt(inContact.mPosition, &contactPosition);
+			FromJolt(-inContact.mContactNormal, &contactNormal);
 
 			JPH_CharacterContactSettings settings = {};
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
@@ -9430,8 +9436,8 @@ public:
 			s_Procs->OnContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
-				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				(JPH_BodyID)inContact.mBodyB.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue(),
 				&contactPosition,
 				&contactNormal,
 				&settings
@@ -9442,15 +9448,15 @@ public:
 		}
 	}
 
-	void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	void OnContactPersisted(const CharacterVirtual* inCharacter, const CharacterContact& inContact, CharacterContactSettings& ioSettings) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
 
-			FromJolt(inContactPosition, &contactPosition);
-			FromJolt(inContactNormal, &contactNormal);
+			FromJolt(inContact.mPosition, &contactPosition);
+			FromJolt(-inContact.mContactNormal, &contactNormal);
 
 			JPH_CharacterContactSettings settings = {};
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
@@ -9459,8 +9465,8 @@ public:
 			s_Procs->OnContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				(JPH_BodyID)inBodyID2.GetIndexAndSequenceNumber(),
-				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				(JPH_BodyID)inContact.mBodyB.GetIndexAndSequenceNumber(),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue(),
 				&contactPosition,
 				&contactNormal,
 				&settings
@@ -9484,15 +9490,15 @@ public:
 		}
 	}
 
-	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	void OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterContact& inContact, CharacterContactSettings& ioSettings) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnCharacterContactAdded)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
 
-			FromJolt(inContactPosition, &contactPosition);
-			FromJolt(inContactNormal, &contactNormal);
+			FromJolt(inContact.mPosition, &contactPosition);
+			FromJolt(-inContact.mContactNormal, &contactNormal);
 
 			JPH_CharacterContactSettings settings = {};
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
@@ -9501,8 +9507,8 @@ public:
 			s_Procs->OnCharacterContactAdded(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				ToCharacterVirtual(inOtherCharacter),
-				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				ToCharacterVirtual(inContact.mCharacterB),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue(),
 				&contactPosition,
 				&contactNormal,
 				&settings
@@ -9513,15 +9519,15 @@ public:
 		}
 	}
 
-	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+	void OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterContact& inContact, CharacterContactSettings& ioSettings) override
 	{
 		if (s_Procs != nullptr && s_Procs->OnCharacterContactPersisted)
 		{
 			JPH_RVec3 contactPosition;
 			JPH_Vec3 contactNormal;
 
-			FromJolt(inContactPosition, &contactPosition);
-			FromJolt(inContactNormal, &contactNormal);
+			FromJolt(inContact.mPosition, &contactPosition);
+			FromJolt(-inContact.mContactNormal, &contactNormal);
 
 			JPH_CharacterContactSettings settings = {};
 			settings.canPushCharacter = ioSettings.mCanPushCharacter;
@@ -9530,8 +9536,8 @@ public:
 			s_Procs->OnCharacterContactPersisted(
 				userData,
 				ToCharacterVirtual(inCharacter),
-				ToCharacterVirtual(inOtherCharacter),
-				(JPH_SubShapeID)inSubShapeID2.GetValue(),
+				ToCharacterVirtual(inContact.mCharacterB),
+				(JPH_SubShapeID)inContact.mSubShapeIDB.GetValue(),
 				&contactPosition,
 				&contactNormal,
 				&settings
@@ -10663,7 +10669,250 @@ bool JPH_Skeleton_AreJointsCorrectlyOrdered(const JPH_Skeleton* skeleton)
 	return AsSkeleton(skeleton)->AreJointsCorrectlyOrdered();
 }
 
-/* Ragdoll */
+/* SkeletonPose */
+JPH_SkeletonPose* JPH_SkeletonPose_Create(void)
+{
+	return ToSkeletonPose(new JPH::SkeletonPose());
+}
+
+void JPH_SkeletonPose_Destroy(JPH_SkeletonPose* pose)
+{
+	delete AsSkeletonPose(pose);
+}
+
+void JPH_SkeletonPose_SetSkeleton(JPH_SkeletonPose* pose, const JPH_Skeleton* skeleton)
+{
+	AsSkeletonPose(pose)->SetSkeleton(AsSkeleton(skeleton));
+}
+
+const JPH_Skeleton* JPH_SkeletonPose_GetSkeleton(const JPH_SkeletonPose* pose)
+{
+	return ToSkeleton(AsSkeletonPose(pose)->GetSkeleton());
+}
+
+void JPH_SkeletonPose_SetRootOffset(JPH_SkeletonPose* pose, const JPH_RVec3* offset)
+{
+	AsSkeletonPose(pose)->SetRootOffset(ToJolt(offset));
+}
+
+void JPH_SkeletonPose_GetRootOffset(const JPH_SkeletonPose* pose, JPH_RVec3* result)
+{
+	FromJolt(AsSkeletonPose(pose)->GetRootOffset(), result);
+}
+
+int JPH_SkeletonPose_GetJointCount(const JPH_SkeletonPose* pose)
+{
+	return static_cast<int>(AsSkeletonPose(pose)->GetJointCount());
+}
+
+void JPH_SkeletonPose_GetJointState(const JPH_SkeletonPose* pose, int index, JPH_Vec3* outTranslation, JPH_Quat* outRotation)
+{
+	if (index < 0 || index >= JPH_SkeletonPose_GetJointCount(pose))
+		return;
+
+	const auto& joint = AsSkeletonPose(pose)->GetJoint(index);
+	if (outTranslation)
+		FromJolt(joint.mTranslation, outTranslation);
+	if (outRotation)
+		FromJolt(joint.mRotation, outRotation);
+}
+
+void JPH_SkeletonPose_SetJointState(JPH_SkeletonPose* pose, int index, const JPH_Vec3* translation, const JPH_Quat* rotation)
+{
+	if (index < 0 || index >= JPH_SkeletonPose_GetJointCount(pose))
+		return;
+
+	auto& joint = AsSkeletonPose(pose)->GetJoint(index);
+	if (translation)
+		joint.mTranslation = ToJolt(translation);
+	if (rotation)
+		joint.mRotation = ToJolt(rotation);
+}
+
+void JPH_SkeletonPose_GetJointMatrix(const JPH_SkeletonPose* pose, int index, JPH_Matrix4x4* result)
+{
+	if (result && index >= 0 && index < JPH_SkeletonPose_GetJointCount(pose))
+		FromJolt(AsSkeletonPose(pose)->GetJointMatrix(index), result);
+}
+
+void JPH_SkeletonPose_SetJointMatrix(JPH_SkeletonPose* pose, int index, const JPH_Matrix4x4* matrix)
+{
+	if (matrix && index >= 0 && index < JPH_SkeletonPose_GetJointCount(pose))
+		AsSkeletonPose(pose)->GetJointMatrix(index) = ToJolt(matrix);
+}
+
+int JPH_SkeletonPose_GetJointMatrices(const JPH_SkeletonPose* pose, JPH_Matrix4x4* outMatrices, int capacity)
+{
+	if (!outMatrices || capacity <= 0)
+		return 0;
+
+	const auto& matrices = AsSkeletonPose(pose)->GetJointMatrices();
+	const int copyCount = std::min(capacity, static_cast<int>(matrices.size()));
+	for (int i = 0; i < copyCount; ++i)
+		FromJolt(matrices[i], &outMatrices[i]);
+	return copyCount;
+}
+
+int JPH_SkeletonPose_SetJointMatrices(JPH_SkeletonPose* pose, const JPH_Matrix4x4* matrices, int count)
+{
+	if (!matrices || count <= 0)
+		return 0;
+
+	auto& poseMatrices = AsSkeletonPose(pose)->GetJointMatrices();
+	const int copyCount = std::min(count, static_cast<int>(poseMatrices.size()));
+	for (int i = 0; i < copyCount; ++i)
+		poseMatrices[i] = ToJolt(&matrices[i]);
+	return copyCount;
+}
+
+void JPH_SkeletonPose_CalculateJointMatrices(JPH_SkeletonPose* pose)
+{
+	AsSkeletonPose(pose)->CalculateJointMatrices();
+}
+
+void JPH_SkeletonPose_CalculateJointStates(JPH_SkeletonPose* pose)
+{
+	AsSkeletonPose(pose)->CalculateJointStates();
+}
+
+int JPH_SkeletonPose_CalculateLocalSpaceJointMatrices(const JPH_SkeletonPose* pose, JPH_Matrix4x4* outMatrices, int capacity)
+{
+	const int count = JPH_SkeletonPose_GetJointCount(pose);
+	if (!outMatrices || capacity < count)
+		return 0;
+
+	JPH::Array<JPH::Mat44> matrices(count);
+	AsSkeletonPose(pose)->CalculateLocalSpaceJointMatrices(matrices.data());
+	for (int i = 0; i < count; ++i)
+		FromJolt(matrices[i], &outMatrices[i]);
+	return count;
+}
+
+/* SkeletalAnimation */
+JPH_SkeletalAnimation* JPH_SkeletalAnimation_Create(void)
+{
+	auto* animation = new JPH::SkeletalAnimation();
+	animation->AddRef();
+	return ToSkeletalAnimation(animation);
+}
+
+void JPH_SkeletalAnimation_Destroy(JPH_SkeletalAnimation* animation)
+{
+	if (animation)
+		AsSkeletalAnimation(animation)->Release();
+}
+
+float JPH_SkeletalAnimation_GetDuration(const JPH_SkeletalAnimation* animation)
+{
+	return AsSkeletalAnimation(animation)->GetDuration();
+}
+
+bool JPH_SkeletalAnimation_IsLooping(const JPH_SkeletalAnimation* animation)
+{
+	return AsSkeletalAnimation(animation)->IsLooping();
+}
+
+void JPH_SkeletalAnimation_SetIsLooping(JPH_SkeletalAnimation* animation, bool looping)
+{
+	AsSkeletalAnimation(animation)->SetIsLooping(looping);
+}
+
+void JPH_SkeletalAnimation_ScaleJoints(JPH_SkeletalAnimation* animation, float scale)
+{
+	AsSkeletalAnimation(animation)->ScaleJoints(scale);
+}
+
+void JPH_SkeletalAnimation_Sample(const JPH_SkeletalAnimation* animation, float time, JPH_SkeletonPose* pose)
+{
+	AsSkeletalAnimation(animation)->Sample(time, *AsSkeletonPose(pose));
+}
+
+int JPH_SkeletalAnimation_GetAnimatedJointCount(const JPH_SkeletalAnimation* animation)
+{
+	return static_cast<int>(AsSkeletalAnimation(animation)->GetAnimatedJoints().size());
+}
+
+int JPH_SkeletalAnimation_AddAnimatedJoint(JPH_SkeletalAnimation* animation, const char* jointName)
+{
+	auto& joints = AsSkeletalAnimation(animation)->GetAnimatedJoints();
+	joints.push_back(JPH::SkeletalAnimation::AnimatedJoint());
+	joints.back().mJointName = jointName ? jointName : "";
+	return static_cast<int>(joints.size()) - 1;
+}
+
+bool JPH_SkeletalAnimation_AddKeyframe(JPH_SkeletalAnimation* animation, int jointIndex, float time, const JPH_Vec3* translation, const JPH_Quat* rotation)
+{
+	auto& joints = AsSkeletalAnimation(animation)->GetAnimatedJoints();
+	if (jointIndex < 0 || jointIndex >= static_cast<int>(joints.size()))
+		return false;
+
+	JPH::SkeletalAnimation::Keyframe keyframe;
+	keyframe.mTime = time;
+	if (translation)
+		keyframe.mTranslation = ToJolt(translation);
+	if (rotation)
+		keyframe.mRotation = ToJolt(rotation);
+	joints[jointIndex].mKeyframes.push_back(keyframe);
+	return true;
+}
+
+/* SkeletonMapper */
+JPH_SkeletonMapper* JPH_SkeletonMapper_Create(void)
+{
+	auto* mapper = new JPH::SkeletonMapper();
+	mapper->AddRef();
+	return ToSkeletonMapper(mapper);
+}
+
+void JPH_SkeletonMapper_Destroy(JPH_SkeletonMapper* mapper)
+{
+	if (mapper)
+		AsSkeletonMapper(mapper)->Release();
+}
+
+void JPH_SkeletonMapper_Initialize(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton1, const JPH_Matrix4x4* neutralPose1, const JPH_Skeleton* skeleton2, const JPH_Matrix4x4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->Initialize(
+		AsSkeleton(skeleton1), reinterpret_cast<const JPH::Mat44*>(neutralPose1),
+		AsSkeleton(skeleton2), reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_LockAllTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const JPH_Matrix4x4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->LockAllTranslations(AsSkeleton(skeleton2), reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_LockTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const bool* lockedTranslations, const JPH_Matrix4x4* neutralPose2)
+{
+	AsSkeletonMapper(mapper)->LockTranslations(AsSkeleton(skeleton2), lockedTranslations, reinterpret_cast<const JPH::Mat44*>(neutralPose2));
+}
+
+void JPH_SkeletonMapper_Map(const JPH_SkeletonMapper* mapper, const JPH_Matrix4x4* pose1ModelSpace, const JPH_Matrix4x4* pose2LocalSpace, JPH_Matrix4x4* outPose2ModelSpace)
+{
+	AsSkeletonMapper(mapper)->Map(
+		reinterpret_cast<const JPH::Mat44*>(pose1ModelSpace),
+		reinterpret_cast<const JPH::Mat44*>(pose2LocalSpace),
+		reinterpret_cast<JPH::Mat44*>(outPose2ModelSpace));
+}
+
+void JPH_SkeletonMapper_MapReverse(const JPH_SkeletonMapper* mapper, const JPH_Matrix4x4* pose2ModelSpace, JPH_Matrix4x4* outPose1ModelSpace)
+{
+	AsSkeletonMapper(mapper)->MapReverse(
+		reinterpret_cast<const JPH::Mat44*>(pose2ModelSpace),
+		reinterpret_cast<JPH::Mat44*>(outPose1ModelSpace));
+}
+
+int JPH_SkeletonMapper_GetMappedJointIndex(const JPH_SkeletonMapper* mapper, int joint1Index)
+{
+	return AsSkeletonMapper(mapper)->GetMappedJointIdx(joint1Index);
+}
+
+bool JPH_SkeletonMapper_IsJointTranslationLocked(const JPH_SkeletonMapper* mapper, int joint2Index)
+{
+	return AsSkeletonMapper(mapper)->IsJointTranslationLocked(joint2Index);
+}
+
+/* RagdollSettings */
 JPH_RagdollSettings* JPH_RagdollSettings_Create(void)
 {
 	auto settings = new JPH::RagdollSettings();
@@ -10692,12 +10941,20 @@ bool JPH_RagdollSettings_Stabilize(JPH_RagdollSettings* settings)
 	return AsRagdollSettings(settings)->Stabilize();
 }
 
+void JPH_RagdollSettings_CalculateConstraintPriorities(JPH_RagdollSettings* settings, uint32_t basePriority)
+{
+	AsRagdollSettings(settings)->CalculateConstraintPriorities(basePriority);
+}
+
 void JPH_RagdollSettings_DisableParentChildCollisions(JPH_RagdollSettings* settings, const JPH_Matrix4x4* jointMatrices, float minSeparationDistance)
 {
 	if (jointMatrices)
 	{
-		auto joltJointMatrices = ToJolt(jointMatrices);
-		AsRagdollSettings(settings)->DisableParentChildCollisions(&joltJointMatrices, minSeparationDistance);
+		const int count = static_cast<int>(AsRagdollSettings(settings)->mParts.size());
+		JPH::Array<JPH::Mat44> joltJointMatrices(count);
+		for (int i = 0; i < count; ++i)
+			joltJointMatrices[i] = ToJolt(&jointMatrices[i]);
+		AsRagdollSettings(settings)->DisableParentChildCollisions(joltJointMatrices.data(), minSeparationDistance);
 	}
 	else
 	{
@@ -10712,7 +10969,8 @@ void JPH_RagdollSettings_CalculateBodyIndexToConstraintIndex(JPH_RagdollSettings
 
 int JPH_RagdollSettings_GetConstraintIndexForBodyIndex(JPH_RagdollSettings* settings, int bodyIndex)
 {
-	return AsRagdollSettings(settings)->GetConstraintIndexForBodyIndex(bodyIndex);
+	const auto& indices = AsRagdollSettings(settings)->GetBodyIndexToConstraintIndex();
+	return bodyIndex >= 0 && bodyIndex < static_cast<int>(indices.size()) ? indices[bodyIndex] : -1;
 }
 
 void JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(JPH_RagdollSettings* settings)
@@ -10720,9 +10978,128 @@ void JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(JPH_RagdollSettin
 	AsRagdollSettings(settings)->CalculateConstraintIndexToBodyIdxPair();
 }
 
+bool JPH_RagdollSettings_GetBodyIndicesForConstraintIndex(const JPH_RagdollSettings* settings, int constraintIndex, int* outBodyIndex1, int* outBodyIndex2)
+{
+	const auto& pairs = AsRagdollSettings(settings)->GetConstraintIndexToBodyIdxPair();
+	if (constraintIndex < 0 || constraintIndex >= static_cast<int>(pairs.size()))
+		return false;
+
+	const auto pair = pairs[constraintIndex];
+	if (outBodyIndex1)
+		*outBodyIndex1 = pair.first;
+	if (outBodyIndex2)
+		*outBodyIndex2 = pair.second;
+	return true;
+}
+
+void JPH_RagdollSettings_ResizeParts(JPH_RagdollSettings* settings, int count)
+{
+	AsRagdollSettings(settings)->mParts.resize(count > 0 ? count : 0);
+}
+
+int JPH_RagdollSettings_GetPartCount(const JPH_RagdollSettings* settings)
+{
+	return static_cast<int>(AsRagdollSettings(settings)->mParts.size());
+}
+
+JPH_BodyCreationSettings* JPH_RagdollSettings_GetPart(JPH_RagdollSettings* settings, int partIndex)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex < 0 || partIndex >= static_cast<int>(parts.size()))
+		return nullptr;
+	return ToBodyCreationSettings(static_cast<JPH::BodyCreationSettings*>(&parts[partIndex]));
+}
+
+void JPH_RagdollSettings_SetPartShape(JPH_RagdollSettings* settings, int partIndex, const JPH_Shape* shape)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex >= 0 && partIndex < static_cast<int>(parts.size()))
+		parts[partIndex].SetShape(AsShape(shape));
+}
+
+void JPH_RagdollSettings_SetPartPosition(JPH_RagdollSettings* settings, int partIndex, const JPH_RVec3* position)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (position && partIndex >= 0 && partIndex < static_cast<int>(parts.size()))
+		parts[partIndex].mPosition = ToJolt(position);
+}
+
+void JPH_RagdollSettings_SetPartRotation(JPH_RagdollSettings* settings, int partIndex, const JPH_Quat* rotation)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (rotation && partIndex >= 0 && partIndex < static_cast<int>(parts.size()))
+		parts[partIndex].mRotation = ToJolt(rotation);
+}
+
+void JPH_RagdollSettings_SetPartMotionType(JPH_RagdollSettings* settings, int partIndex, JPH_MotionType motionType)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex >= 0 && partIndex < static_cast<int>(parts.size()))
+		parts[partIndex].mMotionType = static_cast<JPH::EMotionType>(motionType);
+}
+
+void JPH_RagdollSettings_SetPartObjectLayer(JPH_RagdollSettings* settings, int partIndex, JPH_ObjectLayer layer)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex >= 0 && partIndex < static_cast<int>(parts.size()))
+		parts[partIndex].mObjectLayer = layer;
+}
+
+void JPH_RagdollSettings_SetPartMassProperties(JPH_RagdollSettings* settings, int partIndex, float mass)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex < 0 || partIndex >= static_cast<int>(parts.size()))
+		return;
+
+	parts[partIndex].mMassPropertiesOverride.mMass = mass;
+	parts[partIndex].mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+}
+
+void JPH_RagdollSettings_SetPartToParent(JPH_RagdollSettings* settings, int partIndex, const JPH_SwingTwistConstraintSettings* constraintSettings)
+{
+	auto& parts = AsRagdollSettings(settings)->mParts;
+	if (partIndex < 0 || partIndex >= static_cast<int>(parts.size()))
+		return;
+
+	if (!constraintSettings)
+	{
+		parts[partIndex].mToParent = nullptr;
+		return;
+	}
+
+	auto* joltSettings = new JPH::SwingTwistConstraintSettings();
+	JPH_SwingTwistConstraintSettings_ToJolt(joltSettings, constraintSettings);
+	parts[partIndex].mToParent = joltSettings;
+}
+
+bool JPH_RagdollSettings_AddAdditionalConstraint(JPH_RagdollSettings* settings, int bodyIndex1, int bodyIndex2, const JPH_SwingTwistConstraintSettings* constraintSettings)
+{
+	auto* ragdollSettings = AsRagdollSettings(settings);
+	const int partCount = static_cast<int>(ragdollSettings->mParts.size());
+	if (!constraintSettings || bodyIndex1 < 0 || bodyIndex1 >= partCount || bodyIndex2 < 0 || bodyIndex2 >= partCount || bodyIndex1 == bodyIndex2)
+		return false;
+
+	auto* joltSettings = new JPH::SwingTwistConstraintSettings();
+	JPH_SwingTwistConstraintSettings_ToJolt(joltSettings, constraintSettings);
+	ragdollSettings->mAdditionalConstraints.emplace_back(bodyIndex1, bodyIndex2, joltSettings);
+	return true;
+}
+
+void JPH_RagdollSettings_ClearAdditionalConstraints(JPH_RagdollSettings* settings)
+{
+	AsRagdollSettings(settings)->mAdditionalConstraints.clear();
+}
+
+int JPH_RagdollSettings_GetAdditionalConstraintCount(const JPH_RagdollSettings* settings)
+{
+	return static_cast<int>(AsRagdollSettings(settings)->mAdditionalConstraints.size());
+}
+
 JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JPH_PhysicsSystem* system, JPH_CollisionGroupID collisionGroup, uint64_t userData)
 {
 	Ragdoll* ragdoll = AsRagdollSettings(settings)->CreateRagdoll(collisionGroup, userData, system->physicsSystem);
+	if (!ragdoll)
+		return nullptr;
 	ragdoll->AddRef();
 
 	return ToRagdoll(ragdoll);
@@ -10756,9 +11133,136 @@ bool JPH_Ragdoll_IsActive(const JPH_Ragdoll* ragdoll, bool lockBodies /* = true 
 	return AsRagdoll(ragdoll)->IsActive(lockBodies);
 }
 
+void JPH_Ragdoll_SetGroupID(JPH_Ragdoll* ragdoll, JPH_CollisionGroupID groupID, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetGroupID(groupID, lockBodies);
+}
+
 void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll)
 {
 	AsRagdoll(ragdoll)->ResetWarmStart();
+}
+
+void JPH_Ragdoll_SetPose(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetPose(*AsSkeletonPose(pose), lockBodies);
+}
+
+void JPH_Ragdoll_SetPose2(JPH_Ragdoll* ragdoll, const JPH_RVec3* rootOffset, const JPH_Matrix4x4* jointMatrices, bool lockBodies)
+{
+	const int count = static_cast<int>(AsRagdoll(ragdoll)->GetBodyCount());
+	JPH::Array<JPH::Mat44> matrices(count);
+	for (int i = 0; i < count; ++i)
+		matrices[i] = ToJolt(&jointMatrices[i]);
+	AsRagdoll(ragdoll)->SetPose(ToJolt(rootOffset), matrices.data(), lockBodies);
+}
+
+void JPH_Ragdoll_GetPose(const JPH_Ragdoll* ragdoll, JPH_SkeletonPose* outPose, bool lockBodies)
+{
+	const_cast<JPH::Ragdoll*>(AsRagdoll(ragdoll))->GetPose(*AsSkeletonPose(outPose), lockBodies);
+}
+
+void JPH_Ragdoll_GetPose2(const JPH_Ragdoll* ragdoll, JPH_RVec3* outRootOffset, JPH_Matrix4x4* outJointMatrices, bool lockBodies)
+{
+	const int count = static_cast<int>(AsRagdoll(ragdoll)->GetBodyCount());
+	JPH::Array<JPH::Mat44> matrices(count);
+	JPH::RVec3 rootOffset;
+	const_cast<JPH::Ragdoll*>(AsRagdoll(ragdoll))->GetPose(rootOffset, matrices.data(), lockBodies);
+	if (outRootOffset)
+		FromJolt(rootOffset, outRootOffset);
+	if (outJointMatrices)
+		for (int i = 0; i < count; ++i)
+			FromJolt(matrices[i], &outJointMatrices[i]);
+}
+
+void JPH_Ragdoll_DriveToPoseUsingKinematics(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, float deltaTime, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->DriveToPoseUsingKinematics(*AsSkeletonPose(pose), deltaTime, lockBodies);
+}
+
+void JPH_Ragdoll_DriveToPoseUsingKinematics2(JPH_Ragdoll* ragdoll, const JPH_RVec3* rootOffset, const JPH_Matrix4x4* jointMatrices, float deltaTime, bool lockBodies)
+{
+	const int count = static_cast<int>(AsRagdoll(ragdoll)->GetBodyCount());
+	JPH::Array<JPH::Mat44> matrices(count);
+	for (int i = 0; i < count; ++i)
+		matrices[i] = ToJolt(&jointMatrices[i]);
+	AsRagdoll(ragdoll)->DriveToPoseUsingKinematics(ToJolt(rootOffset), matrices.data(), deltaTime, lockBodies);
+}
+
+void JPH_Ragdoll_DriveToPoseUsingMotors(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose)
+{
+	AsRagdoll(ragdoll)->DriveToPoseUsingMotors(*AsSkeletonPose(pose));
+}
+
+void JPH_Ragdoll_DriveToPoseUsingMotors2(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* previousPose, const JPH_SkeletonPose* pose, float deltaTime)
+{
+	AsRagdoll(ragdoll)->DriveToPoseUsingMotors(*AsSkeletonPose(previousPose), *AsSkeletonPose(pose), deltaTime);
+}
+
+void JPH_Ragdoll_SetLinearAndAngularVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, const JPH_Vec3* angularVelocity, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetLinearAndAngularVelocity(ToJolt(linearVelocity), ToJolt(angularVelocity), lockBodies);
+}
+
+void JPH_Ragdoll_SetLinearVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->SetLinearVelocity(ToJolt(linearVelocity), lockBodies);
+}
+
+void JPH_Ragdoll_AddLinearVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->AddLinearVelocity(ToJolt(linearVelocity), lockBodies);
+}
+
+void JPH_Ragdoll_AddImpulse(JPH_Ragdoll* ragdoll, const JPH_Vec3* impulse, bool lockBodies)
+{
+	AsRagdoll(ragdoll)->AddImpulse(ToJolt(impulse), lockBodies);
+}
+
+int JPH_Ragdoll_GetBodyCount(const JPH_Ragdoll* ragdoll)
+{
+	return static_cast<int>(AsRagdoll(ragdoll)->GetBodyCount());
+}
+
+JPH_BodyID JPH_Ragdoll_GetBodyID(const JPH_Ragdoll* ragdoll, int bodyIndex)
+{
+	if (bodyIndex < 0 || bodyIndex >= JPH_Ragdoll_GetBodyCount(ragdoll))
+		return JPH::BodyID::cInvalidBodyID;
+	return AsRagdoll(ragdoll)->GetBodyID(bodyIndex).GetIndexAndSequenceNumber();
+}
+
+int JPH_Ragdoll_GetConstraintCount(const JPH_Ragdoll* ragdoll)
+{
+	return static_cast<int>(AsRagdoll(ragdoll)->GetConstraintCount());
+}
+
+JPH_TwoBodyConstraint* JPH_Ragdoll_GetConstraint(JPH_Ragdoll* ragdoll, int constraintIndex)
+{
+	if (constraintIndex < 0 || constraintIndex >= JPH_Ragdoll_GetConstraintCount(ragdoll))
+		return nullptr;
+	return ToTwoBodyConstraint(AsRagdoll(ragdoll)->GetConstraint(constraintIndex));
+}
+
+void JPH_Ragdoll_GetRootTransform(const JPH_Ragdoll* ragdoll, JPH_RVec3* outPosition, JPH_Quat* outRotation, bool lockBodies)
+{
+	JPH::RVec3 position;
+	JPH::Quat rotation;
+	AsRagdoll(ragdoll)->GetRootTransform(position, rotation, lockBodies);
+	if (outPosition)
+		FromJolt(position, outPosition);
+	if (outRotation)
+		FromJolt(rotation, outRotation);
+}
+
+void JPH_Ragdoll_GetWorldSpaceBounds(const JPH_Ragdoll* ragdoll, JPH_AABox* result, bool lockBodies)
+{
+	if (result)
+		FromJolt(AsRagdoll(ragdoll)->GetWorldSpaceBounds(lockBodies), result);
+}
+
+const JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings(const JPH_Ragdoll* ragdoll)
+{
+	return ToRagdollSettings(AsRagdoll(ragdoll)->GetRagdollSettings());
 }
 
 /* CollisionEstimationResult */
@@ -10775,14 +11279,18 @@ static void CopyCollisionEstimationResult(
 	FromJolt(joltResult.mAngularVelocity2, &result->angularVelocity2);
 	FromJolt(joltResult.mTangent1, &result->tangent1);
 	FromJolt(joltResult.mTangent2, &result->tangent2);
+	FromJolt(joltResult.mFrictionPoint, &result->frictionPoint);
+	result->frictionImpulse1 = joltResult.mFrictionImpulse1;
+	result->frictionImpulse2 = joltResult.mFrictionImpulse2;
+	result->angularFrictionImpulse = joltResult.mAngularFrictionImpulse;
 
-	result->impulseCount = std::min(impulseCapacity, static_cast<uint32_t>(joltResult.mImpulses.size()));
+	result->impulseCount = std::min(impulseCapacity, static_cast<uint32_t>(joltResult.mContactImpulse.size()));
 	result->impulses = impulses;
 	for (uint32_t i = 0; i < result->impulseCount; ++i)
 	{
-		result->impulses[i].contactImpulse = joltResult.mImpulses[i].mContactImpulse;
-		result->impulses[i].frictionImpulse1 = joltResult.mImpulses[i].mFrictionImpulse1;
-		result->impulses[i].frictionImpulse2 = joltResult.mImpulses[i].mFrictionImpulse2;
+		result->impulses[i].contactImpulse = joltResult.mContactImpulse[i];
+		result->impulses[i].frictionImpulse1 = i == 0 ? joltResult.mFrictionImpulse1 : 0.0f;
+		result->impulses[i].frictionImpulse2 = i == 0 ? joltResult.mFrictionImpulse2 : 0.0f;
 	}
 }
 
@@ -10799,7 +11307,7 @@ void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2,
 		minVelocityForRestitution,
 		numIterations);
 
-	const uint32_t impulseCount = static_cast<uint32_t>(joltResult.mImpulses.size());
+	const uint32_t impulseCount = static_cast<uint32_t>(joltResult.mContactImpulse.size());
 	auto* impulses = impulseCount > 0
 		? static_cast<JPH_CollisionEstimationResultImpulse*>(malloc(sizeof(JPH_CollisionEstimationResultImpulse) * impulseCount))
 		: nullptr;

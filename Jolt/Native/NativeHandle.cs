@@ -11,7 +11,11 @@ namespace Jolt
 
         private T* ptr;
 
+        private bool ownsNativeResource;
+
         public nint RawValue => (nint)ptr;
+
+        public readonly bool OwnsNativeResource => ownsNativeResource;
 
         public NativeHandle(T* ptr)
         {
@@ -20,6 +24,7 @@ namespace Jolt
             #endif
 
             this.ptr = ptr;
+            ownsNativeResource = true;
         }
 
         /// <summary>
@@ -28,9 +33,9 @@ namespace Jolt
         public NativeHandle<U> CreateOwnedHandle<U>(U* ptr) where U : unmanaged
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
-            return new NativeHandle<U> { ptr = ptr, safety = safety };
+            return new NativeHandle<U> { ptr = ptr, safety = safety, ownsNativeResource = false };
             #else
-            return new NativeHandle<U> { ptr = ptr };
+            return new NativeHandle<U> { ptr = ptr, ownsNativeResource = false };
             #endif
         }
 
@@ -38,9 +43,9 @@ namespace Jolt
         public readonly NativeHandle<U> Reinterpret<U>() where U : unmanaged
         {
             #if !JOLT_DISABLE_SAFETY_CHECkS
-            return new NativeHandle<U> { ptr = (U*) ptr, safety = safety };
+            return new NativeHandle<U> { ptr = (U*) ptr, safety = safety, ownsNativeResource = ownsNativeResource };
             #else
-            return new NativeHandle<U> { ptr = (U*) ptr };
+            return new NativeHandle<U> { ptr = (U*) ptr, ownsNativeResource = ownsNativeResource };
             #endif
         }
 

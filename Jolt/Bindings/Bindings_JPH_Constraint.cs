@@ -6,7 +6,7 @@ namespace Jolt
     {
         public static void JPH_Constraint_Destroy(NativeHandle<JPH_Constraint> constraint)
         {
-            if (constraint.HasUser()) return;
+            if (!constraint.OwnsNativeResource || constraint.HasUser()) return;
 
             UnsafeBindings.JPH_Constraint_Destroy(constraint);
 

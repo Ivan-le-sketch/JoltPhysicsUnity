@@ -21,7 +21,7 @@ namespace Jolt
 
         public static void JPH_BodyCreationSettings_Destroy(NativeHandle<JPH_BodyCreationSettings> settings)
         {
-            if (settings.HasUser()) return;
+            if (!settings.OwnsNativeResource || settings.HasUser()) return;
 
             UnsafeBindings.JPH_BodyCreationSettings_Destroy(settings);
 

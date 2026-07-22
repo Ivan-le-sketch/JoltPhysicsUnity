@@ -29,5 +29,11 @@ namespace Jolt
         
         #endregion
         
+        #region JPH_JobSystem
+
+        public void Destroy() => Bindings.JPH_JobSystem_Destroy(Handle);
+
+        #endregion
+
     }
 }

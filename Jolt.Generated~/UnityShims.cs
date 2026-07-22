@@ -101,15 +101,26 @@ namespace Unity.Collections
 
         public int Length => 0;
 
+        public int Count => 0;
+
         public void Dispose() { }
 
-        public void Add(T _) { }
+        public bool Add(T _) => true;
 
         public bool Remove(T _) => true;
 
         public bool Contains(T _) => true;
 
         public void Clear() { }
+
+        public Enumerator GetEnumerator() => default;
+
+        public struct Enumerator
+        {
+            public T Current => default;
+
+            public bool MoveNext() => false;
+        }
     }
 
     public struct NativeParallelHashMap<TKey, TValue> : System.IDisposable

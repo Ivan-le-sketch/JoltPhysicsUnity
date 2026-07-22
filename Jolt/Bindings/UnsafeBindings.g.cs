@@ -647,6 +647,18 @@ namespace Jolt
     {
     }
 
+    internal partial struct JPH_SkeletonPose
+    {
+    }
+
+    internal partial struct JPH_SkeletalAnimation
+    {
+    }
+
+    internal partial struct JPH_SkeletonMapper
+    {
+    }
+
     internal partial struct JPH_RagdollSettings
     {
     }
@@ -825,6 +837,9 @@ namespace Jolt
 
         [NativeTypeName("bool")]
         public NativeBool canPushCharacter;
+
+        [NativeTypeName("bool")]
+        public NativeBool isBackFacingContact;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -3913,6 +3928,115 @@ namespace Jolt
         public static extern NativeBool JPH_Skeleton_AreJointsCorrectlyOrdered([NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_SkeletonPose* JPH_SkeletonPose_Create();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_Destroy(JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_SetSkeleton(JPH_SkeletonPose* pose, [NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("const JPH_Skeleton *")]
+        public static extern JPH_Skeleton* JPH_SkeletonPose_GetSkeleton([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_SetRootOffset(JPH_SkeletonPose* pose, [NativeTypeName("const JPH_RVec3 *")] rvec3* offset);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_GetRootOffset([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, [NativeTypeName("JPH_RVec3 *")] rvec3* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletonPose_GetJointCount([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_GetJointState([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, int index, [NativeTypeName("JPH_Vec3 *")] float3* outTranslation, [NativeTypeName("JPH_Quat *")] quaternion* outRotation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_SetJointState(JPH_SkeletonPose* pose, int index, [NativeTypeName("const JPH_Vec3 *")] float3* translation, [NativeTypeName("const JPH_Quat *")] quaternion* rotation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_GetJointMatrix([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, int index, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* result);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_SetJointMatrix(JPH_SkeletonPose* pose, int index, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* matrix);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletonPose_GetJointMatrices([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* outMatrices, int capacity);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletonPose_SetJointMatrices(JPH_SkeletonPose* pose, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* matrices, int count);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_CalculateJointMatrices(JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonPose_CalculateJointStates(JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletonPose_CalculateLocalSpaceJointMatrices([NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* outMatrices, int capacity);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_SkeletalAnimation* JPH_SkeletalAnimation_Create();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletalAnimation_Destroy(JPH_SkeletalAnimation* animation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern float JPH_SkeletalAnimation_GetDuration([NativeTypeName("const JPH_SkeletalAnimation *")] JPH_SkeletalAnimation* animation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_SkeletalAnimation_IsLooping([NativeTypeName("const JPH_SkeletalAnimation *")] JPH_SkeletalAnimation* animation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletalAnimation_SetIsLooping(JPH_SkeletalAnimation* animation, [NativeTypeName("bool")] NativeBool looping);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletalAnimation_ScaleJoints(JPH_SkeletalAnimation* animation, float scale);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletalAnimation_Sample([NativeTypeName("const JPH_SkeletalAnimation *")] JPH_SkeletalAnimation* animation, float time, JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletalAnimation_GetAnimatedJointCount([NativeTypeName("const JPH_SkeletalAnimation *")] JPH_SkeletalAnimation* animation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletalAnimation_AddAnimatedJoint(JPH_SkeletalAnimation* animation, [NativeTypeName("const char *")] sbyte* jointName);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_SkeletalAnimation_AddKeyframe(JPH_SkeletalAnimation* animation, int jointIndex, float time, [NativeTypeName("const JPH_Vec3 *")] float3* translation, [NativeTypeName("const JPH_Quat *")] quaternion* rotation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_SkeletonMapper* JPH_SkeletonMapper_Create();
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_Destroy(JPH_SkeletonMapper* mapper);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_Initialize(JPH_SkeletonMapper* mapper, [NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton1, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* neutralPose1, [NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton2, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* neutralPose2);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_LockAllTranslations(JPH_SkeletonMapper* mapper, [NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton2, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* neutralPose2);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_LockTranslations(JPH_SkeletonMapper* mapper, [NativeTypeName("const JPH_Skeleton *")] JPH_Skeleton* skeleton2, [NativeTypeName("const bool *")] NativeBool* lockedTranslations, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* neutralPose2);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_Map([NativeTypeName("const JPH_SkeletonMapper *")] JPH_SkeletonMapper* mapper, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* pose1ModelSpace, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* pose2LocalSpace, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* outPose2ModelSpace);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_SkeletonMapper_MapReverse([NativeTypeName("const JPH_SkeletonMapper *")] JPH_SkeletonMapper* mapper, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* pose2ModelSpace, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* outPose1ModelSpace);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_SkeletonMapper_GetMappedJointIndex([NativeTypeName("const JPH_SkeletonMapper *")] JPH_SkeletonMapper* mapper, int joint1Index);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_SkeletonMapper_IsJointTranslationLocked([NativeTypeName("const JPH_SkeletonMapper *")] JPH_SkeletonMapper* mapper, int joint2Index);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_RagdollSettings* JPH_RagdollSettings_Create();
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -3930,6 +4054,9 @@ namespace Jolt
         public static extern NativeBool JPH_RagdollSettings_Stabilize(JPH_RagdollSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_CalculateConstraintPriorities(JPH_RagdollSettings* settings, uint basePriority);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_RagdollSettings_DisableParentChildCollisions(JPH_RagdollSettings* settings, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* jointMatrices, float minSeparationDistance);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -3940,6 +4067,50 @@ namespace Jolt
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(JPH_RagdollSettings* settings);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_RagdollSettings_GetBodyIndicesForConstraintIndex([NativeTypeName("const JPH_RagdollSettings *")] JPH_RagdollSettings* settings, int constraintIndex, int* outBodyIndex1, int* outBodyIndex2);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_ResizeParts(JPH_RagdollSettings* settings, int count);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_RagdollSettings_GetPartCount([NativeTypeName("const JPH_RagdollSettings *")] JPH_RagdollSettings* settings);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_BodyCreationSettings* JPH_RagdollSettings_GetPart(JPH_RagdollSettings* settings, int partIndex);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartShape(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("const JPH_Shape *")] JPH_Shape* shape);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartPosition(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("const JPH_RVec3 *")] rvec3* position);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartRotation(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("const JPH_Quat *")] quaternion* rotation);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartMotionType(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("JPH_MotionType")] MotionType motionType);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartObjectLayer(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("JPH_ObjectLayer")] ObjectLayer layer);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartMassProperties(JPH_RagdollSettings* settings, int partIndex, float mass);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_SetPartToParent(JPH_RagdollSettings* settings, int partIndex, [NativeTypeName("const JPH_SwingTwistConstraintSettings *")] SwingTwistConstraintSettings* constraintSettings);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("bool")]
+        public static extern NativeBool JPH_RagdollSettings_AddAdditionalConstraint(JPH_RagdollSettings* settings, int bodyIndex1, int bodyIndex2, [NativeTypeName("const JPH_SwingTwistConstraintSettings *")] SwingTwistConstraintSettings* constraintSettings);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_RagdollSettings_ClearAdditionalConstraints(JPH_RagdollSettings* settings);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_RagdollSettings_GetAdditionalConstraintCount([NativeTypeName("const JPH_RagdollSettings *")] JPH_RagdollSettings* settings);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JPH_PhysicsSystem* system, [NativeTypeName("JPH_CollisionGroupID")] uint collisionGroup, [NativeTypeName("uint64_t")] ulong userData);
@@ -3961,7 +4132,69 @@ namespace Jolt
         public static extern NativeBool JPH_Ragdoll_IsActive([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, [NativeTypeName("bool")] NativeBool lockBodies);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_SetGroupID(JPH_Ragdoll* ragdoll, [NativeTypeName("JPH_CollisionGroupID")] uint groupID, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_SetPose(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_SetPose2(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_RVec3 *")] rvec3* rootOffset, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* jointMatrices, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_GetPose([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, JPH_SkeletonPose* outPose, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_GetPose2([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, [NativeTypeName("JPH_RVec3 *")] rvec3* outRootOffset, [NativeTypeName("JPH_Matrix4x4 *")] float4x4* outJointMatrices, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_DriveToPoseUsingKinematics(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, float deltaTime, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_DriveToPoseUsingKinematics2(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_RVec3 *")] rvec3* rootOffset, [NativeTypeName("const JPH_Matrix4x4 *")] float4x4* jointMatrices, float deltaTime, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_DriveToPoseUsingMotors(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_DriveToPoseUsingMotors2(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* previousPose, [NativeTypeName("const JPH_SkeletonPose *")] JPH_SkeletonPose* pose, float deltaTime);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_SetLinearAndAngularVelocity(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_Vec3 *")] float3* linearVelocity, [NativeTypeName("const JPH_Vec3 *")] float3* angularVelocity, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_SetLinearVelocity(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_Vec3 *")] float3* linearVelocity, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_AddLinearVelocity(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_Vec3 *")] float3* linearVelocity, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_AddImpulse(JPH_Ragdoll* ragdoll, [NativeTypeName("const JPH_Vec3 *")] float3* impulse, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_Ragdoll_GetBodyCount([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("JPH_BodyID")]
+        public static extern BodyID JPH_Ragdoll_GetBodyID([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, int bodyIndex);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern int JPH_Ragdoll_GetConstraintCount([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern JPH_TwoBodyConstraint* JPH_Ragdoll_GetConstraint(JPH_Ragdoll* ragdoll, int constraintIndex);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_GetRootTransform([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, [NativeTypeName("JPH_RVec3 *")] rvec3* outPosition, [NativeTypeName("JPH_Quat *")] quaternion* outRotation, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void JPH_Ragdoll_GetWorldSpaceBounds([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll, [NativeTypeName("JPH_AABox *")] AABox* result, [NativeTypeName("bool")] NativeBool lockBodies);
+
+        [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        [return: NativeTypeName("const JPH_RagdollSettings *")]
+        public static extern JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings([NativeTypeName("const JPH_Ragdoll *")] JPH_Ragdoll* ragdoll);
 
         [DllImport("joltc", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern void JPH_EstimateCollisionResponse([NativeTypeName("const JPH_Body *")] JPH_Body* body1, [NativeTypeName("const JPH_Body *")] JPH_Body* body2, [NativeTypeName("const JPH_ContactManifold *")] JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint numIterations, [NativeTypeName("JPH_CollisionEstimationResult *")] CollisionEstimationResult* result);

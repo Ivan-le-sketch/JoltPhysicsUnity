@@ -716,6 +716,7 @@ typedef float JPH_CastShapeCollectorCallback(void* context, const JPH_ShapeCastR
 
 typedef struct JPH_CollisionEstimationResultImpulse {
 	float	contactImpulse;
+	/* Jolt 5.6 reports aggregate friction on the parent result. Impulse zero mirrors it for legacy sums. */
 	float	frictionImpulse1;
 	float	frictionImpulse2;
 } JPH_CollisionEstimationResultImpulse;
@@ -731,6 +732,12 @@ typedef struct JPH_CollisionEstimationResult {
 
 	uint32_t								impulseCount;
 	JPH_CollisionEstimationResultImpulse* impulses;
+
+	/* Jolt 5.6 uses one friction point and three aggregate friction impulses. */
+	JPH_Vec3								frictionPoint;
+	float									frictionImpulse1;
+	float									frictionImpulse2;
+	float									angularFrictionImpulse;
 } JPH_CollisionEstimationResult;
 
 typedef struct JPH_BodyActivationListener           JPH_BodyActivationListener;
@@ -766,6 +773,9 @@ typedef struct JPH_CharacterVsCharacterCollision	JPH_CharacterVsCharacterCollisi
 
 /* Skeleton/Ragdoll */
 typedef struct JPH_Skeleton							JPH_Skeleton;
+typedef struct JPH_SkeletonPose						JPH_SkeletonPose;
+typedef struct JPH_SkeletalAnimation				JPH_SkeletalAnimation;
+typedef struct JPH_SkeletonMapper					JPH_SkeletonMapper;
 typedef struct JPH_RagdollSettings					JPH_RagdollSettings;
 typedef struct JPH_Ragdoll							JPH_Ragdoll;
 
@@ -992,6 +1002,7 @@ typedef struct JPH_CharacterVirtualContact {
 	bool							hadCollision;
 	bool							wasDiscarded;
 	bool							canPushCharacter;
+	bool							isBackFacingContact;
 } JPH_CharacterVirtualContact;
 
 typedef void(JPH_API_CALL* JPH_TraceFunc)(const char* mssage);
@@ -2720,25 +2731,104 @@ JPH_CAPI int JPH_Skeleton_GetJointIndex(const JPH_Skeleton* skeleton, const char
 JPH_CAPI void JPH_Skeleton_CalculateParentJointIndices(JPH_Skeleton* skeleton);
 JPH_CAPI bool JPH_Skeleton_AreJointsCorrectlyOrdered(const JPH_Skeleton* skeleton);
 
-/* Ragdoll */
+/* SkeletonPose */
+JPH_CAPI JPH_SkeletonPose* JPH_SkeletonPose_Create(void);
+JPH_CAPI void JPH_SkeletonPose_Destroy(JPH_SkeletonPose* pose);
+JPH_CAPI void JPH_SkeletonPose_SetSkeleton(JPH_SkeletonPose* pose, const JPH_Skeleton* skeleton);
+JPH_CAPI const JPH_Skeleton* JPH_SkeletonPose_GetSkeleton(const JPH_SkeletonPose* pose);
+JPH_CAPI void JPH_SkeletonPose_SetRootOffset(JPH_SkeletonPose* pose, const JPH_RVec3* offset);
+JPH_CAPI void JPH_SkeletonPose_GetRootOffset(const JPH_SkeletonPose* pose, JPH_RVec3* result);
+JPH_CAPI int JPH_SkeletonPose_GetJointCount(const JPH_SkeletonPose* pose);
+JPH_CAPI void JPH_SkeletonPose_GetJointState(const JPH_SkeletonPose* pose, int index, JPH_Vec3* outTranslation, JPH_Quat* outRotation);
+JPH_CAPI void JPH_SkeletonPose_SetJointState(JPH_SkeletonPose* pose, int index, const JPH_Vec3* translation, const JPH_Quat* rotation);
+JPH_CAPI void JPH_SkeletonPose_GetJointMatrix(const JPH_SkeletonPose* pose, int index, JPH_Matrix4x4* result);
+JPH_CAPI void JPH_SkeletonPose_SetJointMatrix(JPH_SkeletonPose* pose, int index, const JPH_Matrix4x4* matrix);
+JPH_CAPI int JPH_SkeletonPose_GetJointMatrices(const JPH_SkeletonPose* pose, JPH_Matrix4x4* outMatrices, int capacity);
+JPH_CAPI int JPH_SkeletonPose_SetJointMatrices(JPH_SkeletonPose* pose, const JPH_Matrix4x4* matrices, int count);
+JPH_CAPI void JPH_SkeletonPose_CalculateJointMatrices(JPH_SkeletonPose* pose);
+JPH_CAPI void JPH_SkeletonPose_CalculateJointStates(JPH_SkeletonPose* pose);
+JPH_CAPI int JPH_SkeletonPose_CalculateLocalSpaceJointMatrices(const JPH_SkeletonPose* pose, JPH_Matrix4x4* outMatrices, int capacity);
+
+/* SkeletalAnimation */
+JPH_CAPI JPH_SkeletalAnimation* JPH_SkeletalAnimation_Create(void);
+JPH_CAPI void JPH_SkeletalAnimation_Destroy(JPH_SkeletalAnimation* animation);
+JPH_CAPI float JPH_SkeletalAnimation_GetDuration(const JPH_SkeletalAnimation* animation);
+JPH_CAPI bool JPH_SkeletalAnimation_IsLooping(const JPH_SkeletalAnimation* animation);
+JPH_CAPI void JPH_SkeletalAnimation_SetIsLooping(JPH_SkeletalAnimation* animation, bool looping);
+JPH_CAPI void JPH_SkeletalAnimation_ScaleJoints(JPH_SkeletalAnimation* animation, float scale);
+JPH_CAPI void JPH_SkeletalAnimation_Sample(const JPH_SkeletalAnimation* animation, float time, JPH_SkeletonPose* pose);
+JPH_CAPI int JPH_SkeletalAnimation_GetAnimatedJointCount(const JPH_SkeletalAnimation* animation);
+JPH_CAPI int JPH_SkeletalAnimation_AddAnimatedJoint(JPH_SkeletalAnimation* animation, const char* jointName);
+JPH_CAPI bool JPH_SkeletalAnimation_AddKeyframe(JPH_SkeletalAnimation* animation, int jointIndex, float time, const JPH_Vec3* translation, const JPH_Quat* rotation);
+
+/* SkeletonMapper */
+JPH_CAPI JPH_SkeletonMapper* JPH_SkeletonMapper_Create(void);
+JPH_CAPI void JPH_SkeletonMapper_Destroy(JPH_SkeletonMapper* mapper);
+JPH_CAPI void JPH_SkeletonMapper_Initialize(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton1, const JPH_Matrix4x4* neutralPose1, const JPH_Skeleton* skeleton2, const JPH_Matrix4x4* neutralPose2);
+JPH_CAPI void JPH_SkeletonMapper_LockAllTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const JPH_Matrix4x4* neutralPose2);
+JPH_CAPI void JPH_SkeletonMapper_LockTranslations(JPH_SkeletonMapper* mapper, const JPH_Skeleton* skeleton2, const bool* lockedTranslations, const JPH_Matrix4x4* neutralPose2);
+JPH_CAPI void JPH_SkeletonMapper_Map(const JPH_SkeletonMapper* mapper, const JPH_Matrix4x4* pose1ModelSpace, const JPH_Matrix4x4* pose2LocalSpace, JPH_Matrix4x4* outPose2ModelSpace);
+JPH_CAPI void JPH_SkeletonMapper_MapReverse(const JPH_SkeletonMapper* mapper, const JPH_Matrix4x4* pose2ModelSpace, JPH_Matrix4x4* outPose1ModelSpace);
+JPH_CAPI int JPH_SkeletonMapper_GetMappedJointIndex(const JPH_SkeletonMapper* mapper, int joint1Index);
+JPH_CAPI bool JPH_SkeletonMapper_IsJointTranslationLocked(const JPH_SkeletonMapper* mapper, int joint2Index);
+
+/* RagdollSettings */
 JPH_CAPI JPH_RagdollSettings* JPH_RagdollSettings_Create(void);
 JPH_CAPI void JPH_RagdollSettings_Destroy(JPH_RagdollSettings* settings);
 
 JPH_CAPI const JPH_Skeleton* JPH_RagdollSettings_GetSkeleton(const JPH_RagdollSettings* character);
 JPH_CAPI void JPH_RagdollSettings_SetSkeleton(JPH_RagdollSettings* character, JPH_Skeleton* skeleton);
 JPH_CAPI bool JPH_RagdollSettings_Stabilize(JPH_RagdollSettings* settings);
+JPH_CAPI void JPH_RagdollSettings_CalculateConstraintPriorities(JPH_RagdollSettings* settings, uint32_t basePriority);
 JPH_CAPI void JPH_RagdollSettings_DisableParentChildCollisions(JPH_RagdollSettings* settings, const JPH_Matrix4x4* jointMatrices /*=nullptr*/, float minSeparationDistance/* = 0.0f*/);
 JPH_CAPI void JPH_RagdollSettings_CalculateBodyIndexToConstraintIndex(JPH_RagdollSettings* settings);
 JPH_CAPI int JPH_RagdollSettings_GetConstraintIndexForBodyIndex(JPH_RagdollSettings* settings, int bodyIndex);
 JPH_CAPI void JPH_RagdollSettings_CalculateConstraintIndexToBodyIdxPair(JPH_RagdollSettings* settings);
+JPH_CAPI bool JPH_RagdollSettings_GetBodyIndicesForConstraintIndex(const JPH_RagdollSettings* settings, int constraintIndex, int* outBodyIndex1, int* outBodyIndex2);
+
+JPH_CAPI void JPH_RagdollSettings_ResizeParts(JPH_RagdollSettings* settings, int count);
+JPH_CAPI int JPH_RagdollSettings_GetPartCount(const JPH_RagdollSettings* settings);
+JPH_CAPI JPH_BodyCreationSettings* JPH_RagdollSettings_GetPart(JPH_RagdollSettings* settings, int partIndex);
+JPH_CAPI void JPH_RagdollSettings_SetPartShape(JPH_RagdollSettings* settings, int partIndex, const JPH_Shape* shape);
+JPH_CAPI void JPH_RagdollSettings_SetPartPosition(JPH_RagdollSettings* settings, int partIndex, const JPH_RVec3* position);
+JPH_CAPI void JPH_RagdollSettings_SetPartRotation(JPH_RagdollSettings* settings, int partIndex, const JPH_Quat* rotation);
+JPH_CAPI void JPH_RagdollSettings_SetPartMotionType(JPH_RagdollSettings* settings, int partIndex, JPH_MotionType motionType);
+JPH_CAPI void JPH_RagdollSettings_SetPartObjectLayer(JPH_RagdollSettings* settings, int partIndex, JPH_ObjectLayer layer);
+JPH_CAPI void JPH_RagdollSettings_SetPartMassProperties(JPH_RagdollSettings* settings, int partIndex, float mass);
+JPH_CAPI void JPH_RagdollSettings_SetPartToParent(JPH_RagdollSettings* settings, int partIndex, const JPH_SwingTwistConstraintSettings* constraintSettings);
+JPH_CAPI bool JPH_RagdollSettings_AddAdditionalConstraint(JPH_RagdollSettings* settings, int bodyIndex1, int bodyIndex2, const JPH_SwingTwistConstraintSettings* constraintSettings);
+JPH_CAPI void JPH_RagdollSettings_ClearAdditionalConstraints(JPH_RagdollSettings* settings);
+JPH_CAPI int JPH_RagdollSettings_GetAdditionalConstraintCount(const JPH_RagdollSettings* settings);
 
 JPH_CAPI JPH_Ragdoll* JPH_RagdollSettings_CreateRagdoll(JPH_RagdollSettings* settings, JPH_PhysicsSystem* system, JPH_CollisionGroupID collisionGroup /*=0*/, uint64_t userData/* = 0*/);
+
+/* Ragdoll */
 JPH_CAPI void JPH_Ragdoll_Destroy(JPH_Ragdoll* ragdoll);
 JPH_CAPI void JPH_Ragdoll_AddToPhysicsSystem(JPH_Ragdoll* ragdoll, JPH_Activation activationMode /*= JPH_ActivationActivate */, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Ragdoll_RemoveFromPhysicsSystem(JPH_Ragdoll* ragdoll, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Ragdoll_Activate(JPH_Ragdoll* ragdoll, bool lockBodies /* = true */);
 JPH_CAPI bool JPH_Ragdoll_IsActive(const JPH_Ragdoll* ragdoll, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_SetGroupID(JPH_Ragdoll* ragdoll, JPH_CollisionGroupID groupID, bool lockBodies /* = true */);
 JPH_CAPI void JPH_Ragdoll_ResetWarmStart(JPH_Ragdoll* ragdoll);
+JPH_CAPI void JPH_Ragdoll_SetPose(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_SetPose2(JPH_Ragdoll* ragdoll, const JPH_RVec3* rootOffset, const JPH_Matrix4x4* jointMatrices, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_GetPose(const JPH_Ragdoll* ragdoll, JPH_SkeletonPose* outPose, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_GetPose2(const JPH_Ragdoll* ragdoll, JPH_RVec3* outRootOffset, JPH_Matrix4x4* outJointMatrices, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_DriveToPoseUsingKinematics(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose, float deltaTime, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_DriveToPoseUsingKinematics2(JPH_Ragdoll* ragdoll, const JPH_RVec3* rootOffset, const JPH_Matrix4x4* jointMatrices, float deltaTime, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_DriveToPoseUsingMotors(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* pose);
+JPH_CAPI void JPH_Ragdoll_DriveToPoseUsingMotors2(JPH_Ragdoll* ragdoll, const JPH_SkeletonPose* previousPose, const JPH_SkeletonPose* pose, float deltaTime);
+JPH_CAPI void JPH_Ragdoll_SetLinearAndAngularVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, const JPH_Vec3* angularVelocity, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_SetLinearVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_AddLinearVelocity(JPH_Ragdoll* ragdoll, const JPH_Vec3* linearVelocity, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_AddImpulse(JPH_Ragdoll* ragdoll, const JPH_Vec3* impulse, bool lockBodies /* = true */);
+JPH_CAPI int JPH_Ragdoll_GetBodyCount(const JPH_Ragdoll* ragdoll);
+JPH_CAPI JPH_BodyID JPH_Ragdoll_GetBodyID(const JPH_Ragdoll* ragdoll, int bodyIndex);
+JPH_CAPI int JPH_Ragdoll_GetConstraintCount(const JPH_Ragdoll* ragdoll);
+JPH_CAPI JPH_TwoBodyConstraint* JPH_Ragdoll_GetConstraint(JPH_Ragdoll* ragdoll, int constraintIndex);
+JPH_CAPI void JPH_Ragdoll_GetRootTransform(const JPH_Ragdoll* ragdoll, JPH_RVec3* outPosition, JPH_Quat* outRotation, bool lockBodies /* = true */);
+JPH_CAPI void JPH_Ragdoll_GetWorldSpaceBounds(const JPH_Ragdoll* ragdoll, JPH_AABox* result, bool lockBodies /* = true */);
+JPH_CAPI const JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings(const JPH_Ragdoll* ragdoll);
 
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);

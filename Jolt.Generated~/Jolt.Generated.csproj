@@ -20,14 +20,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GeneratedFiles Include="$(CompilerGeneratedFilesOutputPath)\**\*.cs" />
+    <ExistingGeneratedFiles Include="..\Jolt\Generated\*.cs" />
   </ItemGroup>
 
   <Target Name="Delete Generated Files" BeforeTargets="Build">
-    <RemoveDir Directories="..\Jolt\Generated" />
+    <Delete Files="@(ExistingGeneratedFiles)" />
   </Target>
 
   <Target Name="Export Generated Files" AfterTargets="Build">
+    <ItemGroup>
+      <GeneratedFiles Include="$(CompilerGeneratedFilesOutputPath)\**\*.cs" />
+    </ItemGroup>
     <Copy SourceFiles="@(GeneratedFiles)" DestinationFolder="..\Jolt\Generated" />
   </Target>
 

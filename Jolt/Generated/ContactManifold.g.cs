@@ -45,6 +45,10 @@ namespace Jolt
         
         public rvec3 GetWorldSpaceContactPointOn2(uint index) => Bindings.JPH_ContactManifold_GetWorldSpaceContactPointOn2(Handle, index);
         
+        public unsafe uint GetWorldSpaceContactPointsOn1(rvec3* results, uint capacity) => Bindings.JPH_ContactManifold_GetWorldSpaceContactPointsOn1(Handle, results, capacity);
+
+        public unsafe uint GetWorldSpaceContactPointsOn2(rvec3* results, uint capacity) => Bindings.JPH_ContactManifold_GetWorldSpaceContactPointsOn2(Handle, results, capacity);
+
         #endregion
         
     }

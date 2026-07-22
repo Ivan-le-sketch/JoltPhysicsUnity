@@ -319,7 +319,10 @@ internal class JoltSourceGenerator : ISourceGenerator
 
             // Interpolate the public declaration.
 
-            var declaration = $"public {declaredModifier}{declaredReturn} {declaredName}({declaredParamsString})";
+            var unsafeModifier = declaredReturn.Contains("*") || declaredParams.Exists(param => param.Contains("*"))
+                ? "unsafe "
+                : string.Empty;
+            var declaration = $"public {unsafeModifier}{declaredModifier}{declaredReturn} {declaredName}({declaredParamsString})";
 
             WritePaddedLine(writer, $"{declaration} => {expression};");
         }

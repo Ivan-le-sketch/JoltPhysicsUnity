@@ -7,6 +7,7 @@ namespace Jolt
         public struct Impulse
         {
             public float ContactImpulse;
+            // Jolt 5.6 reports aggregate friction on the parent result. Impulse zero mirrors it for legacy sums.
             public float FrictionImpulse1;
             public float FrictionImpulse2;
         }
@@ -20,5 +21,10 @@ namespace Jolt
 
         public uint impulseCount;
         public Impulse* impulses;
+
+        public float3 frictionPoint;
+        public float frictionImpulse1;
+        public float frictionImpulse2;
+        public float angularFrictionImpulse;
     }
 }
