@@ -13,6 +13,7 @@ JPH_BodyType
 JPH_BroadPhaseCastResult
 JPH_BroadPhaseLayer
 JPH_CollectFacesMode
+JPH_CompoundShapeReplacement
 JPH_CollidePointResult
 JPH_CollideSettingsBase
 JPH_CollideShapeResult
@@ -85,6 +86,7 @@ JPH_BodyType=BodyType
 JPH_BroadPhaseCastResult=BroadPhaseCastResult
 JPH_BroadPhaseLayer=BroadPhaseLayer
 JPH_CollectFacesMode=CollectFacesMode
+JPH_CompoundShapeReplacement=CompoundShapeReplacement
 JPH_CollidePointResult=CollidePointResult
 JPH_CollideSettingsBase=CollideSettingsBase
 JPH_CollideShapeResult=CollideShapeResult

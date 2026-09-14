@@ -1,13 +1,12 @@
 ﻿using Unity.Mathematics;
 
-using System;
 using System.Runtime.InteropServices;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Jolt
 {
-    // Borrowed shape pointers: keep the source shapes alive until ReplaceShapes returns.
+    /// <summary>A child shape and transform for a synchronous compound replacement.</summary>
+    /// <remarks>Borrows the shape; the caller must keep it alive until ReplaceShapes returns.</remarks>
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct CompoundShapeReplacement
     {
@@ -26,17 +25,17 @@ namespace Jolt
     [GenerateHandle("JPH_MutableCompoundShape"), GenerateBindings("JPH_MutableCompoundShape", "JPH_CompoundShape", "JPH_Shape")]
     public readonly partial struct MutableCompoundShape
     {
-        /// <summary>Replace every child in index order, preserving user data and center of mass. Requires exclusive access.</summary>
-        public unsafe void ReplaceShapes(NativeArray<CompoundShapeReplacement> replacements)
+        /// <summary>Replace all children in index order, recalculating bounds once.</summary>
+        /// <remarks>
+        /// Preserves child indices, user data and center of mass. Requires exclusive access: no concurrent
+        /// simulation or collision queries. NotifyShapeChanged must be called afterward for any owning body.
+        /// All referenced shapes must remain alive until the call returns. Invalid batches leave the shape unchanged.
+        /// </remarks>
+        [OverrideBinding("JPH_MutableCompoundShape_ReplaceShapes")]
+        public void ReplaceShapes(NativeArray<CompoundShapeReplacement> replacements)
         {
-            if (!replacements.IsCreated)
-                throw new ArgumentException("A replacement buffer is required.", nameof(replacements));
-            if (ReplaceShapesNative(Handle, (CompoundShapeReplacement*)replacements.GetUnsafeReadOnlyPtr(), (uint)replacements.Length) == 0)
-                throw new ArgumentException("Replacements must contain one valid shape per existing child.", nameof(replacements));
+            Bindings.JPH_MutableCompoundShape_ReplaceShapes(Handle, replacements);
         }
-
-        [DllImport("joltc", EntryPoint = "JPH_MutableCompoundShape_ReplaceShapes", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        private static extern unsafe uint ReplaceShapesNative(JPH_MutableCompoundShape* shape, CompoundShapeReplacement* replacements, uint count);
 
         public static implicit operator MutableCompoundShape(Shape shape)
         {

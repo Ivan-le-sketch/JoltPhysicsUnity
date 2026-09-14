@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Jolt
 {
@@ -29,6 +31,15 @@ namespace Jolt
         public static void JPH_MutableCompoundShape_ModifyShape2(NativeHandle<JPH_MutableCompoundShape> shape, uint index, float3 position, quaternion rotation, NativeHandle<JPH_Shape> newShape)
         {
             UnsafeBindings.JPH_MutableCompoundShape_ModifyShape2(shape, index, &position, &rotation, newShape);
+        }
+
+        public static void JPH_MutableCompoundShape_ReplaceShapes(NativeHandle<JPH_MutableCompoundShape> shape, NativeArray<CompoundShapeReplacement> replacements)
+        {
+            if (!replacements.IsCreated)
+                throw new ArgumentException("A replacement buffer is required.", nameof(replacements));
+            var data = (CompoundShapeReplacement*)replacements.GetUnsafeReadOnlyPtr();
+            if (UnsafeBindings.JPH_MutableCompoundShape_ReplaceShapes(shape, data, (uint)replacements.Length) == 0)
+                throw new ArgumentException("Replacements must contain one valid shape per existing child.", nameof(replacements));
         }
 
         public static void JPH_MutableCompoundShape_AdjustCenterOfMass(NativeHandle<JPH_MutableCompoundShape> shape)
