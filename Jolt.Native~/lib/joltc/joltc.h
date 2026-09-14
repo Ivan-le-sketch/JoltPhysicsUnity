@@ -1420,6 +1420,13 @@ JPH_CAPI uint32_t JPH_MutableCompoundShape_AddShape(JPH_MutableCompoundShape* sh
 JPH_CAPI void JPH_MutableCompoundShape_RemoveShape(JPH_MutableCompoundShape* shape, uint32_t index);
 JPH_CAPI void JPH_MutableCompoundShape_ModifyShape(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation);
 JPH_CAPI void JPH_MutableCompoundShape_ModifyShape2(JPH_MutableCompoundShape* shape, uint32_t index, const JPH_Vec3* position, const JPH_Quat* rotation, const JPH_Shape* newShape);
+typedef struct JPH_CompoundShapeReplacement {
+	JPH_Vec3 position;
+	JPH_Quat rotation;
+	const JPH_Shape* shape;
+} JPH_CompoundShapeReplacement;
+/* Replaces all children in place. No concurrent queries or simulation are permitted. Returns zero for invalid arguments. */
+JPH_CAPI uint32_t JPH_MutableCompoundShape_ReplaceShapes(JPH_MutableCompoundShape* shape, const JPH_CompoundShapeReplacement* replacements, uint32_t count);
 JPH_CAPI void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape);
 
 /* DecoratedShape */

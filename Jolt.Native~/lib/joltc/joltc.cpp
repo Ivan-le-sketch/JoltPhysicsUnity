@@ -3205,6 +3205,28 @@ void JPH_MutableCompoundShape_ModifyShape2(JPH_MutableCompoundShape* shape, uint
 	joltShape->ModifyShape(index, ToJolt(position), ToJolt(rotation), joltNewShape);
 }
 
+uint32_t JPH_MutableCompoundShape_ReplaceShapes(JPH_MutableCompoundShape* shape, const JPH_CompoundShapeReplacement* replacements, uint32_t count)
+{
+	if (shape == nullptr || (count != 0 && replacements == nullptr))
+		return 0;
+	auto joltShape = reinterpret_cast<JPH::MutableCompoundShape*>(shape);
+	if (count != joltShape->GetNumSubShapes())
+		return 0;
+	JPH::Array<JPH::Vec3> positions(count);
+	JPH::Array<JPH::Quat> rotations(count);
+	JPH::Array<const JPH::Shape*> shapes(count);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		if (replacements[i].shape == nullptr)
+			return 0;
+		positions[i] = ToJolt(&replacements[i].position);
+		rotations[i] = ToJolt(&replacements[i].rotation);
+		shapes[i] = AsShape(replacements[i].shape);
+	}
+	joltShape->ModifyShapes(0, count, shapes.data(), positions.data(), rotations.data());
+	return 1;
+}
+
 void JPH_MutableCompoundShape_AdjustCenterOfMass(JPH_MutableCompoundShape* shape)
 {
 	reinterpret_cast<JPH::MutableCompoundShape*>(shape)->AdjustCenterOfMass();
