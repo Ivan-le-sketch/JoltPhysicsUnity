@@ -276,7 +276,8 @@ namespace Jolt
 
         public static ObjectLayer JPH_BodyInterface_GetObjectLayer(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
         {
-            return UnsafeBindings.JPH_BodyInterface_GetObjectLayer(@interface, bodyID);
+            // Keep struct wrappers on the managed side of the Burst-compatible native call.
+            return new ObjectLayer(UnsafeBindings.JPH_BodyInterface_GetObjectLayer(@interface, bodyID.Value));
         }
 
         public static rmatrix4x4 JPH_BodyInterface_GetWorldTransform(NativeHandle<JPH_BodyInterface> @interface, BodyID bodyID)
