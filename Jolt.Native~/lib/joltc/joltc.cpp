@@ -1503,7 +1503,6 @@ static JPH_SimShapeFilterBodyData ToSimShapeFilterBodyData(
 	result.subShapeID = subShapeID.GetValue();
 	result.leafShapeRemainder = leafShapeRemainder.GetValue();
 	result.bodyFlags = body.IsStatic() ? 1u : 0u;
-	result.shapeVolume = shape != nullptr ? shape->GetVolume() : 0.0f;
 	return result;
 }
 

@@ -2241,7 +2241,6 @@ typedef struct JPH_SimShapeFilterBodyData {
 	JPH_SubShapeID subShapeID;
 	JPH_SubShapeID leafShapeRemainder;
 	uint32_t bodyFlags;
-	float shapeVolume;
 } JPH_SimShapeFilterBodyData;
 
 typedef struct JPH_SimShapeFilterFast_Procs {

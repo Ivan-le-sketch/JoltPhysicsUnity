@@ -18,7 +18,6 @@ namespace Jolt
         public SubShapeID SubShapeID;
         public SubShapeID LeafShapeRemainder;
         internal uint BodyFlags;
-        public float ShapeVolume;
 
         public Body GetBody() => new Body(new NativeHandle<JPH_Body>((JPH_Body*)BodyPointer));
         public Shape GetShape() => new Shape(new NativeHandle<JPH_Shape>((JPH_Shape*)ShapePointer));
@@ -26,7 +25,12 @@ namespace Jolt
         public ulong GetUserData() => BodyUserData;
         public ObjectLayer GetObjectLayer() => ObjectLayer;
         public bool IsStatic() => (BodyFlags & StaticBody) != 0;
-        public float GetVolume() => ShapeVolume;
+
+        /// <summary>
+        /// Volume of <see cref="GetShape"/>, computed on demand: a compound sums the volumes of all its children,
+        /// which cost microseconds per call on large compounds when it was filled in for every call.
+        /// </summary>
+        public float GetVolume() => GetShape().GetVolume();
         public ulong GetLeafShapeUserData() => LeafShapeUserData;
         public Shape GetLeafShape(out SubShapeID remainder)
         {
