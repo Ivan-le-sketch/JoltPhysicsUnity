@@ -4,7 +4,9 @@ using Unity.Mathematics;
 
 namespace Jolt
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    // Natural packing, like joltc's JPH_CollideShapeResult: its face pointers are 8-byte aligned, 80 bytes in all. Pack = 4
+    // made this 76 bytes, so in a result array filled by joltc every result after the first was read from the wrong place.
+    [StructLayout(LayoutKind.Sequential)]
     public unsafe struct CollideShapeResult
     {
         public float3 ContactPointOn1; 
