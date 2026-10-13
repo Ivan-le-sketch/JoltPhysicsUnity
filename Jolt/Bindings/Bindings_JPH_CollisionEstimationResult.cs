@@ -40,5 +40,33 @@
 
             return collisionEstimationResult;
         }
+
+        public static CollisionEstimationResult JPH_EstimateCollisionResponseWithSettingsInto(
+            NativeHandle<JPH_Body> body1, NativeHandle<JPH_Body> body2,
+            NativeHandle<JPH_ContactManifold> manifold,
+            in ContactSettingsData settings,
+            float minVelocityForRestitution,
+            uint numIterations,
+            CollisionEstimationResult.Impulse* impulses,
+            uint impulseCapacity,
+            rvec3* contactPointsOn1,
+            uint contactPointCapacity,
+            out uint contactPointCount)
+        {
+            var collisionEstimationResult = new CollisionEstimationResult();
+
+            fixed (ContactSettingsData* settingsPointer = &settings)
+            {
+                contactPointCount = UnsafeBindings.JPH_EstimateCollisionResponseWithSettingsInto(
+                    body1, body2, manifold,
+                    settingsPointer,
+                    minVelocityForRestitution, numIterations,
+                    impulses, impulseCapacity,
+                    contactPointsOn1, contactPointCapacity,
+                    &collisionEstimationResult);
+            }
+
+            return collisionEstimationResult;
+        }
     }
 }

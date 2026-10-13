@@ -11365,6 +11365,37 @@ uint32_t JPH_EstimateCollisionResponseInto(
 	return JPH_ContactManifold_GetWorldSpaceContactPointsOn1(manifold, contactPointsOn1, contactPointCapacity);
 }
 
+uint32_t JPH_EstimateCollisionResponseWithSettingsInto(
+	const JPH_Body* body1,
+	const JPH_Body* body2,
+	const JPH_ContactManifold* manifold,
+	const JPH_ContactSettingsData* settings,
+	float minVelocityForRestitution,
+	uint32_t numIterations,
+	JPH_CollisionEstimationResultImpulse* impulses,
+	uint32_t impulseCapacity,
+	JPH_RVec3* contactPointsOn1,
+	uint32_t contactPointCapacity,
+	JPH_CollisionEstimationResult* result)
+{
+	JPH_ASSERT(settings && result);
+	JPH_ASSERT(impulseCapacity == 0 || impulses != nullptr);
+	JPH_ASSERT(contactPointCapacity == 0 || contactPointsOn1 != nullptr);
+
+	ContactSettings joltSettings;
+	ApplyContactSettingsData(*settings, joltSettings);
+
+	JPH::CollisionEstimationResult joltResult;
+	JPH::EstimateCollisionResponse(*AsBody(body1), *AsBody(body2),
+		*AsContactManifold(manifold), joltResult,
+		joltSettings,
+		minVelocityForRestitution,
+		numIterations);
+
+	CopyCollisionEstimationResult(joltResult, impulses, impulseCapacity, result);
+	return JPH_ContactManifold_GetWorldSpaceContactPointsOn1(manifold, contactPointsOn1, contactPointCapacity);
+}
+
 /* WheelWV */
 JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
 	const JPH_Vec3* position,

@@ -2839,6 +2839,7 @@ JPH_CAPI const JPH_RagdollSettings* JPH_Ragdoll_GetRagdollSettings(const JPH_Rag
 /* JPH_EstimateCollisionResponse */
 JPH_CAPI void JPH_EstimateCollisionResponse(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResult* result);
 JPH_CAPI uint32_t JPH_EstimateCollisionResponseInto(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, float combinedFriction, float combinedRestitution, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResultImpulse* impulses, uint32_t impulseCapacity, JPH_RVec3* contactPointsOn1, uint32_t contactPointCapacity, JPH_CollisionEstimationResult* result);
+JPH_CAPI uint32_t JPH_EstimateCollisionResponseWithSettingsInto(const JPH_Body* body1, const JPH_Body* body2, const JPH_ContactManifold* manifold, const JPH_ContactSettingsData* settings, float minVelocityForRestitution, uint32_t numIterations, JPH_CollisionEstimationResultImpulse* impulses, uint32_t impulseCapacity, JPH_RVec3* contactPointsOn1, uint32_t contactPointCapacity, JPH_CollisionEstimationResult* result);
 
 /* WheelWV */
 JPH_CAPI JPH_WheelSettingsWV* JPH_WheelSettingsWV_Create(
